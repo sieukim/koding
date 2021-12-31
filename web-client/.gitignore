@@ -58,3 +58,5 @@ packages/react-devtools-timeline/dist# See https://help.github.com/articles/igno
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+.prettierrc

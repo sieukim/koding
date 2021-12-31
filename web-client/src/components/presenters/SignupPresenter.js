@@ -1,0 +1,263 @@
+import styled from 'styled-components';
+import { useCallback, useState, useRef } from 'react';
+
+const StyledSignup = styled.form`
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+
+  & > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+    width: 100%;
+
+    input {
+      width: 85%;
+      height: 30px;
+    }
+
+    button {
+      width: 10%;
+      height: 30px;
+    }
+
+    .submit-button {
+      width: 85%;
+      height: 30px;
+    }
+  }
+`;
+
+const SignupPresenter = ({
+  signup,
+  loading,
+  failure,
+  duplicated,
+  checked,
+  duplicateCheck,
+  resetCheck,
+}) => {
+  // user에 대한 정보를 갖는다.
+  const [form, setForm] = useState({});
+
+  /* 정보 추가 */
+
+  // input 이벤트 핸들러
+  const onChangeInput = useCallback((e) => {
+    // 현재 정보에서 입력중인 값을 추가
+    setForm((form) => ({
+      ...form,
+      [e.target.name]: e.target.value,
+    }));
+    // 만약 추가중인 정보가 id 또는 email, nickname이면 resetCheck 함수를 호출하여 중복 검사 초기화
+    if (
+      e.target.name === 'id' ||
+      e.target.name === 'email' ||
+      e.target.name === 'nickname'
+    ) {
+      resetCheck(e.target.name);
+    }
+  }, []);
+
+  /* 중복 검사*/
+
+  // id, email, nickname에 대한 DOM을 선택하기 위해 ref를 사용(useRef)
+  const idInput = useRef();
+  const emailInput = useRef();
+  const nicknameInput = useRef();
+  const inputs = {
+    id: idInput,
+    email: emailInput,
+    nickname: nicknameInput,
+  };
+
+  // 중복 검사 버튼 이벤트 핸들러
+  const onClickDuplicateCheckButton = useCallback(
+    (e) => {
+      const key = e.target.dataset.name;
+      const value = form[key];
+      const input = inputs[key];
+
+      // 현재 입력중인 값이 input 조건을 만족하면 중복 검사를 진행
+      if (input.current.reportValidity()) {
+        duplicateCheck(key, value);
+      }
+    },
+    [form, inputs],
+  );
+
+  /* 회원가입 */
+
+  // 회원가입 버튼 이벤트 핸들러
+  const onSubmitButton = useCallback(
+    (e) => {
+      const user = {
+        ...form,
+      };
+      delete user[`password-check`];
+      signup(user);
+      e.preventDefault();
+    },
+    [form, signup],
+  );
+
+  // id, email, nickname의 값이 유효한지에 대한 정보
+  const validatedId = checked.id && !duplicated.id;
+  const validatedEmail = checked.email && !duplicated.email;
+  const validatedNickname = checked.nickname && !duplicated.nickname;
+
+  // 회원가입 진행중인지 id, email, nickname의 값은 유효한지 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
+  const disableButton =
+    loading ||
+    !validatedId ||
+    !validatedEmail ||
+    !validatedNickname ||
+    !form[`password`] ||
+    !form[`password-check`] ||
+    form[`password`] !== form[`password-check`];
+
+  return (
+    <StyledSignup onSubmit={onSubmitButton}>
+      <p>아이디</p>
+      <div>
+        <input
+          ref={idInput}
+          name="id"
+          type="text"
+          placeholder="5 ~ 20자 영문 소문자, 숫자를 사용하세요."
+          minLength="5"
+          maxLength="20"
+          pattern="[a-z0-9]*"
+          required
+          onChange={onChangeInput}
+        />
+        <button
+          data-name="id"
+          onClick={onClickDuplicateCheckButton}
+          disabled={validatedId}
+          type="button"
+        >
+          중복 확인
+        </button>
+      </div>
+      {validatedId && <p>가능한 아이디입니다.</p>}
+      {checked.id && duplicated.id && <p>중복된 아이디입니다.</p>}
+
+      <p>이메일</p>
+      <div>
+        <input
+          ref={emailInput}
+          name="email"
+          type="email"
+          required
+          onChange={onChangeInput}
+        />
+        <button
+          data-name="email"
+          onClick={onClickDuplicateCheckButton}
+          disabled={validatedEmail}
+          type="button"
+        >
+          중복 확인
+        </button>
+      </div>
+      {validatedEmail && <p>가능한 이메일입니다.</p>}
+      {checked.email && duplicated.email && <p>중복된 이메일입니다.</p>}
+
+      <p>비밀번호</p>
+      <div>
+        <input
+          name="password"
+          type="password"
+          placeholder="8 ~ 16자 영문 대소문자, 숫자, 특수문자를 사용하세요. "
+          minLength="8"
+          maxLength="16"
+          required
+          onChange={onChangeInput}
+        />
+      </div>
+
+      <p>비밀번호 확인</p>
+      <div>
+        <input
+          name="password-check"
+          type="password"
+          minLength="8"
+          maxLength="16"
+          required
+          onChange={onChangeInput}
+        />
+      </div>
+
+      <p>닉네임</p>
+      <div>
+        <input
+          ref={nicknameInput}
+          name="nickname"
+          type="text"
+          placeholder="영문 대소문자, 한글, 숫자를 사용하세요. (단, 띄어쓰기는 불가)"
+          minLength="2"
+          maxLength="10"
+          pattern="[A-Za-z0-9가-힣]*"
+          required
+          onChange={onChangeInput}
+        />
+        <button
+          data-name="nickname"
+          onClick={onClickDuplicateCheckButton}
+          disabled={validatedNickname}
+          type="button"
+        >
+          중복 확인
+        </button>
+      </div>
+      {validatedNickname && <p>가능한 별명입니다.</p>}
+      {checked.nickname && duplicated.nickname && <p>중복된 별명입니다.</p>}
+
+      <p>블로그(선택)</p>
+      <div>
+        <input
+          name="blog"
+          type="url"
+          placeholder="블로그 주소를 입력하세요."
+          onChange={onChangeInput}
+        />
+      </div>
+
+      <p>깃허브(선택)</p>
+      <div>
+        <input
+          name="github"
+          type="url"
+          placeholder="깃허브 주소를 입력하세요."
+          onChange={onChangeInput}
+        />
+      </div>
+
+      <p>포트폴리오(선택)</p>
+      <div>
+        <input
+          name="portfolio"
+          type="url"
+          placeholder="포트폴리오 주소를 입력하세요."
+          onChange={onChangeInput}
+        />
+      </div>
+
+      <div>
+        <button
+          type="submit"
+          className="submit-button"
+          disabled={disableButton}
+        >
+          회원가입
+        </button>
+      </div>
+      {failure && <p>오류가 발생했습니다. 다시 시도해주세요.</p>}
+    </StyledSignup>
+  );
+};
+
+export default SignupPresenter;
