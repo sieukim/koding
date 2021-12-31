@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import SignupPresenter from '../presenters/SignupPresenter';
 import { Navigate } from 'react-router-dom';
 import * as api from '../../modules/api';

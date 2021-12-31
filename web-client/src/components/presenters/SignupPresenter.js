@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useCallback, useState, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 const StyledSignup = styled.form`
   display: flex;
@@ -93,16 +93,15 @@ const SignupPresenter = ({
   // 회원가입 버튼 이벤트 핸들러
   const onSubmitButton = useCallback(
     (e) => {
+      e.preventDefault();
       const user = {
         ...form,
       };
       delete user[`password-check`];
       signup(user);
-      e.preventDefault();
     },
     [form, signup],
   );
-
   // id, email, nickname의 값이 유효한지에 대한 정보
   const validatedId = checked.id && !duplicated.id;
   const validatedEmail = checked.email && !duplicated.email;
