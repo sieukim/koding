@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './strategy/local.strategy';
 import { GithubStrategy } from './strategy/github.strategy';
 import { LocalSerializer } from './local.serializer';
+import { KakaoStrategy } from './strategy/kakao.strategy';
 
 @Module({
   imports: [
@@ -15,6 +16,12 @@ import { LocalSerializer } from './local.serializer';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, GithubStrategy, LocalSerializer],
+  providers: [
+    AuthService,
+    LocalSerializer,
+    LocalStrategy,
+    GithubStrategy,
+    KakaoStrategy,
+  ],
 })
 export class AuthModule {}

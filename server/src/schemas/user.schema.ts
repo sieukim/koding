@@ -97,8 +97,14 @@ export class User {
   @Prop({ required: false })
   portfolioUrl?: string;
 
+  @Prop({ required: false, unique: true })
+  githubUserIdentifier?: number;
+
   @Prop({ required: false, type: GithubUserInfoSchema })
   githubUserInfo?: GithubUserInfo;
+
+  @Prop({ required: false, unique: true })
+  kakaoUserIdentifier?: number;
 
   @Prop({ default: () => v1() })
   verifyToken?: string;
