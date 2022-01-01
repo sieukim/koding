@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import SignupContainer from '../containers/SignupContainer';
+import SignupContainer from '../components/containers/SignupContainer';
 
 const StyledSignup = styled.div`
   display: flex;

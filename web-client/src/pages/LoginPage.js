@@ -1,4 +1,4 @@
-import LoginContainer from '../containers/LoginContainer';
+import LoginContainer from '../components/containers/LoginContainer';
 import styled from 'styled-components';
 
 const StyledLogin = styled.div`

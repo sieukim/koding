@@ -52,23 +52,17 @@ const SignupPresenter = ({
       [e.target.name]: e.target.value,
     }));
     // 만약 추가중인 정보가 id 또는 email, nickname이면 resetCheck 함수를 호출하여 중복 검사 초기화
-    if (
-      e.target.name === 'id' ||
-      e.target.name === 'email' ||
-      e.target.name === 'nickname'
-    ) {
+    if (e.target.name === 'email' || e.target.name === 'nickname') {
       resetCheck(e.target.name);
     }
   }, []);
 
   /* 중복 검사*/
 
-  // id, email, nickname에 대한 DOM을 선택하기 위해 ref를 사용(useRef)
-  const idInput = useRef();
+  // email, nickname에 대한 DOM을 선택하기 위해 ref를 사용(useRef)
   const emailInput = useRef();
   const nicknameInput = useRef();
   const inputs = {
-    id: idInput,
     email: emailInput,
     nickname: nicknameInput,
   };
@@ -102,15 +96,13 @@ const SignupPresenter = ({
     },
     [form, signup],
   );
-  // id, email, nickname의 값이 유효한지에 대한 정보
-  const validatedId = checked.id && !duplicated.id;
+  // email, nickname의 값이 유효한지에 대한 정보
   const validatedEmail = checked.email && !duplicated.email;
   const validatedNickname = checked.nickname && !duplicated.nickname;
 
-  // 회원가입 진행중인지 id, email, nickname의 값은 유효한지 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
+  // 회원가입 진행중인지 email, nickname의 값은 유효한지 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
   const disableButton =
     loading ||
-    !validatedId ||
     !validatedEmail ||
     !validatedNickname ||
     !form[`password`] ||
@@ -119,37 +111,13 @@ const SignupPresenter = ({
 
   return (
     <StyledSignup onSubmit={onSubmitButton}>
-      <p>아이디</p>
-      <div>
-        <input
-          ref={idInput}
-          name="id"
-          type="text"
-          placeholder="5 ~ 20자 영문 소문자, 숫자를 사용하세요."
-          minLength="5"
-          maxLength="20"
-          pattern="[a-z0-9]*"
-          required
-          onChange={onChangeInput}
-        />
-        <button
-          data-name="id"
-          onClick={onClickDuplicateCheckButton}
-          disabled={validatedId}
-          type="button"
-        >
-          중복 확인
-        </button>
-      </div>
-      {validatedId && <p>가능한 아이디입니다.</p>}
-      {checked.id && duplicated.id && <p>중복된 아이디입니다.</p>}
-
       <p>이메일</p>
       <div>
         <input
           ref={emailInput}
           name="email"
           type="email"
+          placeholder="이메일을 입력하세요."
           required
           onChange={onChangeInput}
         />

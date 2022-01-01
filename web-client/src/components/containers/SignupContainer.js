@@ -8,13 +8,11 @@ const SignupContainer = () => {
 
   // 중복 검사 api 호출 결과로 중복이면 true 값을 갖는다.
   const [duplicated, setDuplicated] = useState({
-    id: true,
     email: true,
     nickname: true,
   });
   // 중복 검사 api 호출 결과로 검사를 하면 true 값을 갖는다.
   const [checked, setChecked] = useState({
-    id: false,
     email: false,
     nickname: false,
   });
@@ -40,14 +38,14 @@ const SignupContainer = () => {
     }
   }, []);
 
-  // 중복 검사 후 입력값이 변화하는 경우 checked와 duplicated 값을 초기화 => 중복검사 재활성화
+  // 중복 검사 후 입력값이 변하는 경우 checked와 duplicated 값을 초기화 => 중복검사 재활성화
   const resetCheck = useCallback((key) => {
-    setChecked((checked) => ({
-      ...checked,
-      [key]: false,
-    }));
     setDuplicated((duplicated) => ({
       ...duplicated,
+      [key]: true,
+    }));
+    setChecked((checked) => ({
+      ...checked,
       [key]: false,
     }));
   }, []);

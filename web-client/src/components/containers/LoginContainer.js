@@ -1,6 +1,6 @@
 import LoginPresenter from '../presenters/LoginPresenter';
 import * as api from '../../modules/api';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogin } from '../../modules/auth';
@@ -16,7 +16,11 @@ const LoginContainer = () => {
   const [failure, setFailure] = useState(false);
 
   const dispatch = useDispatch();
-  const onSetLogin = (user) => dispatch(setLogin(user));
+
+  const onSetLogin = useCallback(
+    (user) => dispatch(setLogin(user)),
+    [dispatch],
+  );
 
   // 로그인 api 호출 함수
   const login = useCallback(
@@ -25,10 +29,10 @@ const LoginContainer = () => {
       try {
         const loggedUser = await api.login(user);
         setSuccess(true);
+        setLoading(false);
         onSetLogin(loggedUser.data);
       } catch (e) {
         setFailure(true);
-      } finally {
         setLoading(false);
       }
     },

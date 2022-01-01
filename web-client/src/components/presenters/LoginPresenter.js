@@ -27,6 +27,16 @@ const StyledLogin = styled.form`
       width: 85%;
       height: 30px;
     }
+
+    a {
+      width: 100%;
+    }
+
+    a .github-button {
+      width: 85%;
+      height: 30px;
+    }
+  }
 `;
 
 const LoginPresenter = ({ login, loading, failure }) => {
@@ -62,15 +72,12 @@ const LoginPresenter = ({ login, loading, failure }) => {
 
   return (
     <StyledLogin onSubmit={onSubmitButton}>
-      <p>아이디</p>
+      <p>이메일</p>
       <div>
         <input
-          name="id"
-          type="text"
-          placeholder="아이디"
-          minLength="5"
-          maxLength="20"
-          pattern="[a-z0-9]*"
+          name="email"
+          type="email"
+          placeholder="이메일"
           required
           onChange={onChangeInput}
         />
