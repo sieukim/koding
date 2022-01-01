@@ -1,29 +1,41 @@
-import { Document } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { compare, hash } from 'bcrypt';
-import { v1 } from 'uuid';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {Document} from 'mongoose';
+import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
+import {compare, hash} from 'bcrypt';
+import {v1} from 'uuid';
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 
-@Schema()
 export class GithubRepositoryInfo {
+  @ApiProperty({
+    description: "리포지토리 이름",
+    example: "koding"
+  })
   @Prop()
   name: string;
 
+  @ApiProperty({
+    description: "리포지토리 주소",
+    example: "koding"
+  })
   @Prop()
   htmlUrl: string;
 
+  @ApiProperty({
+    description: "리포지토리 설명",
+    example: "개발자 커뮤니티 🐾"
+  })
   @Prop()
   description?: string;
 
+  @ApiProperty({
+    description: "리포지토리 스타 수",
+    example: 23
+  })
   @Prop()
   starCount: number;
 }
 
-const GithubRepositoryInfoSchema =
-  SchemaFactory.createForClass(GithubRepositoryInfo);
-
-@Schema()
 export class GithubUserInfo {
+
   @Prop()
   githubId: string;
 
@@ -33,14 +45,19 @@ export class GithubUserInfo {
   @Prop()
   name: string;
 
+  @ApiProperty({
+    description: "깃허브 회원가입 이메일",
+    example: "test@test.com"
+  })
   @Prop()
   email: string;
 
-  @Prop({ type: [GithubRepositoryInfoSchema] })
+  @ApiProperty({
+    description: "소유한 리포지토리들의 정보",
+  })
+  @Prop({type: [GithubRepositoryInfo]})
   repositories: GithubRepositoryInfo[];
 }
-
-const GithubUserInfoSchema = SchemaFactory.createForClass(GithubUserInfo);
 
 export type UserDocument = User & Document;
 
@@ -97,8 +114,14 @@ export class User {
   @Prop({ required: false })
   portfolioUrl?: string;
 
-  @Prop({ required: false, type: GithubUserInfoSchema })
+  @Prop({ required: false, unique: true })
+  githubUserIdentifier?: number;
+
+  @Prop({required: false, type: GithubUserInfo})
   githubUserInfo?: GithubUserInfo;
+
+  @Prop({ required: false, unique: true })
+  kakaoUserIdentifier?: number;
 
   @Prop({ default: () => v1() })
   verifyToken?: string;

@@ -45,13 +45,17 @@ export class UsersService {
   }
 
   async signupGithub(profile: any) {
+    console.log(profile);
     const {
+      id,
       login: githubId,
       email,
       name,
       avatar_url: avatarUrl,
       repos_url,
     } = profile._json;
+
+    const githubUserIdentifier = id as number;
 
     const rawRepositories: Array<any> = (await axios.get(repos_url)).data;
 
@@ -68,9 +72,10 @@ export class UsersService {
       repositories,
     } as GithubUserInfo;
 
-    let user = await this.userModel.findOne({ email }).exec();
+    let user = await this.findUserByEmail(email, false);
 
     if (user) {
+      user.githubUserIdentifier = githubUserIdentifier;
       user.githubUserInfo = githubUserInfo;
       await user.save();
     } else {
@@ -78,7 +83,29 @@ export class UsersService {
         email,
         verified: true,
         githubUserInfo,
+        githubUserIdentifier: githubUserIdentifier,
       });
+      await user.save();
+    }
+    return user;
+  }
+
+  async signupKakao(profile: any) {
+    console.log(profile);
+    const id = profile._json.id as number;
+    const hasEmail = profile._json.has_email as boolean;
+
+    if (!hasEmail)
+      throw new BadRequestException('이메일 수집 동의가 필요합니다');
+
+    const email = profile._json.email as string;
+
+    let user = await this.findUserByEmail(email, false);
+    if (user) {
+      user.kakaoUserIdentifier = id;
+      await user.save();
+    } else {
+      user = new this.userModel({ email, kakaoUserIdentifier: id });
       await user.save();
     }
     return user;
@@ -94,16 +121,17 @@ export class UsersService {
     await user.save();
   }
 
-  async findUserById(id: string, includePassword = false) {
-    return this.userModel
-      .findOne({ id }, { password: includePassword ? 1 : 0 })
-      .exec();
+  findUserById(id: string, includePassword = false) {
+    return this.findUserByField({ id }, includePassword);
   }
 
-  async findUserByEmail(email: string, includePassword = false) {
-    return this.userModel
-      .findOne({ email }, { password: includePassword ? 1 : 0 })
-      .exec();
+  findUserByEmail(email: string, includePassword = false) {
+    return this.findUserByField({ email }, includePassword);
+  }
+
+  private findUserByField(condition: Partial<User>, includePassword = false) {
+    if (includePassword) return this.userModel.findOne(condition).exec();
+    return this.userModel.findOne(condition).select('-password').exec();
   }
 
   async checkExistence(key: 'id' | 'nickname' | 'email', value: string) {
@@ -111,10 +139,5 @@ export class UsersService {
     console.log(user);
     if (user) return true;
     return false;
-  }
-
-  async signupKakao(profile: any) {
-    console.log(profile);
-    return null;
   }
 }
