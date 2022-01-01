@@ -1,31 +1,23 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { GithubAuthGuard } from './guard/github-auth.guard';
-import { User } from '../schemas/user.schema';
-import { LogoutGuard } from './guard/logout.guard';
+import {Controller, Delete, Get, HttpCode, HttpStatus, Logger, Post, UseGuards,} from '@nestjs/common';
+import {AuthService} from './auth.service';
+import {GithubAuthGuard} from './guard/github-auth.guard';
+import {User} from '../schemas/user.schema';
+import {LogoutGuard} from './guard/logout.guard';
 import {
   ApiBody,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { LocalAuthGuard } from './guard/local-auth.guard';
-import { LoginLocalDto } from './dto/login-local.dto';
-import { LoggedInGuard } from './guard/logged-in.guard';
-import { KakaoAuthGuard } from './guard/kakao-auth.guard';
-import { LoginUser } from 'src/common/decorator/login-user.decorator';
-import { LoginResultDto } from '../users/dto/login-result.dto';
+import {LocalAuthGuard} from './guard/local-auth.guard';
+import {LoginLocalDto} from './dto/login-local.dto';
+import {LoggedInGuard} from './guard/logged-in.guard';
+import {KakaoAuthGuard} from './guard/kakao-auth.guard';
+import {LoginUser} from 'src/common/decorator/login-user.decorator';
+import {LoginResultDto} from '../users/dto/login-result.dto';
 
 @ApiTags('AUTH')
 @ApiUnauthorizedResponse({
@@ -35,12 +27,13 @@ import { LoginResultDto } from '../users/dto/login-result.dto';
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {
+  }
 
   @ApiOperation({
     summary: '이메일 로그인',
   })
-  @ApiBody({ type: LoginLocalDto })
+  @ApiBody({type: LoginLocalDto})
   @ApiOkResponse({
     description: '로그인/회원가입 성공',
     type: LoginResultDto,
@@ -115,6 +108,12 @@ export class AuthController {
     return new LoginResultDto(user);
   }
 
+  @ApiOperation({
+    summary: '로그아웃',
+  })
+  @ApiNoContentResponse({
+    description: '로그아웃 성공',
+  })
   @UseGuards(LoggedInGuard, LogoutGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
