@@ -1,7 +1,7 @@
-import { User } from './schemas/user.schema';
+import { User } from "./schemas/user.schema";
 
-declare module 'express' {
-  interface Request {
-    user: User;
-  }
+declare module "express" {
+    interface Request {
+        user: User;
+    }
 }
