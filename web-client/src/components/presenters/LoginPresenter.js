@@ -39,7 +39,7 @@ const StyledLogin = styled.form`
   }
 `;
 
-const LoginPresenter = ({ login, loading, failure }) => {
+const LoginPresenter = ({ login, loading, failure, url }) => {
   // user에 대한 정보를 갖는다.
   const [form, setForm] = useState({});
 
@@ -104,6 +104,14 @@ const LoginPresenter = ({ login, loading, failure }) => {
         </button>
       </div>
       {failure && <p>일치하지 않는 회원정보입니다.</p>}
+
+      <div>
+        <a href={url}>
+          <button className="github-button" type="button">
+            깃허브 로그인
+          </button>
+        </a>
+      </div>
     </StyledLogin>
   );
 };

@@ -39,10 +39,30 @@ const LoginContainer = () => {
     [onSetLogin],
   );
 
+  /* github callback */
+  const url = useMemo(() => {
+    const CLIENT_ID = '855268489b238ce4aa0e';
+    const REDIRECT_URL = 'http://localhost:3000/github/login';
+    const params = new URLSearchParams({
+      client_id: CLIENT_ID,
+      redirect_uri: REDIRECT_URL,
+    });
+    const scopes = ['read:user', 'user:email'];
+
+    params.append('scope', scopes.join(' '));
+
+    return `https://github.com/login/oauth/authorize?${params.toString()}`;
+  }, []);
+
   return (
     <>
       {success && <Navigate to="/" />}
-      <LoginPresenter login={login} loading={loading} failure={failure} />
+      <LoginPresenter
+        login={login}
+        loading={loading}
+        failure={failure}
+        url={url}
+      />
     </>
   );
 };

@@ -2,6 +2,7 @@ import { combineReducers } from 'redux';
 import { persistReducer } from 'redux-persist';
 import sessionStorage from 'redux-persist/lib/storage/session';
 import auth from './auth';
+import github from './github';
 
 const persistConfig = {
   key: 'root',
@@ -11,6 +12,7 @@ const persistConfig = {
 
 const rootReducer = combineReducers({
   auth: auth,
+  github: github,
 });
 
 export default persistReducer(persistConfig, rootReducer);
