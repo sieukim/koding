@@ -45,31 +45,34 @@ const SignupPresenter = ({
   /* 정보 추가 */
 
   // input 이벤트 핸들러
-  const onChangeInput = useCallback((e) => {
-    // 현재 정보에서 입력중인 값을 추가
-    setForm((form) => ({
-      ...form,
-      [e.target.name]: e.target.value,
-    }));
-    // 만약 추가중인 정보가 id 또는 email, nickname이면 resetCheck 함수를 호출하여 중복 검사 초기화
-    if (e.target.name === 'email' || e.target.name === 'nickname') {
-      resetCheck(e.target.name);
-    }
-  }, []);
+  const onChangeInput = useCallback(
+    (e) => {
+      // 현재 정보에서 입력중인 값을 추가
+      setForm((form) => ({
+        ...form,
+        [e.target.name]: e.target.value,
+      }));
+      // 만약 추가중인 정보가 id 또는 email, nickname이면 resetCheck 함수를 호출하여 중복 검사 초기화
+      if (e.target.name === 'email' || e.target.name === 'nickname') {
+        resetCheck(e.target.name);
+      }
+    },
+    [resetCheck],
+  );
 
   /* 중복 검사*/
 
   // email, nickname에 대한 DOM을 선택하기 위해 ref를 사용(useRef)
   const emailInput = useRef();
   const nicknameInput = useRef();
-  const inputs = {
-    email: emailInput,
-    nickname: nicknameInput,
-  };
 
   // 중복 검사 버튼 이벤트 핸들러
   const onClickDuplicateCheckButton = useCallback(
     (e) => {
+      const inputs = {
+        email: emailInput,
+        nickname: nicknameInput,
+      };
       const key = e.target.dataset.name;
       const value = form[key];
       const input = inputs[key];
@@ -79,7 +82,7 @@ const SignupPresenter = ({
         duplicateCheck(key, value);
       }
     },
-    [form, inputs],
+    [form, duplicateCheck],
   );
 
   /* 회원가입 */

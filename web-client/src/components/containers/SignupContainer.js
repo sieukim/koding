@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 import SignupPresenter from '../presenters/SignupPresenter';
 import { Navigate } from 'react-router-dom';
 import * as api from '../../modules/api';
+import { useDispatch } from 'react-redux';
+import { setLogin } from '../../modules/auth';
 
 const SignupContainer = () => {
   /* 중복 검사 */
@@ -59,18 +61,30 @@ const SignupContainer = () => {
   // 회원가입 api 호출 결과로 회원가입에 실패하면 true 값을 갖는다.
   const [failure, setFailure] = useState(false);
 
+  const dispatch = useDispatch();
+
+  const onSetLogin = useCallback(
+    (user) => dispatch(setLogin(user)),
+    [dispatch],
+  );
+
   // 회원가입 api 호출 함수
-  const signup = useCallback(async (user) => {
-    setLoading(true);
-    try {
-      await api.signup(user);
-      setSuccess(true);
-    } catch (e) {
-      setFailure(true);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const signup = useCallback(
+    async (user) => {
+      setLoading(true);
+      try {
+        await api.signup(user);
+        const loggedUser = await api.login(user);
+        onSetLogin(loggedUser.data);
+        setSuccess(true);
+      } catch (e) {
+        setFailure(true);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [onSetLogin],
+  );
 
   return (
     <>

@@ -32,17 +32,17 @@ const Header = () => {
   /* 로그 아웃 */
 
   const dispatch = useDispatch();
-  const onSetLogout = () => dispatch(setLogout());
 
   // 로그 아웃 api 호출하는 함수
   const logout = useCallback(async () => {
     try {
+      const onSetLogout = () => dispatch(setLogout());
       await api.logout();
       onSetLogout();
     } catch (e) {
       alert('로그아웃에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
-  }, [onSetLogout]);
+  }, [dispatch]);
 
   return (
     <StyledHeader>

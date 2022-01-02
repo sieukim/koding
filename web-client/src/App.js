@@ -2,9 +2,9 @@ import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import HomePage from './components/pages/HomePage';
-import SignupPage from './components/pages/SignupPage';
-import LoginPage from './components/pages/LoginPage';
+import HomePage from './pages/HomePage';
+import SignupPage from './pages/SignupPage';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   return (
