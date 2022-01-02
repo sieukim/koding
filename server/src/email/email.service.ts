@@ -32,6 +32,18 @@ export class EmailService {
         this.adminEmail = configService.get<string>("auth.email.admin.email");
     }
 
+    async sendPasswordResetToken(email: string, verifyToken: string) {
+        const mailOptions: EmailOptions = {
+            to: email,
+            subject: "비밀번호 초기화 인증코드 메일",
+            html: `
+        비밀번호 초기화 인증코드입니다.<br/>
+        <b>${verifyToken}</b>
+      `
+        };
+        return await this.send(mailOptions);
+    }
+
     async sendVerificationEmail(nickname: string, email: string, verifyToken: string) {
         const verificationUrl = `${
           this.baseUrl
@@ -42,7 +54,7 @@ export class EmailService {
             subject: "회원가입 인증 메일",
             html: `
         가입 확인 버튼을 누르시면 가입 인증이 완료됩니다.<br/>
-        <a href='${verificationUrl}'>가입 확인</a>
+        <a href="${verificationUrl}">가입 확인</a>
       `
         };
         return await this.send(mailOptions);

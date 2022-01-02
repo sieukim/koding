@@ -6,20 +6,20 @@ import { UsersService } from "../../users/users.service";
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, "github") {
-    constructor(
-      private readonly usersService: UsersService,
-      configService: ConfigService
-    ) {
-        super({
-            clientID: configService.get<string>("auth.social.github.client_id"),
-            clientSecret: configService.get<string>(
-              "auth.social.github.client_secret"
-            )
-        });
-    }
+  constructor(
+    private readonly usersService: UsersService,
+    configService: ConfigService
+  ) {
+    super({
+      clientID: configService.get<string>("auth.social.github.client_id"),
+      clientSecret: configService.get<string>(
+        "auth.social.github.client_secret"
+      )
+    });
+  }
 
-    async validate(accessToken: string, refreshToken: string, profile: any) {
-        delete profile._raw;
-        return this.usersService.signupGithub(profile);
-    }
+  async validate(accessToken: string, refreshToken: string, profile: any) {
+    delete profile._raw;
+    return this.usersService.signupGithub(profile);
+  }
 }
