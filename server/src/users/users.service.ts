@@ -37,7 +37,6 @@ export class UsersService {
   }
 
   async signupGithub(profile: any) {
-    console.log(profile);
     const {
       id,
       login: githubId,
@@ -105,7 +104,7 @@ export class UsersService {
     return this.findUserByField({ nickname }, includePassword);
   }
 
-  findUserByEmail(email: string, includePassword = false) {
+  findUserByEmail?(email: string, includePassword = false) {
     return this.findUserByField({ email }, includePassword);
   }
 

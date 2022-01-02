@@ -3,11 +3,11 @@ import { AuthGuard } from "@nestjs/passport";
 
 @Injectable()
 export class LocalAuthGuard extends AuthGuard("local") {
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        if (await super.canActivate(context)) {
-            const request = context.switchToHttp().getRequest();
-            await super.logIn(request);
-        }
-        return true;
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (await super.canActivate(context)) {
+      const request = context.switchToHttp().getRequest();
+      await super.logIn(request);
     }
+    return true;
+  }
 }

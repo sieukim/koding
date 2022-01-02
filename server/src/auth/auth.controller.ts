@@ -1,21 +1,10 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  NotFoundException,
-  Post,
-  Res,
-  UseGuards
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Post, Res, UseGuards } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { GithubAuthGuard } from "./guard/github-auth.guard";
 import { User } from "../schemas/user.schema";
 import { LogoutGuard } from "./guard/logout.guard";
 import {
+  ApiAcceptedResponse,
   ApiBadRequestResponse,
   ApiBody,
   ApiCreatedResponse,
@@ -35,6 +24,8 @@ import { LoginResultDto } from "./dto/login-result.dto";
 import { Response } from "express";
 import { SignupGithubVerifyRequestDto } from "./dto/signup-github-verify-request.dto";
 import { SignupGithubResult } from "./dto/signup-github-result";
+import { PasswordResetEmailRequestDto } from "./dto/password-reset-email-request.dto";
+import { PasswordResetRequestDto } from "./dto/password-reset.request.dto";
 
 @ApiTags("AUTH")
 @ApiUnauthorizedResponse({
@@ -83,11 +74,11 @@ export class AuthController {
     type: SignupGithubResult
   })
   @ApiUnauthorizedResponse({
-    description: "로그인 실패"
+    description: "유효하지 않은 토큰"
   })
   @UseGuards(GithubAuthGuard)
   @Get("/github/callback")
-  public async githubLogin(@LoginUser() user: User, @Res({ passthrough: true }) res: Response) {
+  async githubLogin(@LoginUser() user: User, @Res({ passthrough: true }) res: Response) {
 
     if (user.githubSignupVerified) {
       // 기존 유저
@@ -113,17 +104,16 @@ export class AuthController {
     type: LoginResultDto
   })
   @ApiBadRequestResponse({
-    description: "잘못된 verifyToken"
+    description: "유효하지 않은 토큰"
   })
   @ApiNotFoundResponse({
-    description: "없는 email"
+    description: "가입하지 않은 이메일"
   })
   @HttpCode(HttpStatus.OK)
   @Post("/github/verify")
   async verifyGithubSignup(@Body() githubSignupVerifyDto: SignupGithubVerifyRequestDto) {
-    const user = await this.authService.verifyGithubSignupUser(githubSignupVerifyDto);
-    if (!user)
-      throw new NotFoundException();
+    const { email, nickname, verifyToken } = githubSignupVerifyDto;
+    const user = await this.authService.verifyGithubSignupUser({ email, nickname, verifyToken });
     return new LoginResultDto(user);
   }
 
@@ -137,7 +127,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(LoggedInGuard)
   @Get()
-  public getCurrentUser(@LoginUser() user: User) {
+  getCurrentUser(@LoginUser() user: User) {
     return new LoginResultDto(user);
   }
 
@@ -150,13 +140,52 @@ export class AuthController {
   @UseGuards(LoggedInGuard, LogoutGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
-  public logout() {
+  logout() {
     return;
   }
 
-  // @Post('/github/callback')
-  // public async getGithubInfo(@Body() githubCodeDto: GithubCodeDto) {
-  //   const user = await this.authService.getGithubInfo(githubCodeDto);
-  //   return user;
-  // }
+
+  @ApiOperation({
+    summary: "비밀번호 찾기 요청",
+    description: "이메일로 비밀번호 초기화 코드 전송"
+  })
+  @ApiBody({
+    type: PasswordResetEmailRequestDto
+  })
+  @ApiAcceptedResponse({
+    description: "비밀번호 초기화 메일 전송 완료"
+  })
+  @ApiNotFoundResponse({
+    description: "가입한 적 없는 이메일"
+  })
+  @HttpCode(HttpStatus.ACCEPTED)
+  @Delete("/email/password")
+  async requestResetPassword(@Body() passwordResetEmailRequestDto: PasswordResetEmailRequestDto) {
+    const { email } = passwordResetEmailRequestDto;
+    await this.authService.sendPasswordResetToken({ email });
+  }
+
+  @ApiOperation({
+    summary: "비밀번호 초기화",
+    description: "비밀번호 찾기 요청을 통해 이메일로 받은 코드를 이용해 초기화"
+  })
+  @ApiBody({
+    type: PasswordResetRequestDto
+  })
+  @ApiBadRequestResponse({
+    description: "유효하지 않은 토큰"
+  })
+  @ApiNotFoundResponse({
+    description: "가입한 적 없는 이메일"
+  })
+  @ApiNoContentResponse({
+    description: "비밀번호 초기화 완료"
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post("/email/password")
+  async resetPassword(@Body() passwordResetRequestDto: PasswordResetRequestDto) {
+    const { email, password, verifyToken } = passwordResetRequestDto;
+    await this.authService.resetPassword({ email, password, verifyToken });
+  }
+
 }
