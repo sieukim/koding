@@ -241,10 +241,15 @@ export class User {
     this.githubSignupVerifyToken = undefined;
   }
 
-  async verifyResetPassword({ verifyToken, newPassword }: { verifyToken: string, newPassword: string }) {
+  verifyPasswordResetToken(verifyToken: string) {
     if (this.passwordResetToken !== verifyToken)
       throw new BadRequestException("유효하지 않은 토큰");
+  }
+
+  async verifyResetPassword({ verifyToken, newPassword }: { verifyToken: string, newPassword: string }) {
+    this.verifyPasswordResetToken(verifyToken);
     this.password = newPassword;
+    this.passwordResetToken = undefined;
     await this.hashPassword();
   }
 }

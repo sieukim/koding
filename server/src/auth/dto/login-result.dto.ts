@@ -1,7 +1,7 @@
 import { OmitType } from "@nestjs/swagger";
 import { User } from "../../schemas/user.schema";
 
-const excludeProperties = ["password", "emailSignupVerifyToken", "githubSignupVerifyToken"] as const;
+const excludeProperties = ["password", "emailSignupVerifyToken", "githubSignupVerifyToken", "passwordResetToken"] as const;
 
 export class LoginResultDto extends OmitType(User, excludeProperties) {
   constructor(user: User) {
