@@ -7,6 +7,7 @@ import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import GithubCallbackPage from './pages/GithubCallbackPage';
 import GithubVerifyPage from './pages/GithubVerifyPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/github/login" element={<GithubCallbackPage />} />
         <Route path="/github/verify" element={<GithubVerifyPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
       </Routes>
       <Footer />
     </>

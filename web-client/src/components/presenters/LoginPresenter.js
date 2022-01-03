@@ -6,6 +6,12 @@ const StyledLogin = styled.form`
   flex-direction: column;
   width: 50%;
 
+  .findPassword {
+    width: 85%;
+    text-align: right;
+    margin: 10px 0;
+  }
+
   & > div {
     display: flex;
     align-items: center;
@@ -96,7 +102,9 @@ const LoginPresenter = ({ login, loading, failure, url }) => {
         />
       </div>
 
-      {/*<a>아이디/비밀번호 찾기</a>*/}
+      <a className="findPassword" href="/reset-password">
+        비밀번호 초기화
+      </a>
 
       <div>
         <button className="submit-button" disabled={disableButton}>

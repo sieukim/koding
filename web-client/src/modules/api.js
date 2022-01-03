@@ -29,3 +29,18 @@ export const githubCallback = (code) => {
 export const githubVerify = (user) => {
   return axios.post(`/api/auth/github/verify`, user);
 };
+
+// 비밀번호 초기화 token 전송 요청 api 호출
+export const sendToken = (user) => {
+  return axios.delete(`/api/auth/email/password`, { data: user });
+};
+
+// 비밀번호 초기화 token 검증 api 호출
+export const verifyToken = (user) => {
+  return axios.post(`/api/auth/email/password/verifyToken`, user);
+};
+
+// 비밀번호 초기화 api 호출
+export const resetPassword = (user) => {
+  return axios.post(`/api/auth/email/password`, user);
+};
