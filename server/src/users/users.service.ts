@@ -33,7 +33,7 @@ export class UsersService {
       user.email,
       user.emailSignupVerifyToken
     );
-    return user;
+    return user as User;
   }
 
   async signupGithub(profile: any) {
@@ -50,7 +50,7 @@ export class UsersService {
 
     let user = await this.findUserByField({ githubUserIdentifier });
     if (user)
-      return user;
+      return user as User;
 
 
     const rawRepositories: Array<any> = (await axios.get(repos_url)).data;
@@ -86,7 +86,7 @@ export class UsersService {
       user.setNewGithubSignupVerifyToken();
       await user.save();
     }
-    return user;
+    return user as User;
   }
 
   async verifyEmailSignup(nickname: string, verifyToken: string) {

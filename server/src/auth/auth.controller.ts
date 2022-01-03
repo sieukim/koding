@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Post, Res,
 import { AuthService } from "./auth.service";
 import { GithubAuthGuard } from "./guard/github-auth.guard";
 import { User } from "../schemas/user.schema";
-import { LogoutGuard } from "./guard/logout.guard";
+import { LogoutGuard } from "./guard/authorization/logout.guard";
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
@@ -18,19 +18,17 @@ import {
 } from "@nestjs/swagger";
 import { LocalAuthGuard } from "./guard/local-auth.guard";
 import { LoginLocalRequest } from "./dto/login-local-request";
-import { LoggedInGuard } from "./guard/logged-in.guard";
-import { LoginUser } from "src/common/decorator/login-user.decorator";
+import { LoggedInGuard } from "./guard/authorization/logged-in.guard";
+import { LoginUser } from "../common/decorator/login-user.decorator";
 import { LoginResultDto } from "./dto/login-result.dto";
 import { Response } from "express";
 import { SignupGithubVerifyRequestDto } from "./dto/signup-github-verify-request.dto";
 import { SignupGithubResult } from "./dto/signup-github-result";
 import { PasswordResetEmailRequestDto } from "./dto/password-reset-email-request.dto";
 import { PasswordResetRequestDto } from "./dto/password-reset.request.dto";
+import { PasswordResetTokenVerifyRequestDto } from "./dto/password-reset-token-verify-request.dto";
 
 @ApiTags("AUTH")
-@ApiUnauthorizedResponse({
-  description: "인증 실패"
-})
 @Controller("api/auth")
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
@@ -111,8 +109,8 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   @Post("/github/verify")
-  async verifyGithubSignup(@Body() githubSignupVerifyDto: SignupGithubVerifyRequestDto) {
-    const { email, nickname, verifyToken } = githubSignupVerifyDto;
+  async verifyGithubSignup(@Body() body: SignupGithubVerifyRequestDto) {
+    const { email, nickname, verifyToken } = body;
     const user = await this.authService.verifyGithubSignupUser({ email, nickname, verifyToken });
     return new LoginResultDto(user);
   }
@@ -147,7 +145,7 @@ export class AuthController {
 
   @ApiOperation({
     summary: "비밀번호 찾기 요청",
-    description: "이메일로 비밀번호 초기화 코드 전송"
+    description: "이메일로 비밀번호 초기화 토큰 전송"
   })
   @ApiBody({
     type: PasswordResetEmailRequestDto
@@ -160,14 +158,37 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.ACCEPTED)
   @Delete("/email/password")
-  async requestResetPassword(@Body() passwordResetEmailRequestDto: PasswordResetEmailRequestDto) {
-    const { email } = passwordResetEmailRequestDto;
+  async requestResetPassword(@Body() body: PasswordResetEmailRequestDto) {
+    const { email } = body;
     await this.authService.sendPasswordResetToken({ email });
+  }
+
+
+  @ApiOperation({
+    summary: "비밀번호 초기화 토큰 검증"
+  })
+  @ApiBody({
+    type: PasswordResetTokenVerifyRequestDto
+  })
+  @ApiBadRequestResponse({
+    description: "유효하지 않은 토큰"
+  })
+  @ApiNotFoundResponse({
+    description: "가입한 적 없는 이메일"
+  })
+  @ApiNoContentResponse({
+    description: "유효한 토큰"
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post("/email/password/verifyToken")
+  async checkPasswordTokenValidity(@Body() body: PasswordResetTokenVerifyRequestDto) {
+    const { email, verifyToken } = body;
+    await this.authService.checkPasswordTokenValidity({ email, verifyToken });
   }
 
   @ApiOperation({
     summary: "비밀번호 초기화",
-    description: "비밀번호 찾기 요청을 통해 이메일로 받은 코드를 이용해 초기화"
+    description: "비밀번호 찾기 요청을 통해 이메일로 받은 토큰를 이용해 초기화"
   })
   @ApiBody({
     type: PasswordResetRequestDto
@@ -183,8 +204,8 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post("/email/password")
-  async resetPassword(@Body() passwordResetRequestDto: PasswordResetRequestDto) {
-    const { email, password, verifyToken } = passwordResetRequestDto;
+  async resetPassword(@Body() body: PasswordResetRequestDto) {
+    const { email, password, verifyToken } = body;
     await this.authService.resetPassword({ email, password, verifyToken });
   }
 

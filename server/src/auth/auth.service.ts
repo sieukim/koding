@@ -57,8 +57,6 @@ export class AuthService {
       throw new NotFoundException();
     user.setNewPasswordResetToken();
     await Promise.all([user.save(), this.emailService.sendPasswordResetToken(email, user.passwordResetToken)]);
-
-
   }
 
 
@@ -68,5 +66,12 @@ export class AuthService {
       throw new NotFoundException();
     await user.verifyResetPassword({ verifyToken, newPassword: password });
     await user.save();
+  }
+
+  async checkPasswordTokenValidity({ email, verifyToken }: { email: string, verifyToken: string }) {
+    const user = await this.usersService.findUserByEmail(email);
+    if (!user)
+      throw new NotFoundException();
+    user.verifyPasswordResetToken(verifyToken);
   }
 }

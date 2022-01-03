@@ -24,7 +24,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse
 } from "@nestjs/swagger";
-import { SignupResultDto } from "./dto/signup-result.dto";
+import { LoginResultDto } from "../auth/dto/login-result.dto";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -40,7 +40,7 @@ export class UsersController {
   @ApiOperation({ summary: "회원가입" })
   @ApiCreatedResponse({
     description: "회원가입 성공, 확인 이메일 발송",
-    type: SignupResultDto
+    type: LoginResultDto
   })
   @ApiConflictResponse({
     description: "회원가입 실패. 중복 있음"
@@ -48,7 +48,7 @@ export class UsersController {
   @Post()
   async joinUser(@Body() signupUserDto: SignupLocalDto) {
     const user = await this.usersService.signupLocal(signupUserDto);
-    return new SignupResultDto(user);
+    return new LoginResultDto(user);
   }
 
   @ApiQuery({

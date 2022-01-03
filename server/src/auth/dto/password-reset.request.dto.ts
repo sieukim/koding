@@ -12,7 +12,7 @@ export class PasswordResetRequestDto extends PickType(User, ["email", "password"
   @Length(6, 6)
   @IsNumberString({ no_symbols: true })
   @ApiProperty({
-    description: "이메일로 받은 비밀번호 초기화 인증코드",
+    description: "이메일로 받은 비밀번호 초기화 인증토큰",
     example: "945123",
     minLength: 6,
     maxLength: 6
