@@ -1,7 +1,7 @@
 import { OmitType } from "@nestjs/swagger";
 import { User } from "../../schemas/user.schema";
 
-const excludeProperties = ["password", "emailSignupVerifyToken", "githubSignupVerifyToken", "passwordResetToken"] as const;
+const excludeProperties = ["password", "emailSignupVerifyToken", "githubSignupVerifyToken", "passwordResetToken", "followings", "followers"] as const;
 
 export class LoginResultDto extends OmitType(User, excludeProperties) {
   constructor(user: User) {
@@ -15,7 +15,9 @@ export class LoginResultDto extends OmitType(User, excludeProperties) {
       "blogUrl",
       "githubUserInfo",
       "githubUserIdentifier",
-      "githubSignupVerified"
+      "githubSignupVerified",
+      "followersCount",
+      "followingsCount"
     ];
     keys.forEach((key) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

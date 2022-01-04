@@ -6,9 +6,12 @@ import { ConfigService } from "@nestjs/config";
 import * as cookieParser from "cookie-parser";
 import * as session from "express-session";
 import * as passport from "passport";
+import * as mongoose from "mongoose";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // 몽구스 쿼리 디버그
+  mongoose.set("debug", true);
   const configService = app.get(ConfigService);
   app.use(
     cookieParser(configService.get<string>("cookie.secret")),

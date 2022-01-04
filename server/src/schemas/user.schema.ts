@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { compare, hash } from "bcrypt";
 import { v1 } from "uuid";
@@ -192,6 +192,35 @@ export class User {
   @Length(6, 6)
   @Prop()
   passwordResetToken?: string;
+
+  @ApiProperty({
+    description: "내가 팔로우 하는 유저들"
+  })
+  @Prop({ type: [{ type: Types.ObjectId, ref: User.name }] })
+  followings: User[] | Types.ObjectId[];
+  @ApiProperty({
+    description: "나를 팔로우 하는 유저들"
+  })
+  @Prop({ type: [{ type: Types.ObjectId, ref: User.name }], default: [] })
+  followers: User[] | Types.ObjectId[];
+
+  @ApiProperty({
+    description: "내가 팔로우 하는 유저 수 ",
+    example: 100,
+    minimum: 0
+  })
+  get followingsCount() {
+    return this.followings.length;
+  };
+
+  @ApiProperty({
+    description: "나를 팔로우 하는 유저 수",
+    example: 100,
+    minimum: 0
+  })
+  get followersCount() {
+    return this.followers.length;
+  };
 
   get isGithubUser(): boolean {
     return this.githubUserIdentifier !== undefined;

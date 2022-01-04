@@ -3,6 +3,7 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   Get,
   Head,
   HttpCode,
@@ -15,9 +16,12 @@ import {
 import { SignupLocalDto } from "./dto/signup-local.dto";
 import { UsersService } from "./users.service";
 import {
+  ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
   ApiNoContentResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
@@ -25,6 +29,10 @@ import {
   ApiUnauthorizedResponse
 } from "@nestjs/swagger";
 import { LoginResultDto } from "../auth/dto/login-result.dto";
+import { User } from "../schemas/user.schema";
+import { FollowUserDto } from "./dto/follow-user.dto";
+import { FollowUserResultDto } from "./dto/follow-user-result.dto";
+import { UnfollowUserResultDto } from "./dto/unfollow-user-result.dto";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -119,4 +127,95 @@ export class UsersController {
     this.logger.log(`nickname: ${nickname}, verifyToken: ${verifyToken}`);
     await this.usersService.verifyEmailSignup(nickname, verifyToken);
   }
+
+  @ApiOperation({
+    summary: "유저 팔로우"
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "팔로우를 요청한 유저 닉네임"
+  })
+  @ApiBody({
+    type: FollowUserDto
+  })
+  @ApiNotFoundResponse({
+    description: "잘못된 닉네임"
+  })
+  @ApiOkResponse({
+    description: "팔로우 완료(원래 이미 팔로우하고 있었던 경우도 포함)",
+    type: FollowUserResultDto
+  })
+  @HttpCode(HttpStatus.OK)
+  @Post(":nickname/followings")
+  async followUser(@Param("nickname") nickname: string, @Body() body: FollowUserDto) {
+    const { from, to } = await this.usersService.followUser({ nickname }, { nickname: body.nickname });
+    return new FollowUserResultDto(from, to);
+  }
+
+  @ApiOperation({
+    summary: "유저 언팔로우"
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "언팔로우를 요청한 유저 닉네임"
+  })
+  @ApiParam({
+    name: "followNickname",
+    description: "언팔로우 할 유저 닉네임"
+  })
+  @ApiNotFoundResponse({
+    description: "잘못된 닉네임"
+  })
+  @ApiOkResponse({
+    description: "언팔로우 완료(원래 팔로우하지 않았던 경우도 포함)",
+    type: UnfollowUserResultDto
+  })
+  @HttpCode(HttpStatus.OK)
+  @Delete(":nickname/followings/:followNickname")
+  async unfollowUser(@Param("nickname") nickname: string, @Param("followNickname") followNickname: string) {
+    const { from, to } = await this.usersService.unfollowUser({ nickname }, { nickname: followNickname });
+    return new UnfollowUserResultDto(from, to);
+  }
+
+  @ApiOperation({
+    summary: "유저가 팔로잉하는 유저들 정보"
+  })
+  @ApiParam({
+    name: "유저 닉네임"
+  })
+  @ApiNotFoundResponse({
+    description: "없는 유저 닉네임"
+  })
+  @ApiOkResponse({
+    description: "팔로잉하는 유저들 정보 조회 완료",
+    type: [LoginResultDto]
+  })
+  @Get(":nickname/followings")
+  async getFollowings(@Param("nickname") nickname: string) {
+    const user = await this.usersService.findUserByNickname(nickname, false, ["followings"]);
+    const followings = user.followings as User[];
+    return followings.map(following => new LoginResultDto(following));
+  }
+
+  @ApiOperation({
+    summary: "유저를 팔로우하는 유저들 정보"
+  })
+  @ApiParam({
+    name: "유저 닉네임"
+  })
+  @ApiNotFoundResponse({
+    description: "없는 유저 닉네임"
+  })
+  @ApiOkResponse({
+    description: "팔로우하는 유저들 정보 조회 완료",
+    type: [LoginResultDto]
+  })
+  @Get(":nickname/followers")
+  async getFollowers(@Param("nickname") nickname: string) {
+    const user = await this.usersService.findUserByNickname(nickname, false, ["followers"]);
+    const followers = user.followers as User[];
+    return followers.map(follower => new LoginResultDto(follower));
+  }
+
+
 }

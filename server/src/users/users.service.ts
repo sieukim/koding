@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { GithubRepositoryInfo, GithubUserInfo, User, UserDocument } from "../schemas/user.schema";
-import { Model } from "mongoose";
+import { FilterQuery, Model } from "mongoose";
 import { SignupLocalDto } from "./dto/signup-local.dto";
 import { EmailService } from "../email/email.service";
 import axios from "axios";
@@ -100,8 +100,10 @@ export class UsersService {
   }
 
 
-  findUserByNickname(nickname: string, includePassword = false) {
-    return this.findUserByField({ nickname }, includePassword);
+  findUserByNickname(nickname: string, includePassword = false, populate: (keyof User)[] = []) {
+    if (populate.length <= 0)
+      return this.findUserByField({ nickname }, includePassword);
+    else return this.findUserByField({ nickname }, includePassword, populate);
   }
 
   findUserByEmail?(email: string, includePassword = false) {
@@ -110,13 +112,56 @@ export class UsersService {
 
   async checkExistence(key: "nickname" | "email", value: string) {
     const user = await this.userModel.findOne({ [key]: value }).exec();
-    console.log(user);
     if (user) return true;
     return false;
   }
 
-  private findUserByField(condition: Partial<User>, includePassword = false) {
-    if (includePassword) return this.userModel.findOne(condition).exec();
-    return this.userModel.findOne(condition).select("-password").exec();
+  async followUser(from: { nickname: string }, to: { nickname: string }) {
+    const users = await this.userModel.find({
+      nickname: {
+        $in: [from.nickname, to.nickname]
+      }
+    }).exec();
+    if (users.length != 2)
+      throw new NotFoundException("잘못된 유저 정보입니다");
+    const fromUser = users.find(user => user.nickname === from.nickname);
+    const toUser = users.find(user => user.nickname === to.nickname);
+
+    await fromUser.update({ $addToSet: { followings: toUser._id } }).exec();
+    await toUser.update({ $addToSet: { followers: fromUser._id } }).exec();
+
+    return {
+      from: fromUser,
+      to: toUser
+    };
+  }
+
+  async unfollowUser(from: { nickname: string }, to: { nickname: string }) {
+    const users = await this.userModel.find({
+      nickname: {
+        $in: [from.nickname, to.nickname]
+      }
+    }).exec();
+    if (users.length != 2)
+      throw new NotFoundException("잘못된 유저 정보입니다");
+    const fromUser = users.find(user => user.nickname === from.nickname);
+    const toUser = users.find(user => user.nickname === to.nickname);
+
+    await fromUser.update({ $pull: { followings: toUser._id } }).exec();
+    await toUser.update({ $pull: { followers: fromUser._id } }).exec();
+
+    return {
+      from: fromUser,
+      to: toUser
+    };
+  }
+
+  private findUserByField(condition: FilterQuery<UserDocument>, includePassword = false, populate: (keyof User)[] = []) {
+    let query = this.userModel.findOne(condition);
+    if (!includePassword)
+      query = query.select("-password");
+    if (populate.length > 0)
+      query = query.populate(populate);
+    return query.exec();
   }
 }

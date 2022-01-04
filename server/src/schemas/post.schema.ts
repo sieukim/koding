@@ -4,7 +4,7 @@ import { User } from "./user.schema";
 
 export type PostDocument = Post & Document;
 
-@Schema({ id: false, _id: true, autoIndex: true })
+@Schema({ id: false, _id: true, autoIndex: true, versionKey: false })
 export class Post {
   @Prop({ type: Types.ObjectId, ref: User.name, index: true })
   writer: User;
