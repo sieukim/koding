@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import useInputs from '../../hooks/useInput';
 
 const StyledResetPassword = styled.form`
   display: flex;
@@ -47,24 +48,27 @@ const ResetPasswordPresenter = ({
   resetState,
   initializeState,
 }) => {
-  /* 정보 추가 */
+  /* 유저 정보 */
 
-  const [form, setForm] = useState({});
+  // input 이벤트 핸들러
+  const [form, onChange] = useInputs({
+    email: '',
+    verifiedToken: '',
+    password: '',
+    'password-check': '',
+  });
 
-  // input 핸들러 이벤트
-  const onChangeInput = useCallback(
+  const onChangeInputs = useCallback(
     (e) => {
       // 현재 정보에서 입력중인 값을 추가
-      setForm((form) => ({
-        ...form,
-        [e.target.name]: e.target.value,
-      }));
+      onChange(e);
 
+      // email 값이 변경되면 상태 초기화
       if (e.target.name === 'email' || e.target.name === 'verifiedToken') {
         initializeState();
       }
     },
-    [initializeState],
+    [onChange, initializeState],
   );
 
   /* 인증 코드 발송 */
@@ -116,7 +120,7 @@ const ResetPasswordPresenter = ({
       <div>
         <input
           name="email"
-          onChange={onChangeInput}
+          onChange={onChangeInputs}
           placeholder="가입한 이메일을 입력하세요."
         />
         <button
@@ -134,7 +138,7 @@ const ResetPasswordPresenter = ({
       <div>
         <input
           name="verifyToken"
-          onChange={onChangeInput}
+          onChange={onChangeInputs}
           placeholder="인증 코드를 입력하세요."
           disabled={sendState.success && verifyState.success}
         />
@@ -158,7 +162,7 @@ const ResetPasswordPresenter = ({
           minLength="8"
           maxLength="16"
           required
-          onChange={onChangeInput}
+          onChange={onChangeInputs}
           className="no-button-input"
         />
       </div>
@@ -171,7 +175,7 @@ const ResetPasswordPresenter = ({
           minLength="8"
           maxLength="16"
           required
-          onChange={onChangeInput}
+          onChange={onChangeInputs}
           className="no-button-input"
         />
       </div>

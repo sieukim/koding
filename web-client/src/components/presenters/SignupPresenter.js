@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
+import useInputs from '../../hooks/useInput';
 
 const StyledSignup = styled.form`
   display: flex;
@@ -38,19 +39,23 @@ const SignupPresenter = ({
   duplicateCheck,
   resetCheck,
 }) => {
-  // user에 대한 정보를 갖는다.
-  const [form, setForm] = useState({});
-
-  /* 정보 추가 */
+  /* 유저 정보 */
 
   // input 이벤트 핸들러
+  const [form, onChange] = useInputs({
+    email: '',
+    password: '',
+    'password-check': '',
+    nickname: '',
+    blog: '',
+    github: '',
+    portfolio: '',
+  });
+
   const onChangeInput = useCallback(
     (e) => {
-      // 현재 정보에서 입력중인 값을 추가
-      setForm((form) => ({
-        ...form,
-        [e.target.name]: e.target.value,
-      }));
+      onChange(e);
+
       // 만약 추가중인 정보가 id 또는 email, nickname이면 resetCheck 함수를 호출하여 중복 검사 초기화
       if (e.target.name === 'email' || e.target.name === 'nickname') {
         resetCheck(e.target.name);

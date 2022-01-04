@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
+import useInputs from '../../hooks/useInput';
 
 const StyledLogin = styled.form`
   display: flex;
@@ -46,18 +47,9 @@ const StyledLogin = styled.form`
 `;
 
 const LoginPresenter = ({ login, loginState, url }) => {
-  // user에 대한 정보를 갖는다.
-  const [form, setForm] = useState({});
-
-  /* 정보 추가 */
-
+  /* 유저 정보 */
   // input 이벤트 핸들러
-  const onChangeInput = useCallback((e) => {
-    setForm((form) => ({
-      ...form,
-      [e.target.name]: e.target.value,
-    }));
-  }, []);
+  const [form, onChangeInputs] = useInputs({ email: '', password: '' });
 
   /* 로그인 */
 
@@ -85,7 +77,7 @@ const LoginPresenter = ({ login, loginState, url }) => {
           type="email"
           placeholder="이메일"
           required
-          onChange={onChangeInput}
+          onChange={onChangeInputs}
         />
       </div>
 
@@ -98,7 +90,7 @@ const LoginPresenter = ({ login, loginState, url }) => {
           minLength="8"
           maxLength="16"
           required
-          onChange={onChangeInput}
+          onChange={onChangeInputs}
         />
       </div>
 
