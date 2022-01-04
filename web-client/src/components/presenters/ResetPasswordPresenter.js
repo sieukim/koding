@@ -40,16 +40,12 @@ const StyledResetPassword = styled.form`
 
 const ResetPasswordPresenter = ({
   sendToken,
-  resetInfo,
+  sendState,
   verifyToken,
+  verifyState,
   resetPassword,
-  sendSuccess,
-  sendFailure,
-  verifiedSuccess,
-  verifiedFailure,
-  resetSuccess,
-  resetFailure,
-  loading,
+  resetState,
+  initializeState,
 }) => {
   /* 정보 추가 */
 
@@ -65,10 +61,10 @@ const ResetPasswordPresenter = ({
       }));
 
       if (e.target.name === 'email' || e.target.name === 'verifiedToken') {
-        resetInfo(e.target.name);
+        initializeState();
       }
     },
-    [resetInfo],
+    [initializeState],
   );
 
   /* 인증 코드 발송 */
@@ -107,9 +103,9 @@ const ResetPasswordPresenter = ({
 
   // 비밀번호 변경 진행중인지, 유효한 토큰인지, 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
   const disableButton =
-    loading ||
-    !sendSuccess ||
-    !verifiedSuccess ||
+    resetState.loading ||
+    !sendState.success ||
+    !verifyState.success ||
     !form['password'] ||
     !form['password-check'] ||
     form['password'] !== form['password-check'];
@@ -123,12 +119,16 @@ const ResetPasswordPresenter = ({
           onChange={onChangeInput}
           placeholder="가입한 이메일을 입력하세요."
         />
-        <button type="button" onClick={onSendToken} disabled={sendSuccess}>
+        <button
+          type="button"
+          onClick={onSendToken}
+          disabled={sendState.success}
+        >
           인증 코드 발송
         </button>
       </div>
-      {sendSuccess && <p>인증 코드를 입력해주세요.</p>}
-      {sendFailure && <p>일치하지 않는 회원 정보입니다.</p>}
+      {sendState.success && <p>인증 코드를 입력해주세요.</p>}
+      {sendState.error && <p>일치하지 않는 회원 정보입니다.</p>}
 
       <p>인증 코드</p>
       <div>
@@ -136,18 +136,18 @@ const ResetPasswordPresenter = ({
           name="verifyToken"
           onChange={onChangeInput}
           placeholder="인증 코드를 입력하세요."
-          disabled={sendSuccess && verifiedSuccess}
+          disabled={sendState.success && verifyState.success}
         />
         <button
           type="button"
           onClick={onVerifyToken}
-          disabled={sendSuccess && verifiedSuccess}
+          disabled={sendState.success && verifyState.success}
         >
           인증 코드 확인
         </button>
       </div>
-      {verifiedSuccess && <p>비밀 번호 변경을 진행해주세요.</p>}
-      {verifiedFailure && <p>다시 입력해주세요.</p>}
+      {verifyState.success && <p>비밀 번호 변경을 진행해주세요.</p>}
+      {verifyState.failure && <p>다시 입력해주세요.</p>}
 
       <p>비밀번호</p>
       <div>
@@ -185,8 +185,10 @@ const ResetPasswordPresenter = ({
           비밀번호 변경
         </button>
       </div>
-      {resetSuccess && <p>비밀번호가 변경되었습니다.</p>}
-      {resetFailure && <p>오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>}
+      {resetState.success && <p>비밀번호가 변경되었습니다.</p>}
+      {resetState.failure && (
+        <p>오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
+      )}
     </StyledResetPassword>
   );
 };

@@ -32,8 +32,7 @@ const StyledSignup = styled.form`
 
 const SignupPresenter = ({
   signup,
-  loading,
-  failure,
+  signupState,
   duplicated,
   checked,
   duplicateCheck,
@@ -105,7 +104,7 @@ const SignupPresenter = ({
 
   // 회원가입 진행중인지 email, nickname의 값은 유효한지 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
   const disableButton =
-    loading ||
+    signupState.loading ||
     !validatedEmail ||
     !validatedNickname ||
     !form[`password`] ||
@@ -225,7 +224,7 @@ const SignupPresenter = ({
           회원가입
         </button>
       </div>
-      {failure && <p>오류가 발생했습니다. 다시 시도해주세요.</p>}
+      {signupState.error && <p>오류가 발생했습니다. 다시 시도해주세요.</p>}
     </StyledSignup>
   );
 };

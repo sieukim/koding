@@ -1,45 +1,45 @@
 import LoginPresenter from '../presenters/LoginPresenter';
 import * as api from '../../modules/api';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogin } from '../../modules/auth';
+import useAsync from '../../hooks/useAsync';
 
 const LoginContainer = () => {
   /* 로그인 */
 
-  // 로그인 진행 중이면 true 값을 갖는다. => 회원가입 버튼을 비활성화함
-  const [loading, setLoading] = useState(false);
-  // 로그인 api 호출 결과로 로그인에 성공하면 true 값을 갖는다.
-  const [success, setSuccess] = useState(false);
-  // 로그인 api 호출 결과로 로그인에 실패하면 true 값을 갖는다.
-  const [failure, setFailure] = useState(false);
+  // login state
+  const [loginState, loginFetch] = useAsync(
+    (user) => api.login(user),
+    [],
+    true,
+  );
 
   const dispatch = useDispatch();
-
   const onSetLogin = useCallback(
     (user) => dispatch(setLogin(user)),
     [dispatch],
   );
 
-  // 로그인 api 호출 함수
+  // 로그인 api 호출
   const login = useCallback(
     async (user) => {
-      setLoading(true);
-      try {
-        const loggedUser = await api.login(user);
-        setSuccess(true);
-        setLoading(false);
-        onSetLogin(loggedUser.data);
-      } catch (e) {
-        setFailure(true);
-        setLoading(false);
-      }
+      await loginFetch(user);
     },
-    [onSetLogin],
+    [loginFetch],
   );
 
+  // login state에 저장된 user를 이용하여 로그인 상태로 변경
+  useEffect(() => {
+    if (loginState.success) {
+      const user = loginState.success.data;
+      onSetLogin(user);
+    }
+  }, [onSetLogin, loginState.success]);
+
   /* github callback */
+
   const url = useMemo(() => {
     const CLIENT_ID = '855268489b238ce4aa0e';
     const REDIRECT_URL = 'http://localhost:3000/github/login';
@@ -56,13 +56,8 @@ const LoginContainer = () => {
 
   return (
     <>
-      {success && <Navigate to="/" />}
-      <LoginPresenter
-        login={login}
-        loading={loading}
-        failure={failure}
-        url={url}
-      />
+      {loginState.success && <Navigate to="/" />}
+      <LoginPresenter login={login} loginState={loginState} url={url} />
     </>
   );
 };

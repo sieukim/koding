@@ -45,7 +45,7 @@ const StyledLogin = styled.form`
   }
 `;
 
-const LoginPresenter = ({ login, loading, failure, url }) => {
+const LoginPresenter = ({ login, loginState, url }) => {
   // user에 대한 정보를 갖는다.
   const [form, setForm] = useState({});
 
@@ -74,7 +74,7 @@ const LoginPresenter = ({ login, loading, failure, url }) => {
   );
 
   // 로그인 진행중인지에 대한 정보
-  const disableButton = loading;
+  const disableButton = loginState.loading;
 
   return (
     <StyledLogin onSubmit={onSubmitButton}>
@@ -111,7 +111,7 @@ const LoginPresenter = ({ login, loading, failure, url }) => {
           로그인
         </button>
       </div>
-      {failure && <p>일치하지 않는 회원정보입니다.</p>}
+      {loginState.error && <p>일치하지 않는 회원정보입니다.</p>}
 
       <div>
         <a href={url}>

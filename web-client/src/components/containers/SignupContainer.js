@@ -1,9 +1,10 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import SignupPresenter from '../presenters/SignupPresenter';
 import { Navigate } from 'react-router-dom';
 import * as api from '../../modules/api';
 import { useDispatch } from 'react-redux';
 import { setLogin } from '../../modules/auth';
+import useAsync from '../../hooks/useAsync';
 
 const SignupContainer = () => {
   /* 중복 검사 */
@@ -54,45 +55,51 @@ const SignupContainer = () => {
 
   /* 회원가입 */
 
-  // 회원가입 진행 중이면 true 값을 갖는다. => 회원가입 버튼을 비활성화함
-  const [loading, setLoading] = useState(false);
-  // 회원가입 api 호출 결과로 회원가입에 성공하면 true 값을 갖는다.
-  const [success, setSuccess] = useState(false);
-  // 회원가입 api 호출 결과로 회원가입에 실패하면 true 값을 갖는다.
-  const [failure, setFailure] = useState(false);
+  // signup state
+  const [signupState, signupFetch] = useAsync(
+    (user) => api.signup(user),
+    [],
+    true,
+  );
+
+  // login state
+  const [loginState, loginFetch] = useAsync(
+    (user) => api.login(user),
+    [],
+    true,
+  );
+
+  // signup api & login api 호출
+  const signup = useCallback(
+    async (user) => {
+      await signupFetch(user);
+      await loginFetch(user);
+    },
+    [signupFetch, loginFetch],
+  );
+
+  /* 로그인 */
 
   const dispatch = useDispatch();
-
   const onSetLogin = useCallback(
     (user) => dispatch(setLogin(user)),
     [dispatch],
   );
 
-  // 회원가입 api 호출 함수
-  const signup = useCallback(
-    async (user) => {
-      setLoading(true);
-      try {
-        await api.signup(user);
-        const loggedUser = await api.login(user);
-        onSetLogin(loggedUser.data);
-        setSuccess(true);
-      } catch (e) {
-        setFailure(true);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [onSetLogin],
-  );
+  // login state에 저장된 user를 이용하여 로그인 상태로 변경
+  useEffect(() => {
+    if (loginState.success) {
+      const user = loginState.success.data;
+      onSetLogin(user);
+    }
+  }, [onSetLogin, loginState.success]);
 
   return (
     <>
-      {success && <Navigate to="/" />}
+      {loginState.success && <Navigate to="/" />}
       <SignupPresenter
         signup={signup}
-        loading={loading}
-        failure={failure}
+        signupState={signupState}
         duplicated={duplicated}
         checked={checked}
         duplicateCheck={duplicateCheck}
