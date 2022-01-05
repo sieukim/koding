@@ -6,7 +6,15 @@
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
+    "@toast-ui/editor": "^3.1.1",
+    "@toast-ui/editor-plugin-chart": "^3.0.1",
+    "@toast-ui/editor-plugin-code-syntax-highlight": "^3.0.0",
+    "@toast-ui/editor-plugin-color-syntax": "^3.0.2",
+    "@toast-ui/editor-plugin-table-merged-cell": "^3.0.1",
+    "@toast-ui/editor-plugin-uml": "^3.0.1",
+    "@toast-ui/react-editor": "^3.1.1",
     "axios": "^0.24.0",
+    "prismjs": "^1.25.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.6",
@@ -16,6 +24,7 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
     "styled-components": "^5.3.3",
+    "tui-color-picker": "^2.2.7",
     "web-vitals": "^2.1.2"
   },
   "scripts": {

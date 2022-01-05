@@ -44,3 +44,28 @@ export const verifyToken = (user) => {
 export const resetPassword = (user) => {
   return axios.post(`/api/auth/email/password`, user);
 };
+
+// 게시글 작성 api 호출
+export const writePost = (boardType, post) => {
+  return axios.post(`/api/posts/${boardType}`, post);
+};
+
+// 게시글 읽기 api 호출
+export const readPost = (boardType, postId) => {
+  return axios.get(`/api/posts/${boardType}/${postId}`);
+};
+
+// 게시글 목록 갖고오기 api 호출
+export const readBoard = (boardType) => {
+  return axios.get(`/api/posts/${boardType}`);
+};
+
+// 게시글 삭제 api 호출
+export const removePost = (boardType, postId) => {
+  return axios.delete(`/api/posts/${boardType}/${postId}`);
+};
+
+// 게시글 수정 api 호출
+export const editPost = (boardType, postId, post) => {
+  return axios.patch(`/api/posts/${boardType}/${postId}`, post);
+};

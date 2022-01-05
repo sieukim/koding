@@ -36,8 +36,7 @@ const GithubVerifyPresenter = ({
   duplicateCheck,
   resetCheck,
   githubVerify,
-  loading,
-  failure,
+  githubVerifyState,
 }) => {
   /* 중복 검사 */
 
@@ -78,7 +77,7 @@ const GithubVerifyPresenter = ({
     [nickname, githubVerify],
   );
 
-  const validated = !loading && checked && !duplicated;
+  const validated = !githubVerifyState.loading && checked && !duplicated;
 
   return (
     <StyledGithubVerify onSubmit={onSubmitButton}>
@@ -112,7 +111,9 @@ const GithubVerifyPresenter = ({
           회원가입
         </button>
       </div>
-      {failure && <p>오류가 발생했습니다. 다시 시도해주세요.</p>}
+      {githubVerifyState.error && (
+        <p>오류가 발생했습니다. 다시 시도해주세요.</p>
+      )}
     </StyledGithubVerify>
   );
 };

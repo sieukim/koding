@@ -1,9 +1,10 @@
 import GithubVerifyPresenter from '../presenters/GithubVerifyPresenter';
 import * as api from '../../modules/api';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLogin } from '../../modules/auth';
 import { Navigate } from 'react-router-dom';
+import useAsync from '../../hooks/useAsync';
 
 const GithubVerifyContainer = () => {
   /* 중복 검사 */
@@ -31,51 +32,48 @@ const GithubVerifyContainer = () => {
 
   /* github verify */
 
-  // 회원가입 진행 중이면 true 값을 갖는다. => 회원가입 버튼을 비활성화함
-  const [loading, setLoading] = useState(false);
-  // 회원가입 api 호출 결과로 회원가입에 성공하면 true 값을 갖는다.
-  const [success, setSuccess] = useState(false);
-  // 회원가입 api 호출 결과로 회원가입에 실패하면 true 값을 갖는다.
-  const [failure, setFailure] = useState(false);
-
-  // 사용자 정보 가져오기
-  const user = useSelector((state) => state.github.user);
+  // githubLogin state
+  const [githubVerifyState, githubVerifyFetch] = useAsync(
+    (user) => api.githubVerify(user),
+    [],
+    true,
+  );
 
   const dispatch = useDispatch();
-
-  // 로그인 상태로 변경
   const onSetLogin = useCallback(
     (user) => dispatch(setLogin(user)),
     [dispatch],
   );
 
+  // github user 정보 가져오기
+  const githubUser = useSelector((state) => state.github.user);
+
+  // github api 호출
   const githubVerify = useCallback(
     async (nickname) => {
-      setLoading(true);
-      try {
-        await api.githubVerify({ ...user, nickname: nickname });
-        setLoading(false);
-        setSuccess(true);
-        onSetLogin({ ...user, nickname: nickname });
-      } catch (e) {
-        setFailure(true);
-        setLoading(false);
-      }
+      await githubVerifyFetch({ ...githubUser, nickname: nickname });
     },
-    [onSetLogin, user],
+    [githubVerifyFetch, githubUser],
   );
+
+  // github login state에 저장된 user를 이용하여 로그인 상태로 변경
+  useEffect(() => {
+    if (githubVerifyState.success) {
+      const user = githubVerifyState.success.data;
+      onSetLogin(user);
+    }
+  }, [onSetLogin, githubVerifyState]);
 
   return (
     <>
-      {success && <Navigate to="/" />}
+      {githubVerifyState.success && <Navigate to="/" />}
       <GithubVerifyPresenter
         duplicated={duplicated}
         checked={checked}
         duplicateCheck={duplicateCheck}
         resetCheck={resetCheck}
         githubVerify={githubVerify}
-        loading={loading}
-        failure={failure}
+        githubVerifyState={githubVerifyState}
       />
     </>
   );

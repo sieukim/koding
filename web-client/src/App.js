@@ -8,6 +8,10 @@ import LoginPage from './pages/LoginPage';
 import GithubCallbackPage from './pages/GithubCallbackPage';
 import GithubVerifyPage from './pages/GithubVerifyPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import WritePostPage from './pages/WritePostPage';
+import ReadPostPage from './pages/ReadPostPage';
+import BoardPage from './pages/BoardPage';
+import EditPostPage from './pages/EditPostPage';
 
 function App() {
   return (
@@ -20,6 +24,19 @@ function App() {
         <Route path="/github/login" element={<GithubCallbackPage />} />
         <Route path="/github/verify" element={<GithubVerifyPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/board/:boardType" element={<BoardPage />} />
+        <Route
+          path="/board/:boardType/post/write"
+          element={<WritePostPage />}
+        />
+        <Route
+          path="/board/:boardType/post/:postId"
+          element={<ReadPostPage />}
+        />
+        <Route
+          path="/board/:boardType/post/:postId/edit"
+          element={<EditPostPage />}
+        />
       </Routes>
       <Footer />
     </>

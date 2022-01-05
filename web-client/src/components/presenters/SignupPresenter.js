@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
+import useInputs from '../../hooks/useInput';
 
 const StyledSignup = styled.form`
   display: flex;
@@ -32,32 +33,35 @@ const StyledSignup = styled.form`
 
 const SignupPresenter = ({
   signup,
-  loading,
-  failure,
+  signupState,
   duplicated,
   checked,
   duplicateCheck,
   resetCheck,
 }) => {
-  // user에 대한 정보를 갖는다.
-  const [form, setForm] = useState({});
-
-  /* 정보 추가 */
+  /* 유저 정보 */
 
   // input 이벤트 핸들러
+  const [form, onChange] = useInputs({
+    email: '',
+    password: '',
+    'password-check': '',
+    nickname: '',
+    blog: '',
+    github: '',
+    portfolio: '',
+  });
+
   const onChangeInput = useCallback(
     (e) => {
-      // 현재 정보에서 입력중인 값을 추가
-      setForm((form) => ({
-        ...form,
-        [e.target.name]: e.target.value,
-      }));
+      onChange(e);
+
       // 만약 추가중인 정보가 id 또는 email, nickname이면 resetCheck 함수를 호출하여 중복 검사 초기화
       if (e.target.name === 'email' || e.target.name === 'nickname') {
         resetCheck(e.target.name);
       }
     },
-    [resetCheck],
+    [resetCheck, onChange],
   );
 
   /* 중복 검사*/
@@ -99,13 +103,14 @@ const SignupPresenter = ({
     },
     [form, signup],
   );
+
   // email, nickname의 값이 유효한지에 대한 정보
   const validatedEmail = checked.email && !duplicated.email;
   const validatedNickname = checked.nickname && !duplicated.nickname;
 
   // 회원가입 진행중인지 email, nickname의 값은 유효한지 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
   const disableButton =
-    loading ||
+    signupState.loading ||
     !validatedEmail ||
     !validatedNickname ||
     !form[`password`] ||
@@ -225,7 +230,7 @@ const SignupPresenter = ({
           회원가입
         </button>
       </div>
-      {failure && <p>오류가 발생했습니다. 다시 시도해주세요.</p>}
+      {signupState.error && <p>오류가 발생했습니다. 다시 시도해주세요.</p>}
     </StyledSignup>
   );
 };
