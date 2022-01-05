@@ -61,7 +61,7 @@ const SignupPresenter = ({
         resetCheck(e.target.name);
       }
     },
-    [resetCheck],
+    [resetCheck, onChange],
   );
 
   /* 중복 검사*/
@@ -103,6 +103,7 @@ const SignupPresenter = ({
     },
     [form, signup],
   );
+
   // email, nickname의 값이 유효한지에 대한 정보
   const validatedEmail = checked.email && !duplicated.email;
   const validatedNickname = checked.nickname && !duplicated.nickname;

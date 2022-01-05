@@ -51,22 +51,22 @@ const Header = () => {
       </NavLink>
       <ul>
         <li>
-          <a>자유</a>
+          <NavLink to="/board/common">일반</NavLink>
         </li>
         <li>
-          <a>질문</a>
+          <NavLink to="/board/question">질문</NavLink>
         </li>
         <li>
-          <a>취업/진로</a>
+          <NavLink to="/board/career">취업/진로</NavLink>
         </li>
         <li>
-          <a>채용</a>
+          <NavLink to="/board/recruit">채용</NavLink>
         </li>
         <li>
-          <a>스터디</a>
+          <NavLink to="/board/study-group">스터디</NavLink>
         </li>
         <li>
-          <a>칼럼</a>
+          <NavLink to="/board/column">칼럼</NavLink>
         </li>
         <li>
           <a>검색</a>

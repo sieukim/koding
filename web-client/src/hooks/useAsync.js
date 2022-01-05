@@ -58,7 +58,7 @@ function useAsync(callback, deps = [], skip = false) {
     if (skip) return;
     fetchData();
     // eslint-disable-next-line
-  }, [fetchData, skip, ...deps]);
+  }, deps);
 
   return [state, fetchData, initializeState];
 }
