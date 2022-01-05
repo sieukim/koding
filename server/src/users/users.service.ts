@@ -24,6 +24,7 @@ export class UsersService {
 
     if (user) throw new ConflictException("이미 존재하는 사용자입니다");
     user = new this.userModel(signupLocalDto);
+    user.isEmailUser = true;
     user.setNewEmailSignupVerifyToken();
     await user.hashPassword();
     await user.save();
@@ -74,14 +75,15 @@ export class UsersService {
       user.githubUserIdentifier = githubUserIdentifier;
       user.githubUserInfo = githubUserInfo;
       user.githubSignupVerified = true;
+      user.isGithubUser = true;
       await user.save();
     } else {
       user = new this.userModel({
         email,
-        emailSignupVerified: true,
         githubSignupVerified: false,
         githubUserInfo,
-        githubUserIdentifier: githubUserIdentifier
+        githubUserIdentifier: githubUserIdentifier,
+        isGithubUser: true
       });
       user.setNewGithubSignupVerifyToken();
       await user.save();

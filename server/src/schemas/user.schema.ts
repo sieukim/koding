@@ -92,6 +92,7 @@ export type UserDocument = User & Document;
 @Schema({ id: false, _id: true, versionKey: false, autoIndex: true })
 export class User {
   private static readonly round = 10;
+  _id: Types.ObjectId;
 
   @IsEmail()
   @ApiProperty({
@@ -111,7 +112,7 @@ export class User {
     minLength: 2,
     maxLength: 10
   })
-  @Prop({ required: false, index: { unique: true, partialFilterExpression: { nickname: { $type: "string" } } } })
+  @Prop({ required: false, index: { unique: true, sparse: true } })
   nickname: string;
 
   @Length(8, 16)
@@ -152,11 +153,17 @@ export class User {
   @Prop({ required: false })
   portfolioUrl?: string;
 
+  @Prop({ default: false })
+  isGithubUser: boolean;
+
+  @Prop({ default: false })
+  isEmailUser: boolean;
+
   @IsOptional()
   @IsNumber()
   @Prop({
-    required: false,
-    index: { unique: true, partialFilterExpression: { githubUserIdentifier: { $type: "int" } } }
+    required: false
+    // index: { unique: true, sparse:true }
   })
   githubUserIdentifier?: number;
 
@@ -221,14 +228,6 @@ export class User {
   get followersCount() {
     return this.followers.length;
   };
-
-  get isGithubUser(): boolean {
-    return this.githubUserIdentifier !== undefined;
-  }
-
-  get isEmailUser(): boolean {
-    return this.password !== undefined;
-  }
 
   get isVerifiedUser(): boolean {
     // 이메일 유저 & 이메일 인증 완료

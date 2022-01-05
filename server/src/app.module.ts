@@ -6,6 +6,8 @@ import { AppLoggerMiddleware } from "./middlewares/logger.middleware";
 import { MongooseModule } from "@nestjs/mongoose";
 import { UsersModule } from "./users/users.module";
 import { EmailModule } from "./email/email.module";
+import { UploadModule } from "./upload/upload.module";
+import { PostsModule } from "./posts/posts.module";
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { EmailModule } from "./email/email.module";
     }),
     AuthModule,
     UsersModule,
-    EmailModule
+    EmailModule,
+    UploadModule,
+    PostsModule
   ],
   controllers: [],
   providers: []
