@@ -23,6 +23,11 @@ export class ReadPostDto extends PickType(Post, keys) {
   })
   comments: ReadCommentDto[];
 
+  @ApiProperty({
+    description: "게시글 작성자 닉네임"
+  })
+  writerNickname: string;
+
   constructor(post: Post) {
     super();
     for (const key in post) {
@@ -32,6 +37,7 @@ export class ReadPostDto extends PickType(Post, keys) {
     }
     this.comments = post.comments.map((comment) => new ReadCommentDto(comment));
     this.postId = post._id.toString();
+    this.writerNickname = post.writer.nickname;
   }
 
 }

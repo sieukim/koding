@@ -16,7 +16,12 @@ export class PostsService {
 
   async writePost(boardType: PostBoardType, writer: User, writePostRequest: WritePostRequestDto) {
     const { title, tags, markdownContent } = writePostRequest;
-    const post = new this.postModel({ boardType, title, tags, markdownContent, writer });
+    const post = new this.postModel({
+      title, tags, markdownContent, boardType, writer: {
+        _id: writer._id,
+        nickname: writer.nickname
+      }
+    });
     await post.save();
     return post;
   }

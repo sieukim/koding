@@ -53,9 +53,7 @@ export class Comment extends Types.Subdocument {
       return false;
     if (this.writer._id instanceof User)
       return this.writer._id._id.toString() === user._id.toString();
-    else if (this.writer._id instanceof Types.ObjectId)
-      return this.writer._id.toString() === user._id.toString();
-    else return this.writer.nickname === user.nickname;
+    else return this.writer._id.toString() === user._id.toString();
   }
 
   modifyComment({ content, mentionedUsers }: { content?: string, mentionedUsers?: User[] }) {
@@ -72,7 +70,6 @@ schemaLoadClass(CommentSchema, Comment);
 export type PostDocument = Post & Document;
 export const postBoardTypes = ["common", "question", "career", "recruit", "study-group", "column"] as const;
 export type PostBoardType = typeof postBoardTypes[number];
-
 @Schema({
   id: false, _id: true, autoIndex: true, versionKey: false, timestamps: {
     createdAt: true, updatedAt: false,
@@ -98,8 +95,16 @@ export class Post extends Document {
   @Prop({ type: String, index: true, default: "common" })
   boardType: PostBoardType;
 
-  @Prop({ type: Types.ObjectId, ref: User.name, index: true })
-  writer: User | Types.ObjectId;
+  @Prop({
+    type: {
+      _id: { type: Types.ObjectId, ref: User.name, index: true },
+      nickname: String
+    }
+  })
+  writer: {
+    _id: User | Types.ObjectId,
+    nickname: string
+  };
 
   @IsString({ each: true })
   @ApiProperty({
@@ -141,10 +146,10 @@ export class Post extends Document {
   }
 
   isOwner(user: User) {
-    if (this.writer instanceof User)
-      return this.writer._id.toString() === user._id.toString();
+    if (this.writer._id instanceof User)
+      return this.writer._id._id.toString() === user._id.toString();
     else
-      return this.writer.toString() === user._id.toString();
+      return this.writer._id.toString() === user._id.toString();
   }
 
   addComment(writer: User, { content, mentionedUsers = [] }: { content: string, mentionedUsers: User[] }) {

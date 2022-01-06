@@ -224,6 +224,7 @@ export class User extends Document {
 
   @ApiProperty({
     description: "내가 팔로우 하는 유저 수 ",
+    type: Number,
     example: 100,
     minimum: 0
   })
@@ -233,6 +234,7 @@ export class User extends Document {
 
   @ApiProperty({
     description: "나를 팔로우 하는 유저 수",
+    type: Number,
     example: 100,
     minimum: 0
   })
