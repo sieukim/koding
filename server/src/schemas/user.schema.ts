@@ -17,6 +17,8 @@ import {
 } from "class-validator";
 import { BadRequestException } from "@nestjs/common";
 import * as crypto from "crypto";
+import { schemaLoadClass } from "../common/utils/schema-load-class.util";
+import { currentTime } from "../common/utils/current-time.util";
 
 export class GithubRepositoryInfo {
   @ApiProperty({
@@ -87,10 +89,14 @@ export class GithubUserInfo {
   repositories: GithubRepositoryInfo[];
 }
 
-export type UserDocument = User & Document;
-
-@Schema({ id: false, _id: true, versionKey: false, autoIndex: true })
-export class User {
+@Schema({
+  id: false,
+  _id: true,
+  versionKey: false,
+  autoIndex: true,
+  timestamps: { createdAt: true, updatedAt: false, currentTime: currentTime }
+})
+export class User extends Document {
   private static readonly round = 10;
   _id: Types.ObjectId;
 
@@ -199,6 +205,11 @@ export class User {
   @Length(6, 6)
   @Prop()
   passwordResetToken?: string;
+  글;
+  @ApiProperty({
+    description: "유저 가입 시간"
+  })
+  createdAt: Date;
 
   @ApiProperty({
     description: "내가 팔로우 하는 유저들"
@@ -213,6 +224,7 @@ export class User {
 
   @ApiProperty({
     description: "내가 팔로우 하는 유저 수 ",
+    type: Number,
     example: 100,
     minimum: 0
   })
@@ -222,6 +234,7 @@ export class User {
 
   @ApiProperty({
     description: "나를 팔로우 하는 유저 수",
+    type: Number,
     example: 100,
     minimum: 0
   })
@@ -284,8 +297,10 @@ export class User {
 
 
 export const UserSchema = SchemaFactory.createForClass(User);
+schemaLoadClass(UserSchema, User);
 // UserSchema.pre<User>('save', async function hashPassword(next) {
 //   await this.hashPassword();
 //   next();
 // });
-UserSchema.loadClass(User);
+// UserSchema.loadClass(User);
+
