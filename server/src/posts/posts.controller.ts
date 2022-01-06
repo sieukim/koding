@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from "@nestjs/common";
-import { WritePostRequestDto } from "./dto/write-post-request.dto";
+import { WritePostRequestDto } from "./dto/posts/write-post-request.dto";
 import { PostsService } from "./posts.service";
-import { ReadPostDto } from "./dto/read-post.dto";
+import { ReadPostDto } from "./dto/posts/read-post.dto";
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -14,19 +14,24 @@ import {
   ApiParam,
   ApiTags
 } from "@nestjs/swagger";
-import { ApiForbiddenVerifiedUserResponse } from "../common/decorator/swagger/api-response.decorator";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../schemas/user.schema";
-import { ModifyPostRequestDto } from "./dto/modify-post-request.dto";
-import { ReadPostWithWriterDto } from "./dto/read-post-with-writer.dto";
+import { ModifyPostRequestDto } from "./dto/posts/modify-post-request.dto";
+import { ReadPostWithWriterDto } from "./dto/posts/read-post-with-writer.dto";
 import { BoardTypeValidationPipe } from "../common/pipes/board-type-validation-pipe";
-import { ApiParamBoardType } from "../common/decorator/swagger/api-param.decorator";
+import { ApiParamBoardType, ApiParamPostId } from "../common/decorator/swagger/api-param.decorator";
 import { PostBoardType } from "../schemas/post.schema";
+import { AddCommentRequestDto } from "./dto/comments/add-comment-request.dto";
+import { ReadCommentDto } from "./dto/comments/read-comment.dto";
+import { ModifyCommentRequestDto } from "./dto/comments/modify-comment-request.dto";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
   description: "param, query, body 중 유효하지 않은 요청값이 존재"
+})
+@ApiForbiddenResponse({
+  description: "인증되지 않은 사용자이거나 권한 없음"
 })
 @Controller("api/posts")
 export class PostsController {
@@ -36,7 +41,7 @@ export class PostsController {
   @ApiOperation({
     summary: "게시글 쓰기"
   })
-  @ApiParamBoardType
+  @ApiParamBoardType()
   @ApiBody({
     type: WritePostRequestDto
   })
@@ -44,7 +49,6 @@ export class PostsController {
     description: "게시글 쓰기 성공",
     type: ReadPostDto
   })
-  @ApiForbiddenVerifiedUserResponse
   @UseGuards(VerifiedUserGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post(":boardType")
@@ -56,7 +60,7 @@ export class PostsController {
   @ApiOperation({
     summary: "게시글 목록 조회"
   })
-  @ApiParamBoardType
+  @ApiParamBoardType()
   @ApiOkResponse({
     description: "게시글 목록 조회 성공",
     type: [ReadPostDto]
@@ -70,11 +74,8 @@ export class PostsController {
   @ApiOperation({
     summary: "게시글 읽기"
   })
-  @ApiParam({
-    name: "postId",
-    description: "읽을 게시글 아이디"
-  })
-  @ApiParamBoardType
+  @ApiParamBoardType()
+  @ApiParamPostId()
   @ApiNotFoundResponse({
     description: "잘못된 게시글 아이디"
   })
@@ -82,11 +83,10 @@ export class PostsController {
     description: "게시글 읽기 성공",
     type: ReadPostWithWriterDto
   })
-  @ApiParamBoardType
   @HttpCode(HttpStatus.OK)
   @Get(":boardType/:postId")
   async readPost(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Param("postId") postId: string) {
-    const post = await this.postsService.readPost(boardType, postId);
+    const post = await this.postsService.readPost({ boardType, postId });
     console.log(post);
     return new ReadPostWithWriterDto(post, post.writer as User);
   }
@@ -97,12 +97,10 @@ export class PostsController {
   @ApiBody({
     type: ModifyPostRequestDto
   })
-  @ApiParam({
-    name: "postId",
-    description: "수정할 게시글의 아이디"
-  })
-  @ApiForbiddenResponse({
-    description: "권한 없음"
+  @ApiParamBoardType()
+  @ApiParamPostId()
+  @ApiNotFoundResponse({
+    description: "잘못된 게시글 아이디"
   })
   @ApiOkResponse({
     description: "게시글 수정 성공",
@@ -112,20 +110,17 @@ export class PostsController {
   @HttpCode(HttpStatus.OK)
   @Patch(":boardType/:postId")
   async modifyPost(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Param("postId") postId: string, @Body() body: ModifyPostRequestDto, @LoginUser() user: User) {
-    const post = await this.postsService.modifyPost(user, boardType, postId, body);
+    const post = await this.postsService.modifyPost(user, { boardType, postId }, body);
     return new ReadPostDto(post);
   }
 
   @ApiOperation({
     summary: "게시글 삭제"
   })
-  @ApiParam({
-    name: "postId",
-    description: "삭제할 게시글의 아이디"
-  })
-  @ApiParamBoardType
-  @ApiForbiddenResponse({
-    description: "권한 없음"
+  @ApiParamBoardType()
+  @ApiParamPostId()
+  @ApiNotFoundResponse({
+    description: "잘못된 게시글 아이디"
   })
   @ApiNoContentResponse({
     description: "게시글 식제 성공"
@@ -134,6 +129,80 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":boardType/:postId")
   async deletePost(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Param("postId") postId: string, @LoginUser() user: User) {
-    await this.postsService.deletePost(user, boardType, postId);
+    await this.postsService.deletePost(user, { boardType, postId });
+  }
+
+  @ApiOperation({
+    summary: "댓글 작성"
+  })
+  @ApiParamBoardType()
+  @ApiParamPostId()
+  @ApiBody({
+    type: AddCommentRequestDto
+  })
+  @ApiNotFoundResponse({
+    description: "잘못된 게시글 아이디"
+  })
+  @ApiOkResponse({
+    description: "댓글 작성 성공",
+    type: ReadCommentDto
+  })
+  @UseGuards(VerifiedUserGuard)
+  @HttpCode(HttpStatus.OK)
+  @Post(":boardType/:postId/comments")
+  async addComment(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Param("postId") postId: string, @LoginUser() user: User,
+                   @Body() body: AddCommentRequestDto) {
+    const newComment = await this.postsService.addComment(user, { boardType, postId }, body);
+    return new ReadCommentDto(newComment);
+  }
+
+  @ApiOperation({
+    summary: "댓글글 수정"
+  })
+  @ApiBody({
+    type: ModifyCommentRequestDto
+  })
+  @ApiParamBoardType()
+  @ApiParamPostId()
+  @ApiParam({
+    name: "commentId",
+    description: "댓글 아이디"
+  })
+  @ApiNotFoundResponse({
+    description: "잘못된 게시글 혹은 댓글 아이디"
+  })
+  @ApiOkResponse({
+    description: "게시글 수정 성공",
+    type: ReadCommentDto
+  })
+  @UseGuards(VerifiedUserGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(":boardType/:postId/comments/:commentId")
+  async modifyComment(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Param("postId") postId: string, @Param("commentId") commentId: string, @Body() body: ModifyCommentRequestDto, @LoginUser() user: User) {
+    const comment = await this.postsService.modifyComment(user, { boardType, postId }, commentId, body);
+    return new ReadCommentDto(comment);
+  }
+
+
+  @ApiOperation({
+    summary: "댓글 삭제"
+  })
+  @ApiParamBoardType()
+  @ApiParamPostId()
+  @ApiParam({
+    name: "commentId",
+    description: "댓글 아이디"
+  })
+  @ApiNotFoundResponse({
+    description: "잘못된 게시글 혹은 댓글 아이디"
+  })
+  @ApiNoContentResponse({
+    description: "게시글 식제 성공"
+  })
+  @UseGuards(VerifiedUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":boardType/:postId/comments/:commentId")
+  async deleteComment(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Param("postId") postId: string, @Param("commentId") commentId: string, @LoginUser() user: User) {
+    await this.postsService.deleteComment(user, { boardType, postId }, commentId);
   }
 }

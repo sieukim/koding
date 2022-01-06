@@ -1,5 +1,5 @@
 import { ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
-import { Post } from "../../schemas/post.schema";
+import { Post } from "../../../schemas/post.schema";
 import { IsOptional } from "class-validator";
 
 const keys = ["title", "markdownContent", "tags"] as const;

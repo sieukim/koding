@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { GithubRepositoryInfo, GithubUserInfo, User, UserDocument } from "../schemas/user.schema";
+import { GithubRepositoryInfo, GithubUserInfo, User } from "../schemas/user.schema";
 import { FilterQuery, Model } from "mongoose";
 import { SignupLocalDto } from "./dto/signup-local.dto";
 import { EmailService } from "../email/email.service";
@@ -9,7 +9,7 @@ import axios from "axios";
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly emailService: EmailService
   ) {
   }
@@ -158,7 +158,7 @@ export class UsersService {
     };
   }
 
-  private findUserByField(condition: FilterQuery<UserDocument>, includePassword = false, populate: (keyof User)[] = []) {
+  private findUserByField(condition: FilterQuery<User>, includePassword = false, populate: (keyof User)[] = []) {
     let query = this.userModel.findOne(condition);
     if (!includePassword)
       query = query.select("-password");

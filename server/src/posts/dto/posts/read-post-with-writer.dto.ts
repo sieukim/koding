@@ -1,8 +1,8 @@
 import { ReadPostDto } from "./read-post.dto";
-import { Post } from "../../schemas/post.schema";
+import { Post } from "../../../schemas/post.schema";
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { LoginResultDto } from "../../auth/dto/login-result.dto";
-import { User } from "../../schemas/user.schema";
+import { LoginResultDto } from "../../../auth/dto/login-result.dto";
+import { User } from "../../../schemas/user.schema";
 
 export class ReadPostWithWriterDto extends ReadPostDto {
   @ApiPropertyOptional({
