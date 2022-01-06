@@ -1,24 +1,27 @@
 import ReadPostContainer from '../components/containers/ReadPostContainer';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
+import CommentContainer from '../components/containers/CommentContainer';
 
-const StyledReadPost = styled.div`
+const StyledPost = styled.div`
   display: flex;
+  flex-direction: column;
   justify-content: center;
   margin: 0 auto;
   width: 60%;
 `;
 
-const ReadPostPage = () => {
+const PostPage = () => {
   const params = useParams();
   const boardType = params.boardType;
   const postId = params.postId;
 
   return (
-    <StyledReadPost>
+    <StyledPost>
       <ReadPostContainer boardType={boardType} postId={postId} />
-    </StyledReadPost>
+      <CommentContainer boardType={boardType} postId={postId} />
+    </StyledPost>
   );
 };
 
-export default ReadPostPage;
+export default PostPage;

@@ -1,7 +1,7 @@
 import LoginPresenter from '../presenters/LoginPresenter';
 import * as api from '../../modules/api';
 import { useCallback, useEffect, useMemo } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogin } from '../../modules/auth';
 import useAsync from '../../hooks/useAsync';
@@ -54,9 +54,16 @@ const LoginContainer = () => {
     return `https://github.com/login/oauth/authorize?${params.toString()}`;
   }, []);
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loginState.success) {
+      navigate(-1);
+    }
+  }, [loginState.success, navigate]);
+
   return (
     <>
-      {loginState.success && <Navigate to="/" />}
       <LoginPresenter login={login} loginState={loginState} url={url} />
     </>
   );

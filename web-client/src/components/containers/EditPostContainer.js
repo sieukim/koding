@@ -2,7 +2,7 @@ import EditPostPresenter from '../presenters/EditPostPresenter';
 import useAsync from '../../hooks/useAsync';
 import * as api from '../../modules/api';
 import { useCallback } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
 const EditPostContainer = ({ boardType, postId }) => {
   /* 수정할 게시글 가져오기 */

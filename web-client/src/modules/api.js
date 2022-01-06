@@ -60,12 +60,32 @@ export const readBoard = (boardType) => {
   return axios.get(`/api/posts/${boardType}`);
 };
 
+// 게시글 수정 api 호출
+export const editPost = (boardType, postId, post) => {
+  return axios.patch(`/api/posts/${boardType}/${postId}`, post);
+};
+
 // 게시글 삭제 api 호출
 export const removePost = (boardType, postId) => {
   return axios.delete(`/api/posts/${boardType}/${postId}`);
 };
 
-// 게시글 수정 api 호출
-export const editPost = (boardType, postId, post) => {
-  return axios.patch(`/api/posts/${boardType}/${postId}`, post);
+// 댓글 작성 api 호출
+export const writeComment = (boardType, postId, comment) => {
+  return axios.post(`/api/posts/${boardType}/${postId}/comments`, comment);
+};
+
+// 댓글 수정 api 호출
+export const editComment = (boardType, postId, commentId, comment) => {
+  return axios.patch(
+    `/api/posts/${boardType}/${postId}/comments/${commentId}`,
+    comment,
+  );
+};
+
+// 댓글 삭제 api 호출
+export const removeComment = (boardType, postId, commentId) => {
+  return axios.delete(
+    `/api/posts/${boardType}/${postId}/comments/${commentId}`,
+  );
 };

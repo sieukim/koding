@@ -58,3 +58,12 @@ input {
     padding: 0;
     box-sizing: border-box;
 }
+
+a, Link, NavLink {
+    text-decoration: none;
+    color: black
+}
+
+a:hover, Link:hover, NavLink:hover {
+    color: #61dafb;
+}
