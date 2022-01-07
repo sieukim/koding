@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards
+} from "@nestjs/common";
 import { WritePostRequestDto } from "./dto/posts/write-post-request.dto";
 import { PostsService } from "./posts.service";
 import { ReadPostDto } from "./dto/posts/read-post.dto";
@@ -12,6 +24,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags
 } from "@nestjs/swagger";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
@@ -25,6 +38,7 @@ import { PostBoardType } from "../schemas/post.schema";
 import { AddCommentRequestDto } from "./dto/comments/add-comment-request.dto";
 import { ReadCommentDto } from "./dto/comments/read-comment.dto";
 import { ModifyCommentRequestDto } from "./dto/comments/modify-comment-request.dto";
+import { CursorPostsDto } from "./dto/posts/cursor-posts.dto";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -61,14 +75,26 @@ export class PostsController {
     summary: "게시글 목록 조회"
   })
   @ApiParamBoardType()
+  @ApiQuery({
+    name: "cursor",
+    description: "조회를 시작할 기준이 되는 게시글 아이디. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
+    type: String,
+    required: false
+  })
   @ApiOkResponse({
     description: "게시글 목록 조회 성공",
-    type: [ReadPostDto]
+    type: CursorPostsDto
   })
   @Get(":boardType")
-  async readPosts(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType) {
-    const posts = await this.postsService.getPosts(boardType);
-    return posts.map(post => new ReadPostDto(post));
+  async readPosts(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Query("cursor") cursor?: string) {
+    const pageSize = 10;
+    const posts = await this.postsService.getPostsWithCursor(boardType, cursor, pageSize);
+    if (posts.length === pageSize + 1) {
+      const nextCursorPost = posts.pop();
+      const nextPageUrl = `/api/posts/${boardType}?${new URLSearchParams({ cursor: nextCursorPost._id.toString() })}`;
+      return new CursorPostsDto(posts, nextPageUrl);
+    } else
+      return new CursorPostsDto(posts);
   }
 
   @ApiOperation({

@@ -26,9 +26,16 @@ export class PostsService {
     return post;
   }
 
-  async getPosts(boardType: PostBoardType) {
-    const posts = await this.postModel.find({ boardType });
-    return posts;
+  async getPostsWithCursor(boardType: PostBoardType, cursorPostId: string | undefined, pageSize: number) {
+    if (!cursorPostId) {
+      // 첫페이지인 경우
+      return await this.postModel.find({ boardType }).sort({ _id: -1 }).limit(pageSize + 1).exec();
+    } else {
+      return await this.postModel.find({
+        boardType,
+        _id: { $lte: cursorPostId }
+      }).sort({ _id: -1 }).limit(pageSize + 1).exec();
+    }
   }
 
   async readPost({ boardType, postId }: PostIdentifier) {
