@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsOptional, IsUrl } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 import { ReadPostMetadataDto } from "./read-post-metadata.dto";
 import { Post } from "../../../schemas/post.schema";
 
@@ -9,24 +9,26 @@ export class CursorPostsDto {
     type: [ReadPostMetadataDto]
   })
   posts: ReadPostMetadataDto[];
+
   @IsOptional()
-  @IsUrl({ require_host: false })
+  @IsString()
   @ApiPropertyOptional({
-    description: "다음 페이지를 가져오는 요청 url. 마지막 페이지인 경우는 값 없음",
-    example: "/api/posts/common?cursor=61d7238b7d7a9ad823c8d8a9"
+    description: "다음 페이지를 가져오기 위한 커서 query 값. 마지막 페이지인 경우는 값 없음",
+    example: "61d7238b7d7a9ad823c8d8a9"
   })
-  nextPageUrl?: string;
+  nextPageCursor?: string;
 
-  // @IsOptional()
-  // @IsUrl({require_host:false})
-  // @ApiPropertyOptional({
-  //   description:"이전 페이지를 가져오는 요청 url. 첫 페이지인 경우는 값 없음",
-  //   example:"/api/posts/common?cursor=61d7238b7d7a9ad823c8d8a9"
-  // })
-  // prevPageUrl?:string;
+  @IsOptional()
+  @IsString()
+  @ApiPropertyOptional({
+    description: "이전 페이지를 가져오기 위한 커서 query 값. 첫 페이지인 경우는 값 없음",
+    example: "61d7238b7d7a9ad823c8d8a9"
+  })
+  prevPageCursor?: string;
 
-  constructor(posts: Post[], nextPageUrl?: string) {
-    this.nextPageUrl = nextPageUrl;
+  constructor(posts: Post[], prevPageCursor?:string, nextPageCursor?: string) {
+    this.prevPageCursor = prevPageCursor;
+    this.nextPageCursor = nextPageCursor;
     this.posts = posts.map(post => new ReadPostMetadataDto(post));
   }
 }

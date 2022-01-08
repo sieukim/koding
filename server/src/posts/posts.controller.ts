@@ -88,13 +88,8 @@ export class PostsController {
   @Get(":boardType")
   async readPosts(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Query("cursor") cursor?: string) {
     const pageSize = 10;
-    const posts = await this.postsService.getPostsWithCursor(boardType, cursor, pageSize);
-    if (posts.length === pageSize + 1) {
-      const nextCursorPost = posts.pop();
-      const nextPageUrl = `/api/posts/${boardType}?${new URLSearchParams({ cursor: nextCursorPost._id.toString() })}`;
-      return new CursorPostsDto(posts, nextPageUrl);
-    } else
-      return new CursorPostsDto(posts);
+    const {posts,prevPageCursor,nextPageCursor} = await this.postsService.getPostsWithCursor(boardType, cursor, pageSize);
+    return new CursorPostsDto(posts,prevPageCursor,nextPageCursor)
   }
 
   @ApiOperation({
