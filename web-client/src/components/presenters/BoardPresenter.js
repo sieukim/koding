@@ -1,14 +1,18 @@
 import styled from 'styled-components';
-import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { getDate } from '../../utils/getDate';
+import {
+  GetDate,
+  MyPageLink,
+  PostLink,
+  PrintState,
+} from '../../utils/MyComponents';
 
 const StyledBoard = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
 
-  .post-list {
+  .board {
     display: flex;
     flex-direction: column;
     padding: 5px;
@@ -33,45 +37,64 @@ const StyledBoard = styled.div`
     margin-left: 5px;
   }
 
-  .post-write {
-    text-align: right;
-    padding: 5px;
+  .paging-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  button {
+    padding: 3px;
     margin: 5px;
+    width: 10%;
+  }
+
+  .post-write {
+    align-self: end;
   }
 `;
 
-const BoardPresenter = ({ boardType, readBoardState }) => {
+const BoardPresenter = ({
+  boardType,
+  readBoardState,
+  hasNextPage,
+  hasPrevPage,
+  onClickNextCursor,
+  onClickPrevCursor,
+  onClickWritePost,
+}) => {
   // 로그인 유저 정보
   const user = useSelector((state) => state.auth.user);
-
   return (
     <StyledBoard>
-      {readBoardState.loading && <div>로딩중입니다. 잠시만 기다려주세요.</div>}
-      {readBoardState.error && (
-        <div>오류가 발생했습니다. 잠시 후 다시 시도해주세요.</div>
-      )}
+      <PrintState state={readBoardState} />
       {readBoardState.success && (
-        <div className="post-list">
-          {readBoardState.success.data.map((post) => (
+        <div className="board">
+          {readBoardState.success.data.posts.map((post) => (
             <div className="post-item" key={post.postId}>
-              <NavLink to={`/board/${boardType}/post/${post.postId}`}>
-                {post.title}
-              </NavLink>
+              <PostLink
+                boardType={boardType}
+                postId={post.postId}
+                postTitle={post.title}
+              />
               <div className="post-info">
-                <NavLink to={`/users/${post.writerNickname}`}>
-                  {post.writerNickname}
-                </NavLink>
-                <div className="post-createdAt">{getDate(post.createdAt)}</div>
+                <MyPageLink nickname={post.writerNickname} />
+                <GetDate date={post.createdAt} className="post-createdAt" />
               </div>
             </div>
           ))}
+          <div className="paging-button">
+            <button onClick={onClickPrevCursor} disabled={!hasPrevPage}>
+              이전
+            </button>
+            <button onClick={onClickNextCursor} disabled={!hasNextPage}>
+              다음
+            </button>
+          </div>
           {user && (
-            <NavLink
-              to={`/board/${boardType}/post/write`}
-              className="post-write"
-            >
+            <button onClick={onClickWritePost} className="post-write">
               글 쓰기
-            </NavLink>
+            </button>
           )}
         </div>
       )}

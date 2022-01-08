@@ -56,8 +56,9 @@ export const readPost = (boardType, postId) => {
 };
 
 // 게시글 목록 갖고오기 api 호출
-export const readBoard = (boardType) => {
-  return axios.get(`/api/posts/${boardType}`);
+export const readBoard = (boardType, cursor) => {
+  const query = cursor ? `?cursor=${cursor}` : '';
+  return axios.get(`/api/posts/${boardType}${query}`);
 };
 
 // 게시글 수정 api 호출

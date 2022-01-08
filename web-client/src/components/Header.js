@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import * as api from '../modules/api';
 import { useCallback } from 'react';
 import { setLogout } from '../modules/auth';
+import { MyPageLink } from '../utils/MyComponents';
 
 const StyledHeader = styled.nav`
   display: flex;
@@ -90,7 +91,7 @@ const Header = () => {
               <a>알림</a>
             </li>
             <li>
-              <a>마이페이지</a>
+              <MyPageLink nickname={user.nickname} str={'마이페이지'} />
             </li>
             <li>
               <button onClick={logout}>로그아웃</button>

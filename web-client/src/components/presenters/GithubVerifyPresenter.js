@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { useCallback, useRef, useState } from 'react';
+import { PrintState } from '../../utils/MyComponents';
 
 const StyledGithubVerify = styled.form`
   display: flex;
@@ -111,9 +112,7 @@ const GithubVerifyPresenter = ({
           회원가입
         </button>
       </div>
-      {githubVerifyState.error && (
-        <p>오류가 발생했습니다. 다시 시도해주세요.</p>
-      )}
+      <PrintState state={githubVerifyState} loading={true} />
     </StyledGithubVerify>
   );
 };

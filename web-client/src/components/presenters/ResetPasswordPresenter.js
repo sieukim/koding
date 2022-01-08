@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useCallback } from 'react';
 import useInputs from '../../hooks/useInput';
+import { PrintState } from '../../utils/MyComponents';
 
 const StyledResetPassword = styled.form`
   display: flex;
@@ -190,9 +191,7 @@ const ResetPasswordPresenter = ({
         </button>
       </div>
       {resetState.success && <p>비밀번호가 변경되었습니다.</p>}
-      {resetState.failure && (
-        <p>오류가 발생했습니다. 잠시 후 다시 시도해주세요.</p>
-      )}
+      <PrintState state={resetState} />
     </StyledResetPassword>
   );
 };

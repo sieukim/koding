@@ -3,7 +3,6 @@ import * as api from '../../modules/api';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLogin } from '../../modules/auth';
-import { Navigate, useNavigate } from 'react-router-dom';
 import useAsync from '../../hooks/useAsync';
 
 const GithubVerifyContainer = () => {
