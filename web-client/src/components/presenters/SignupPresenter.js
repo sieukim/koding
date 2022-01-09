@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useCallback, useRef } from 'react';
 import useInputs from '../../hooks/useInput';
+import { PrintState } from '../../utils/MyComponents';
 
 const StyledSignup = styled.form`
   display: flex;
@@ -230,7 +231,7 @@ const SignupPresenter = ({
           회원가입
         </button>
       </div>
-      {signupState.error && <p>오류가 발생했습니다. 다시 시도해주세요.</p>}
+      <PrintState state={signupState} />
     </StyledSignup>
   );
 };

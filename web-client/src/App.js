@@ -12,6 +12,7 @@ import WritePostPage from './pages/WritePostPage';
 import PostPage from './pages/PostPage';
 import BoardPage from './pages/BoardPage';
 import EditPostPage from './pages/EditPostPage';
+import MyPage from './pages/MyPage';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           path="/board/:boardType/post/:postId/edit"
           element={<EditPostPage />}
         />
+        <Route path="/user/:nickname/profile" element={<MyPage />} />
       </Routes>
       <Footer />
     </>

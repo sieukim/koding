@@ -1,9 +1,8 @@
 import styled from 'styled-components';
 import { useCallback, useRef, useState } from 'react';
-import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { getDate } from '../../utils/getDate';
 import { getMentionedList } from '../../utils/getMentionedList';
+import { GetDate, MyPageLink, PrintState } from '../../utils/MyComponents';
 
 const StyledComment = styled.div`
   display: flex;
@@ -58,6 +57,12 @@ const StyledComment = styled.div`
 
   button {
     margin: 0 5px;
+  }
+
+  [contenteditable='true'] {
+    background: white;
+    width: 80%;
+    outline: none;
   }
 `;
 
@@ -116,6 +121,7 @@ const CommentPresenter = ({
 
   const innerRef = useRef();
 
+  // 댓글 수정
   const onEditComment = useCallback(
     (e) => {
       e.preventDefault();
@@ -156,19 +162,13 @@ const CommentPresenter = ({
         />
         <button>등록</button>
       </form>
-      {writeCommentState.error && (
-        <div>오류가 발생했습니다. 잠시 후 다시 시도해주세요.</div>
-      )}
+      <PrintState state={writeCommentState} />
       {comments.map((comment) => (
         <div key={comment.commentId} className="comment">
           <div className="comment-header">
             <div className="comment-info">
-              <NavLink to={`/user/${comment.writerNickname}`}>
-                {comment.writerNickname}
-              </NavLink>
-              <div className="comment-createdAt">
-                {getDate(comment.createdAt)}
-              </div>
+              <MyPageLink nickname={comment.writerNickname} />
+              <GetDate date={comment.createdAt} className="comment-createdAt" />
             </div>
             {user && user.nickname === comment.writerNickname && (
               <div className="comment-button">
@@ -196,9 +196,8 @@ const CommentPresenter = ({
                 </button>
               </div>
             )}
-            {(editCommentState.error || removeCommentState.error) && (
-              <div>오류가 발생했습니다. 잠시 후 다시 시도해주세요.</div>
-            )}
+            <PrintState state={editCommentState} />
+            <PrintState state={removeCommentState} />
           </div>
           <div
             ref={comment.commentId === editCommentId ? innerRef : undefined}

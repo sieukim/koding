@@ -1,23 +1,6 @@
 import styled from 'styled-components';
 import { useCallback, useRef, useState } from 'react';
-// editor
-import { Editor } from '@toast-ui/react-editor';
-import '@toast-ui/editor/dist/toastui-editor.css';
-// codeSyntaxHighlight
-import Prism from 'prismjs';
-import 'prismjs/themes/prism.css';
-import '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css';
-import codeSyntaxHighlight from '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight-all';
-// colorSyntax
-import colorSyntax from '@toast-ui/editor-plugin-color-syntax';
-import 'tui-color-picker/dist/tui-color-picker.css';
-import '@toast-ui/editor-plugin-color-syntax/dist/toastui-editor-plugin-color-syntax.css';
-// uml
-import uml from '@toast-ui/editor-plugin-uml';
-// table-merged-cell
-import tableMergedCell from '@toast-ui/editor-plugin-table-merged-cell';
-// chart
-import chart from '@toast-ui/editor-plugin-chart';
+import { Editor, PrintState } from '../../utils/MyComponents';
 
 const StyledWritePost = styled.form`
   display: flex;
@@ -59,24 +42,9 @@ const WritePostPresenter = ({ writePost, writePostState }) => {
         required
         onChange={onChangeInput}
       />
-      <Editor
-        ref={editorRef}
-        initialEditType="markdown"
-        previewStyle="vertical"
-        useCommandShortcut={true}
-        plugins={[
-          [codeSyntaxHighlight, { highlighter: Prism }],
-          colorSyntax,
-          uml,
-          tableMergedCell,
-          chart,
-        ]}
-        placeholder="내용을 입력하세요."
-      />
+      <Editor innerRef={editorRef} />
       <button>등록</button>
-      {writePostState.error && (
-        <div>오류가 발생했습니다. 잠시 후 다시 시도해주세요.</div>
-      )}
+      <PrintState state={writePostState} />
     </StyledWritePost>
   );
 };

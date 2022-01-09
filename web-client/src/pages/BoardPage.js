@@ -1,5 +1,5 @@
 import BoardContainer from '../components/containers/BoardContainer';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 const StyledBoard = styled.div`
@@ -13,9 +13,12 @@ const BoardPage = () => {
   const params = useParams();
   const boardType = params.boardType;
 
+  const { search } = useLocation();
+  const cursor = new URLSearchParams(search).get('cursor');
+
   return (
     <StyledBoard>
-      <BoardContainer boardType={boardType} />
+      <BoardContainer boardType={boardType} cursor={cursor} />
     </StyledBoard>
   );
 };

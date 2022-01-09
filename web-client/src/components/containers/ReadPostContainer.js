@@ -2,7 +2,7 @@ import ReadPostPresenter from '../presenters/ReadPostPresenter';
 import useAsync from '../../hooks/useAsync';
 import * as api from '../../modules/api';
 import { useCallback } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const ReadPostContainer = ({ boardType, postId }) => {
   /* 읽을 게시글 가져오기 */
@@ -29,6 +29,25 @@ const ReadPostContainer = ({ boardType, postId }) => {
     [removePostFetch],
   );
 
+  /* button event listener */
+
+  const navigate = useNavigate();
+
+  // 게시글 삭제
+  const onClickRemove = useCallback(() => {
+    removePost(boardType, postId);
+  }, [removePost, boardType, postId]);
+
+  // 게시글 수정
+  const onClickEdit = useCallback(() => {
+    navigate(`/board/${boardType}/post/${postId}/edit`);
+  }, [boardType, postId, navigate]);
+
+  // 목록으로 이동
+  const onClickList = useCallback(() => {
+    navigate(`/board/${boardType}`);
+  }, [boardType, navigate]);
+
   return (
     <>
       {removePostState.success && <Navigate to={`/board/${boardType}`} />}
@@ -37,6 +56,9 @@ const ReadPostContainer = ({ boardType, postId }) => {
         readPostState={readPostState}
         removePost={removePost}
         removePostState={removePostState}
+        onClickRemove={onClickRemove}
+        onClickEdit={onClickEdit}
+        onClickList={onClickList}
       />
     </>
   );
