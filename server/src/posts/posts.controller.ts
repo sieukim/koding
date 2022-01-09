@@ -39,6 +39,7 @@ import { ReadCommentDto } from "./dto/comments/read-comment.dto";
 import { ModifyCommentRequestDto } from "./dto/comments/modify-comment-request.dto";
 import { CursorPostsDto } from "./dto/posts/cursor-posts.dto";
 import { ReadPostWithAroundDto } from "./dto/posts/read-post-with-around.dto";
+import { ReadPostQueryDto } from "./dto/posts/read-post.query.dto";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -81,15 +82,36 @@ export class PostsController {
     type: String,
     required: false
   })
+  @ApiQuery({
+    name: "tags",
+    description: "검색할 태그들. 여러개인 경우 , 로 구분하며, 각각은 OR로 묶임. 검색이 필요 없는 경우 값을 넣지 않음",
+    examples: {
+      "여러 태그를 or로 검색": {
+        value: "react,hooks"
+      }
+      ,
+      "하나의 태그만 검색":
+        {
+          value: "nestjs"
+        }
+    }
+  })
   @ApiOkResponse({
     description: "게시글 목록 조회 성공",
     type: CursorPostsDto
   })
   @Get(":boardType")
-  async readPosts(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Query("cursor") cursor?: string) {
+  async readPosts(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Query() {
+    cursor,
+    tags
+  }: ReadPostQueryDto) {
     const pageSize = 10;
-    const {posts,prevPageCursor,nextPageCursor} = await this.postsService.getPostsWithCursor(boardType, cursor, pageSize);
-    return new CursorPostsDto(posts,prevPageCursor,nextPageCursor)
+    const {
+      posts,
+      prevPageCursor,
+      nextPageCursor
+    } = await this.postsService.getPostsWithCursor(boardType, cursor, pageSize, { tags });
+    return new CursorPostsDto(posts, prevPageCursor, nextPageCursor);
   }
 
   @ApiOperation({

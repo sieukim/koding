@@ -40,14 +40,18 @@ export class PostsService {
     boardType: PostBoardType,
     cursorPostId: string | undefined,
     pageSize: number,
+    searchQuery?: {
+      tags?: string[]
+    }
   ) {
+    const tagSearchOption = searchQuery.tags ? { tags: { $in: searchQuery.tags } } : {};
     let posts: Post[];
     let nextPageCursor: string | undefined;
     let prevPageCursor: string | undefined;
     if (!cursorPostId) {
       // 첫페이지인 경우
       posts = await this.postModel
-        .find({ boardType })
+        .find({ boardType, ...tagSearchOption })
         .sort({ _id: -1 })
         .limit(pageSize + 1)
         .exec();
@@ -56,6 +60,7 @@ export class PostsService {
         .find({
           boardType,
           _id: { $lte: cursorPostId },
+          ...tagSearchOption
         })
         .sort({ _id: -1 })
         .limit(pageSize + 1)
@@ -64,6 +69,7 @@ export class PostsService {
         .find({
           boardType,
           _id: { $gt: cursorPostId },
+          ...tagSearchOption
         })
         .sort({ _id: 1 })
         .limit(pageSize)
