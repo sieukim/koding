@@ -1,28 +1,20 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  Post,
-  PostBoardType,
-  PostDocument,
-  PostIdentifier,
-} from '../schemas/post.schema';
-import { Model } from 'mongoose';
-import { User } from '../schemas/user.schema';
-import { ModifyPostRequestDto } from './dto/posts/modify-post-request.dto';
-import { WritePostRequestDto } from './dto/posts/write-post-request.dto';
-import { AddCommentRequestDto } from './dto/comments/add-comment-request.dto';
-import { ModifyCommentRequestDto } from './dto/comments/modify-comment-request.dto';
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Post, PostBoardType, PostDocument, PostIdentifier } from "../schemas/post.schema";
+import { Model } from "mongoose";
+import { User } from "../schemas/user.schema";
+import { ModifyPostRequestDto } from "./dto/posts/modify-post-request.dto";
+import { WritePostRequestDto } from "./dto/posts/write-post-request.dto";
+import { AddCommentRequestDto } from "./dto/comments/add-comment-request.dto";
+import { ModifyCommentRequestDto } from "./dto/comments/modify-comment-request.dto";
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post.name) private readonly postModel: Model<Post>,
-    @InjectModel(User.name) private readonly userModel: Model<User>,
-  ) {}
+    @InjectModel(User.name) private readonly userModel: Model<User>
+  ) {
+  }
 
   async writePost(
     boardType: PostBoardType,
@@ -93,9 +85,11 @@ export class PostsService {
   async readPost({ boardType, postId }: PostIdentifier) {
     const post = await this.findByPostId(
       { boardType, postId },
-      { increaseReadCount: true, populate: ['writer'] },
+      { increaseReadCount: true, populate: ["writer"] }
     );
-    return post;
+    const prevPost = await this.postModel.findOne({ boardType, _id: { $gt: postId } }).sort({ _id: 1 }).exec();
+    const nextPost = await this.postModel.findOne({ boardType, _id: { $lt: postId } }).sort({ _id: -1 }).exec();
+    return { post, prevPost, nextPost } as { post: Post, prevPost?: Post, nextPost?: Post };
   }
 
   async findByPostId(

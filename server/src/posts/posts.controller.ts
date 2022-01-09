@@ -31,7 +31,6 @@ import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.gua
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../schemas/user.schema";
 import { ModifyPostRequestDto } from "./dto/posts/modify-post-request.dto";
-import { ReadPostWithWriterDto } from "./dto/posts/read-post-with-writer.dto";
 import { BoardTypeValidationPipe } from "../common/pipes/board-type-validation-pipe";
 import { ApiParamBoardType, ApiParamPostId } from "../common/decorator/swagger/api-param.decorator";
 import { PostBoardType } from "../schemas/post.schema";
@@ -39,6 +38,7 @@ import { AddCommentRequestDto } from "./dto/comments/add-comment-request.dto";
 import { ReadCommentDto } from "./dto/comments/read-comment.dto";
 import { ModifyCommentRequestDto } from "./dto/comments/modify-comment-request.dto";
 import { CursorPostsDto } from "./dto/posts/cursor-posts.dto";
+import { ReadPostWithAroundDto } from "./dto/posts/read-post-with-around.dto";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -102,14 +102,13 @@ export class PostsController {
   })
   @ApiOkResponse({
     description: "게시글 읽기 성공",
-    type: ReadPostWithWriterDto
+    type: ReadPostWithAroundDto
   })
   @HttpCode(HttpStatus.OK)
   @Get(":boardType/:postId")
   async readPost(@Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType, @Param("postId") postId: string) {
-    const post = await this.postsService.readPost({ boardType, postId });
-    console.log(post);
-    return new ReadPostWithWriterDto(post, post.writer as User);
+    const { post, prevPost, nextPost } = await this.postsService.readPost({ boardType, postId });
+    return new ReadPostWithAroundDto(post, prevPost, nextPost);
   }
 
   @ApiOperation({
@@ -178,7 +177,7 @@ export class PostsController {
   }
 
   @ApiOperation({
-    summary: "댓글글 수정"
+    summary: "댓글 수정"
   })
   @ApiBody({
     type: ModifyCommentRequestDto
