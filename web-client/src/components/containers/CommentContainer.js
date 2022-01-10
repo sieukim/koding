@@ -16,7 +16,7 @@ const CommentContainer = ({ boardType, postId }) => {
 
   useEffect(() => {
     if (readPostState.success) {
-      setComments(readPostState.success.data.comments);
+      setComments(readPostState.success.data.post.comments);
     }
   }, [readPostState.success, setComments]);
 
