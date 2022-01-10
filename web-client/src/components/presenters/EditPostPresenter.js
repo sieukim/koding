@@ -12,8 +12,8 @@ const EditPostPresenter = ({ readPostState, editPost, editPostState }) => {
   const editorRef = useRef();
 
   // 게시글 정보 가져오기: postTitle, markdownContent
-  const postTitle = readPostState.success?.data?.title;
-  const markdownContent = readPostState.success?.data?.markdownContent;
+  const { title: postTitle = '', markdownContent = '' } =
+    readPostState.success?.data?.post ?? {};
 
   // title 설정
   const [title, setTitle] = useState('');

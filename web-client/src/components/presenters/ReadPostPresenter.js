@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import {
   GetDate,
   MyPageLink,
+  PostLink,
   PrintState,
   Viewer,
 } from '../../utils/MyComponents';
@@ -49,6 +50,20 @@ const StyledReadPost = styled.div`
   button {
     margin: 5px 0;
   }
+
+  .nav-buttons {
+    text-align: center;
+  }
+
+  .nav-button {
+    margin: 5px;
+  }
+
+  .disabled {
+    pointer-events: none;
+    cursor: default;
+    color: gray;
+  }
 `;
 
 const ReadPostPresenter = ({
@@ -62,10 +77,21 @@ const ReadPostPresenter = ({
   const user = useSelector((state) => state.auth.user);
 
   // 게시글 정보: writer, markdownContent, title, createdAt
-  const writer = readPostState.success?.data?.writer;
-  const markdownContent = readPostState.success?.data?.markdownContent;
-  const title = readPostState.success?.data?.title;
-  const createdAt = readPostState.success?.data?.createdAt;
+  const {
+    writerNickname = '',
+    markdownContent = '',
+    title = '',
+    createdAt = '',
+    readCount = 0,
+  } = readPostState.success?.data?.post ?? {};
+
+  // 이전 글 정보
+  const { boardType: prevBoardType = '', postId: prevPostId = '' } =
+    readPostState.success?.data?.prevPostInfo ?? {};
+
+  // 다음 글 정보
+  const { boardType: nextBoardType = '', postId: nextPostId = '' } =
+    readPostState.success?.data?.nextPostInfo ?? {};
 
   /* Viewer */
 
@@ -85,21 +111,41 @@ const ReadPostPresenter = ({
             <div className="post-info">
               <div className="post-title">{title}</div>
               <MyPageLink
-                nickname={writer.nickname}
-                str={`by ${writer.nickname}`}
+                nickname={writerNickname}
+                str={`by ${writerNickname}`}
               />
             </div>
             <GetDate date={createdAt} className="post-createdAt" />
           </div>
           <Viewer innerRef={viewerRef} markdownContent={markdownContent} />
-          {user && user.nickname === writer.nickname && (
+          {user && user.nickname === writerNickname && (
             <div className="buttons">
               <button onClick={onClickEdit}>수정</button>
               <button onClick={onClickRemove}>삭제</button>
               <PrintState state={removePostState} />
             </div>
           )}
-          <button onClick={onClickList}>목록</button>
+          <div className="nav-buttons">
+            <button className="nav-button" disabled={!prevPostId}>
+              <PostLink
+                boardType={prevBoardType}
+                postId={prevPostId}
+                postTitle="이전 글"
+                className={prevPostId || 'disabled'}
+              />
+            </button>
+            <button className="nav-button" onClick={onClickList}>
+              목록
+            </button>
+            <button className="nav-button" disabled={!nextPostId}>
+              <PostLink
+                boardType={nextBoardType}
+                postId={nextPostId}
+                postTitle="다음 글"
+                className={nextPostId || 'disabled'}
+              />
+            </button>
+          </div>
         </>
       )}
     </StyledReadPost>
