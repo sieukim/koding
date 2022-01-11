@@ -90,3 +90,27 @@ export const removeComment = (boardType, postId, commentId) => {
     `/api/posts/${boardType}/${postId}/comments/${commentId}`,
   );
 };
+
+// 팔로우 api 호출
+export const follow = (loginUserNickname, followedUserNickname) => {
+  return axios.post(`/api/users/${loginUserNickname}/followings`, {
+    nickname: followedUserNickname,
+  });
+};
+
+// 언팔로우 api 호출
+export const unfollow = (loginUserNickname, unfollowedUserNickname) => {
+  return axios.delete(
+    `/api/users/${loginUserNickname}/followings/${unfollowedUserNickname}`,
+  );
+};
+
+// 팔로잉 정보 조회 api 호출
+export const getFollowing = (profileUserNickname) => {
+  return axios.get(`/api/users/${profileUserNickname}/followings`);
+};
+
+// 팔로워 정보 조회 api 호출
+export const getFollower = (profileUserNickname) => {
+  return axios.get(`/api/users/${profileUserNickname}/followers`);
+};

@@ -3,16 +3,16 @@ import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
-import SignupPage from './pages/SignupPage';
-import LoginPage from './pages/LoginPage';
-import GithubCallbackPage from './pages/GithubCallbackPage';
-import GithubVerifyPage from './pages/GithubVerifyPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import WritePostPage from './pages/WritePostPage';
-import PostPage from './pages/PostPage';
-import BoardPage from './pages/BoardPage';
-import EditPostPage from './pages/EditPostPage';
-import MyPage from './pages/MyPage';
+import SignupPage from './pages/auth/SignupPage';
+import LoginPage from './pages/auth/LoginPage';
+import GithubCallbackPage from './pages/auth/GithubCallbackPage';
+import GithubVerifyPage from './pages/auth/GithubVerifyPage';
+import ResetPasswordPage from './pages/auth/ResetPasswordPage';
+import WritePostPage from './pages/post/WritePostPage';
+import PostPage from './pages/post/PostPage';
+import BoardPage from './pages/board/BoardPage';
+import EditPostPage from './pages/post/EditPostPage';
+import ProfilePage from './pages/profile/ProfilePage';
 
 function App() {
   return (
@@ -35,7 +35,7 @@ function App() {
           path="/board/:boardType/post/:postId/edit"
           element={<EditPostPage />}
         />
-        <Route path="/user/:nickname/profile" element={<MyPage />} />
+        <Route path="/user/:nickname/profile" element={<ProfilePage />} />
       </Routes>
       <Footer />
     </>
