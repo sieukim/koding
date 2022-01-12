@@ -56,9 +56,12 @@ export const readPost = (boardType, postId) => {
 };
 
 // 게시글 목록 갖고오기 api 호출
-export const readBoard = (boardType, cursor) => {
-  const query = cursor ? `?cursor=${cursor}` : '';
-  return axios.get(`/api/posts/${boardType}${query}`);
+export const readBoard = (boardType, tags, cursor) => {
+  const query = new URLSearchParams();
+  if (tags && tags.length > 0) query.set('tags', tags);
+  if (cursor) query.set('cursor', cursor);
+
+  return axios.get(`/api/posts/${boardType}?${query.toString()}`);
 };
 
 // 게시글 수정 api 호출

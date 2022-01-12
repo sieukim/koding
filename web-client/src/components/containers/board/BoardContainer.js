@@ -4,13 +4,13 @@ import * as api from '../../../modules/api';
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const BoardContainer = ({ boardType, cursor }) => {
+const BoardContainer = ({ boardType, cursor, tags }) => {
   /* 게시글 목록 가져오기 */
 
   // 현재 게시글 목록 가져오기
   const [readBoardState] = useAsync(
-    () => api.readBoard(boardType, cursor),
-    [boardType, cursor],
+    () => api.readBoard(boardType, tags, cursor),
+    [boardType, tags, cursor],
     false,
   );
 
@@ -21,21 +21,39 @@ const BoardContainer = ({ boardType, cursor }) => {
 
   // 다음 게시글 목록으로 이동 이벤트 리스너
   const onClickNextCursor = useCallback(() => {
-    navigate(`/board/${boardType}?cursor=${nextPageCursor}`);
-  }, [navigate, boardType, nextPageCursor]);
+    const query = new URLSearchParams();
+    if (tags && tags.length > 0) query.set('tags', tags);
+    if (nextPageCursor) query.set('cursor', nextPageCursor);
+    navigate(`/board/${boardType}?${query.toString()}`);
+  }, [navigate, boardType, nextPageCursor, tags]);
 
   // 이전 게시글 목록
   const prevPageCursor = readBoardState.success?.data?.prevPageCursor;
 
   // 이전 게시글 목록으로 이동 이벤트 리스너
   const onClickPrevCursor = useCallback(() => {
-    navigate(`/board/${boardType}?cursor=${prevPageCursor}`);
-  }, [navigate, boardType, prevPageCursor]);
+    const query = new URLSearchParams();
+    if (tags && tags.length > 0) query.set('tags', tags);
+    if (prevPageCursor) query.set('cursor', prevPageCursor);
+    navigate(`/board/${boardType}?${query.toString()}`);
+  }, [navigate, boardType, prevPageCursor, tags]);
 
   // 글쓰기 이벤트 리스너
   const onClickWritePost = useCallback(() => {
     navigate(`/board/${boardType}/post/write`);
   }, [navigate, boardType]);
+
+  // 태그 변화 리스너
+  const onChangeTag = useCallback(
+    (e, value) => {
+      if (value.length === 0) {
+        navigate(`/board/${boardType}`);
+      } else {
+        navigate(`/board/${boardType}?tags=${value.join(',')}`);
+      }
+    },
+    [navigate],
+  );
 
   return (
     <BoardPresenter
@@ -46,6 +64,7 @@ const BoardContainer = ({ boardType, cursor }) => {
       onClickNextCursor={onClickNextCursor}
       onClickPrevCursor={onClickPrevCursor}
       onClickWritePost={onClickWritePost}
+      onChangeTag={onChangeTag}
     />
   );
 };

@@ -14,11 +14,13 @@ const BoardPage = () => {
   const boardType = params.boardType;
 
   const { search } = useLocation();
-  const cursor = new URLSearchParams(search).get('cursor');
+  const searchParams = new URLSearchParams(search);
+  const cursor = searchParams.get('cursor');
+  const tags = searchParams.get('tags');
 
   return (
     <StyledBoard>
-      <BoardContainer boardType={boardType} cursor={cursor} />
+      <BoardContainer boardType={boardType} cursor={cursor} tags={tags} />
     </StyledBoard>
   );
 };

@@ -48,6 +48,15 @@ const ReadPostContainer = ({ boardType, postId }) => {
     navigate(`/board/${boardType}`);
   }, [boardType, navigate]);
 
+  // 태그 검색
+  const onClickTag = useCallback(
+    (e) => {
+      const tag = e.target.innerHTML;
+      navigate(`/board/${boardType}?tags=${tag}`);
+    },
+    [boardType, navigate],
+  );
+
   return (
     <>
       {removePostState.success && <Navigate to={`/board/${boardType}`} />}
@@ -59,6 +68,7 @@ const ReadPostContainer = ({ boardType, postId }) => {
         onClickRemove={onClickRemove}
         onClickEdit={onClickEdit}
         onClickList={onClickList}
+        onClickTag={onClickTag}
       />
     </>
   );

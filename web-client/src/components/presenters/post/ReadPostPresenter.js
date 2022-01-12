@@ -8,6 +8,7 @@ import {
   PrintState,
   Viewer,
 } from '../../../utils/MyComponents';
+import { Chip } from '@material-ui/core';
 
 const StyledReadPost = styled.div`
   display: flex;
@@ -72,6 +73,7 @@ const ReadPostPresenter = ({
   onClickRemove,
   onClickEdit,
   onClickList,
+  onClickTag,
 }) => {
   // 로그인 유저 정보
   const user = useSelector((state) => state.auth.user);
@@ -118,6 +120,20 @@ const ReadPostPresenter = ({
             <GetDate date={createdAt} className="post-createdAt" />
           </div>
           <Viewer innerRef={viewerRef} markdownContent={markdownContent} />
+          <div className="tag-container">
+            {readPostState.success?.data?.post?.tags.map((tag) => {
+              return (
+                <Chip
+                  variant="outlined"
+                  label={tag}
+                  key={tag}
+                  size="small"
+                  onClick={onClickTag}
+                  data-tag={tag}
+                />
+              );
+            })}
+          </div>
           {user && user.nickname === writerNickname && (
             <div className="buttons">
               <button onClick={onClickEdit}>수정</button>
