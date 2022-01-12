@@ -13,6 +13,7 @@ import PostPage from './pages/post/PostPage';
 import BoardPage from './pages/board/BoardPage';
 import EditPostPage from './pages/post/EditPostPage';
 import ProfilePage from './pages/profile/ProfilePage';
+import FollowListPage from './pages/FollowListPage';
 
 function App() {
   return (
@@ -36,6 +37,10 @@ function App() {
           element={<EditPostPage />}
         />
         <Route path="/user/:nickname/profile" element={<ProfilePage />} />
+        <Route
+          path="/user/:nickname/profile/:type"
+          element={<FollowListPage />}
+        />
       </Routes>
       <Footer />
     </>

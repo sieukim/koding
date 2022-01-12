@@ -42,6 +42,16 @@ export const PostLink = (props) => {
   );
 };
 
+// 팔로우 리스트로 가는 NavLink
+export const FollowListLink = (props) => {
+  const { nickname, number, type, ...rest } = props;
+  return (
+    <NavLink to={`/user/${nickname}/profile/${type}`} {...rest}>
+      {number}
+    </NavLink>
+  );
+};
+
 // api 호출 로딩중이거나 오류가 발생한 경우 멘트를 출력하는 컴포넌트
 export const PrintState = (props) => {
   const { state, loading, ...rest } = props;
