@@ -56,9 +56,12 @@ export const readPost = (boardType, postId) => {
 };
 
 // 게시글 목록 갖고오기 api 호출
-export const readBoard = (boardType, cursor) => {
-  const query = cursor ? `?cursor=${cursor}` : '';
-  return axios.get(`/api/posts/${boardType}${query}`);
+export const readBoard = (boardType, tags, cursor) => {
+  const query = new URLSearchParams();
+  if (tags && tags.length > 0) query.set('tags', tags);
+  if (cursor) query.set('cursor', cursor);
+
+  return axios.get(`/api/posts/${boardType}?${query.toString()}`);
 };
 
 // 게시글 수정 api 호출
@@ -89,4 +92,28 @@ export const removeComment = (boardType, postId, commentId) => {
   return axios.delete(
     `/api/posts/${boardType}/${postId}/comments/${commentId}`,
   );
+};
+
+// 팔로우 api 호출
+export const follow = (loginUserNickname, followedUserNickname) => {
+  return axios.post(`/api/users/${loginUserNickname}/followings`, {
+    nickname: followedUserNickname,
+  });
+};
+
+// 언팔로우 api 호출
+export const unfollow = (loginUserNickname, unfollowedUserNickname) => {
+  return axios.delete(
+    `/api/users/${loginUserNickname}/followings/${unfollowedUserNickname}`,
+  );
+};
+
+// 팔로잉 정보 조회 api 호출
+export const getFollowing = (profileUserNickname) => {
+  return axios.get(`/api/users/${profileUserNickname}/followings`);
+};
+
+// 팔로워 정보 조회 api 호출
+export const getFollower = (profileUserNickname) => {
+  return axios.get(`/api/users/${profileUserNickname}/followers`);
 };

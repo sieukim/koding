@@ -72,9 +72,6 @@ const Header = () => {
         <li>
           <a>검색</a>
         </li>
-        <li>
-          <a>알림</a>
-        </li>
         {!user && (
           <>
             <li>
