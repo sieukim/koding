@@ -1,4 +1,4 @@
-import ReadPostContainer from '../../components/containers/post/ReadPostContainer';
+import PostContainer from '../../components/containers/post/PostContainer';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 import CommentContainer from '../../components/containers/post/CommentContainer';
@@ -18,7 +18,7 @@ const PostPage = () => {
 
   return (
     <StyledPost>
-      <ReadPostContainer boardType={boardType} postId={postId} />
+      <PostContainer boardType={boardType} postId={postId} />
       <CommentContainer boardType={boardType} postId={postId} />
     </StyledPost>
   );

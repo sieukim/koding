@@ -67,10 +67,10 @@ const ProfileContainer = ({ profileUserNickname }) => {
 
   useEffect(() => {
     if (getFollowingState.success) {
-      setFollowings(getFollowingState.success.data.length);
+      setFollowings(getFollowingState.success.data.count);
     }
     if (getFollowerState.success) {
-      setFollowers(getFollowerState.success.data.length);
+      setFollowers(getFollowerState.success.data.count);
     }
   }, [getFollowingState.success, getFollowerState.success]);
 

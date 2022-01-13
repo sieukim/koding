@@ -67,7 +67,7 @@ const StyledReadPost = styled.div`
   }
 `;
 
-const ReadPostPresenter = ({
+const PostPresenter = ({
   readPostState,
   removePostState,
   onClickRemove,
@@ -168,4 +168,4 @@ const ReadPostPresenter = ({
   );
 };
 
-export default ReadPostPresenter;
+export default PostPresenter;

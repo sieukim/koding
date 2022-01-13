@@ -8,17 +8,17 @@ const CommentContainer = ({ boardType, postId }) => {
 
   const [comments, setComments] = useState([]);
 
-  const [readPostState] = useAsync(
-    () => api.readPost(boardType, postId),
+  const [readCommentState] = useAsync(
+    () => api.readComment(boardType, postId),
     [boardType, postId],
     false,
   );
 
   useEffect(() => {
-    if (readPostState.success) {
-      setComments(readPostState.success.data.post.comments);
+    if (readCommentState.success) {
+      setComments(readCommentState.success.data.comments);
     }
-  }, [readPostState.success, setComments]);
+  }, [readCommentState.success, setComments]);
 
   /* 댓글 작성 api */
 

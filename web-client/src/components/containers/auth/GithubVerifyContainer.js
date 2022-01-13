@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setLogin } from '../../../modules/auth';
 import useAsync from '../../../hooks/useAsync';
+import { useNavigate } from 'react-router-dom';
 
 const GithubVerifyContainer = () => {
   /* 중복 검사 */
@@ -55,11 +56,14 @@ const GithubVerifyContainer = () => {
     [githubVerifyFetch, githubUser],
   );
 
+  const navigate = useNavigate();
+
   // github login state에 저장된 user를 이용하여 로그인 상태로 변경
   useEffect(() => {
     if (githubVerifyState.success) {
       const user = githubVerifyState.success.data;
       onSetLogin(user);
+      navigate('/');
     }
   }, [onSetLogin, githubVerifyState]);
 

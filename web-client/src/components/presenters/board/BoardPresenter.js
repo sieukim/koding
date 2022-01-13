@@ -19,6 +19,7 @@ const StyledBoard = styled.div`
     flex-direction: column;
     padding: 5px;
     background: wheat;
+    height: 632px;
   }
 
   .post-item {

@@ -1,10 +1,10 @@
-import ReadPostPresenter from '../../presenters/post/ReadPostPresenter';
+import PostPresenter from '../../presenters/post/PostPresenter';
 import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
 import { useCallback } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-const ReadPostContainer = ({ boardType, postId }) => {
+const PostContainer = ({ boardType, postId }) => {
   /* 읽을 게시글 가져오기 */
 
   // read post state
@@ -60,7 +60,7 @@ const ReadPostContainer = ({ boardType, postId }) => {
   return (
     <>
       {removePostState.success && <Navigate to={`/board/${boardType}`} />}
-      <ReadPostPresenter
+      <PostPresenter
         boardType={boardType}
         readPostState={readPostState}
         removePost={removePost}
@@ -74,4 +74,4 @@ const ReadPostContainer = ({ boardType, postId }) => {
   );
 };
 
-export default ReadPostContainer;
+export default PostContainer;

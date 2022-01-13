@@ -29,7 +29,7 @@ const FollowListPresenter = ({ getFollowerState, getFollowingState, type }) => {
       {type === 'follower' && (
         <div className="list-container">
           <div>팔로워</div>
-          {getFollowerState?.success?.data?.map((follower) => {
+          {getFollowerState?.success?.data?.followers?.map((follower) => {
             return (
               <div className="list-item" key={follower.nickname}>
                 <div>{follower.nickname}</div>
@@ -44,7 +44,7 @@ const FollowListPresenter = ({ getFollowerState, getFollowingState, type }) => {
       {type === 'following' && (
         <div className="list-container">
           <div>팔로잉</div>
-          {getFollowingState?.success?.data?.map((following) => {
+          {getFollowingState?.success?.data?.followings?.map((following) => {
             return (
               <div className="list-item" key={following.nickname}>
                 <div>{following.nickname}</div>

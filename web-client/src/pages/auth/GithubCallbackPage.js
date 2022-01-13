@@ -1,4 +1,4 @@
-import { useLocation, useNavigate, Navigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useCallback, useEffect, useState } from 'react';
 import { setLogin } from '../../modules/auth';
@@ -39,14 +39,14 @@ const GithubCallbackPage = () => {
 
         // 기존 사용자 로그인
         if (loggedUser.status === 200) {
-          setExistingUser(true);
           onSetLogin(loggedUser.data);
+          setExistingUser(true);
         }
 
         // 신규 사용자 회원가입 & 로그인
         if (loggedUser.status === 201) {
-          setNewUser(true);
           onGithubSignup(loggedUser.data);
+          setNewUser(true);
         }
       } catch (e) {}
     })();

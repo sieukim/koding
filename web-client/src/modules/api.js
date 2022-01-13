@@ -50,11 +50,6 @@ export const writePost = (boardType, post) => {
   return axios.post(`/api/posts/${boardType}`, post);
 };
 
-// 게시글 읽기 api 호출
-export const readPost = (boardType, postId) => {
-  return axios.get(`/api/posts/${boardType}/${postId}`);
-};
-
 // 게시글 목록 갖고오기 api 호출
 export const readBoard = (boardType, tags, cursor) => {
   const query = new URLSearchParams();
@@ -62,6 +57,11 @@ export const readBoard = (boardType, tags, cursor) => {
   if (cursor) query.set('cursor', cursor);
 
   return axios.get(`/api/posts/${boardType}?${query.toString()}`);
+};
+
+// 게시글 읽기 api 호출
+export const readPost = (boardType, postId) => {
+  return axios.get(`/api/posts/${boardType}/${postId}`);
 };
 
 // 게시글 수정 api 호출
@@ -72,6 +72,11 @@ export const editPost = (boardType, postId, post) => {
 // 게시글 삭제 api 호출
 export const removePost = (boardType, postId) => {
   return axios.delete(`/api/posts/${boardType}/${postId}`);
+};
+
+// 댓글 읽기 api 호출
+export const readComment = (boardType, postId) => {
+  return axios.get(`/api/posts/${boardType}/${postId}/comments`);
 };
 
 // 댓글 작성 api 호출
