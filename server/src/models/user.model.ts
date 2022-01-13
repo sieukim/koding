@@ -1,13 +1,23 @@
 import { AggregateRoot } from "@nestjs/cqrs";
-import { PickType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, PickType } from "@nestjs/swagger";
 import { currentTime } from "../common/utils/current-time.util";
 import { compare, hash } from "bcrypt";
 import { v1 } from "uuid";
-import crypto from "crypto";
+import { randomInt } from "crypto";
 import { BadRequestException } from "@nestjs/common";
 import { SendVerificationEmailEvent } from "../users/events/send-verification-email.event";
 import { SendPasswordResetEmailEvent } from "../users/events/send-password-reset-email.event";
 import { GithubUserInfo } from "../schemas/user.schema";
+import {
+  IsDate,
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Length,
+  Matches,
+} from "class-validator";
 
 // export class GithubRepositoryInfo {
 //   @ApiProperty({
@@ -79,24 +89,141 @@ import { GithubUserInfo } from "../schemas/user.schema";
 
 export class User extends AggregateRoot {
   private static readonly round = 10;
+
+  @IsEmail()
+  @ApiProperty({
+    example: "test@test.com",
+    description: "유저 이메일, 중복 불가",
+    type: String,
+  })
   email: string;
+
+  @IsString()
+  @Length(2, 10)
+  @Matches("[A-Za-z0-9가-힣]*")
+  @ApiProperty({
+    example: "testNick",
+    description: "유저 닉네임, 중복 불가",
+    pattern: "[A-Za-z0-9가-힣]*",
+    minLength: 2,
+    maxLength: 10,
+    type: String,
+  })
   nickname: string;
+
+  @Length(8, 16)
+  @IsString()
+  @ApiProperty({
+    example: "abcd1234",
+    description: "유저 비밀번호",
+    minLength: 8,
+    maxLength: 16,
+    type: String,
+  })
   password?: string;
+
+  @IsOptional()
+  @IsUrl()
+  @ApiPropertyOptional({
+    example: "https://blog.naver.com/test",
+    description: "유저 블로그 주소",
+    type: String,
+  })
   blogUrl?: string;
+
+  @IsOptional()
+  @IsUrl()
+  @ApiPropertyOptional({
+    example: "https://test.github.com",
+    description: "유저 깃허브 주소",
+    type: String,
+  })
   githubUrl?: string;
+
+  @IsOptional()
+  @IsUrl()
+  @ApiPropertyOptional({
+    example: "https://linktr.ee/test",
+    description: "유저 포트폴리오 주소",
+    type: String,
+  })
   portfolioUrl?: string;
+
+  @ApiProperty({
+    description: "깃허브 연동 유저 여부",
+    type: Boolean,
+  })
   isGithubUser: boolean;
+
+  @ApiProperty({
+    description: "이메일 가입 유저 여부",
+    type: Boolean,
+  })
   isEmailUser: boolean;
+
+  @ApiProperty({
+    description: "깃허브 API에서 제공하는 깃허브 유저 고유 넘버",
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
   githubUserIdentifier?: number;
+
+  @IsOptional()
+  @ApiProperty({
+    description: "깃허브 연동 정보",
+    type: GithubUserInfo,
+  })
   githubUserInfo?: GithubUserInfo;
+
+  @IsString()
   emailSignupVerifyToken?: string;
+
   emailSignupVerified: boolean;
+
+  @IsString()
   githubSignupVerifyToken?: string;
+
   githubSignupVerified: boolean;
+
+  @IsString()
   passwordResetToken?: string;
+
+  @IsDate()
+  @ApiProperty({
+    description: "가입일",
+    type: Date,
+  })
   createdAt: Date;
   followings: (PartialUser | User)[];
   followers: (PartialUser | User)[];
+
+  @ApiProperty({
+    description: "팔로우 하는 사용자 수",
+    type: Number,
+    minimum: 0,
+  })
+  get followingsCount() {
+    return this.followings.length;
+  }
+
+  @ApiProperty({
+    description: "팔로워 수",
+    type: Number,
+    minimum: 0,
+  })
+  get followersCount() {
+    return this.followers.length;
+  }
+
+  @ApiProperty({ description: "회원가입 인증 여부", type: Boolean })
+  get isVerifiedUser(): boolean {
+    // 이메일 유저 & 이메일 인증 완료
+    if (this.isEmailUser && this.emailSignupVerified) return true;
+    // 깃허브 유저 & 깃허브 인증 완료
+    if (this.isGithubUser && this.githubSignupVerified) return true;
+    return false;
+  }
 
   constructor(param: {
     email: string;
@@ -177,22 +304,6 @@ export class User extends AggregateRoot {
     this.followers = param.followers ?? [];
   }
 
-  get followingsCount() {
-    return this.followings.length;
-  }
-
-  get followersCount() {
-    return this.followers.length;
-  }
-
-  get isVerifiedUser(): boolean {
-    // 이메일 유저 & 이메일 인증 완료
-    if (this.isEmailUser && this.emailSignupVerified) return true;
-    // 깃허브 유저 & 깃허브 인증 완료
-    if (this.isGithubUser && this.githubSignupVerified) return true;
-    return false;
-  }
-
   async hashPassword() {
     if (this.password) this.password = await hash(this.password, User.round);
     return this;
@@ -257,7 +368,7 @@ export class User extends AggregateRoot {
       new SendPasswordResetEmailEvent(
         this.email,
         this.nickname,
-        this.emailSignupVerifyToken,
+        this.passwordResetToken,
       ),
     );
   }
@@ -288,9 +399,7 @@ export class User extends AggregateRoot {
   }
 
   private setNewPasswordResetToken() {
-    const randomDigits = Array.from({ length: 6 }, () =>
-      crypto.randomInt(0, 9),
-    );
+    const randomDigits = Array.from({ length: 6 }, () => randomInt(0, 9));
     this.passwordResetToken = randomDigits.join("");
   }
 

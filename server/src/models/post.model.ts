@@ -18,6 +18,10 @@ export const postBoardTypes = [
 export type PostBoardType = typeof postBoardTypes[number];
 
 export class Post extends AggregateRoot {
+  @ApiProperty({
+    description: "게시글 고유 아이디",
+    type: String,
+  })
   postId: string;
   @ApiProperty({
     description: "게시글 제목",
