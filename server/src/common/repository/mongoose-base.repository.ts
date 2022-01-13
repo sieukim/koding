@@ -76,33 +76,96 @@ export abstract class MongooseBaseRepository<
     const findQuery: FilterQuery<ModelDocument> = {};
     Object.keys(findOption).forEach((key) => {
       let query;
+      console.log("findOption[key]: ", findOption[key]);
+      let value;
       switch (Object.keys(findOption[key])[0]) {
         case "eq":
-          query = findOption[key].eq;
+          value = findOption[key].eq;
+          if (
+            this.shouldConvertedToObjectIdFields.includes(
+              key as keyof DomainModel,
+            )
+          ) {
+            value =
+              value instanceof Types.ObjectId
+                ? value
+                : new Types.ObjectId(value);
+          }
+          query = value;
           break;
         case "lt":
-          query = { $lt: findOption[key].lt };
+          value = findOption[key].lt;
+          if (
+            this.shouldConvertedToObjectIdFields.includes(
+              key as keyof DomainModel,
+            )
+          ) {
+            value =
+              value instanceof Types.ObjectId
+                ? value
+                : new Types.ObjectId(value);
+          }
+          query = { $lt: value };
           break;
         case "lte":
-          query = { $lte: findOption[key].lte };
+          value = findOption[key].lte;
+          if (
+            this.shouldConvertedToObjectIdFields.includes(
+              key as keyof DomainModel,
+            )
+          ) {
+            value =
+              value instanceof Types.ObjectId
+                ? value
+                : new Types.ObjectId(value);
+          }
+          query = { $lte: value };
           break;
         case "gt":
-          query = { $gt: findOption[key].gt };
+          value = findOption[key].gt;
+          if (
+            this.shouldConvertedToObjectIdFields.includes(
+              key as keyof DomainModel,
+            )
+          ) {
+            value =
+              value instanceof Types.ObjectId
+                ? value
+                : new Types.ObjectId(value);
+          }
+          query = { $gt: value };
           break;
         case "gte":
-          query = { $gte: findOption[key].gte };
+          value = findOption[key].gte;
+          if (
+            this.shouldConvertedToObjectIdFields.includes(
+              key as keyof DomainModel,
+            )
+          ) {
+            value =
+              value instanceof Types.ObjectId
+                ? value
+                : new Types.ObjectId(value);
+          }
+          query = { $gte: value };
           break;
         case "in":
-          query = { $in: findOption[key].in };
+          value = findOption[key].in;
+          if (
+            this.shouldConvertedToObjectIdFields.includes(
+              key as keyof DomainModel,
+            )
+          ) {
+            value =
+              value instanceof Types.ObjectId
+                ? value
+                : new Types.ObjectId(value);
+          }
+          query = { $in: value };
           break;
         default:
           break;
       }
-      if (
-        this.shouldConvertedToObjectIdFields.includes(key as keyof DomainModel)
-      )
-        query =
-          query instanceof Types.ObjectId ? query : new Types.ObjectId(query);
 
       if (key === this.virtualPrimaryKeyName) findQuery["_id"] = query;
       else {

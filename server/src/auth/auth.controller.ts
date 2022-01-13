@@ -30,7 +30,7 @@ import { LocalAuthGuard } from "./guard/local-auth.guard";
 import { LoginLocalRequest } from "./dto/login-local-request";
 import { LoggedInGuard } from "./guard/authorization/logged-in.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
-import { UserInfoDto } from "./dto/user-info.dto";
+import { UserInfoDto } from "../users/dto/user-info.dto";
 import { Response } from "express";
 import { SignupGithubVerifyRequestDto } from "./dto/signup-github-verify-request.dto";
 import { SignupGithubResult } from "./dto/signup-github-result";

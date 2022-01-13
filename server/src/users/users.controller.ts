@@ -28,7 +28,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { UserInfoDto } from "../auth/dto/user-info.dto";
+import { UserInfoDto } from "./dto/user-info.dto";
 import { FollowUserDto } from "./dto/follow-user.dto";
 import { FollowUserResultDto } from "./dto/follow-user-result.dto";
 import { UnfollowUserResultDto } from "./dto/unfollow-user-result.dto";
@@ -39,6 +39,8 @@ import { FollowingUsersInfoDto } from "./dto/following-users-info.dto";
 import { FollowerUsersInfoDto } from "./dto/follower-users-info.dto";
 import { GetFollowerUsersQuery } from "./queries/get-follower-users.query";
 import { GetFollowerUsersHandler } from "./queries/handlers/get-follower-users.handler";
+import { GetUserInfoQuery } from "./queries/get-user-info.query";
+import { GetUserInfoHandler } from "./queries/handlers/get-user-info.handler";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -65,6 +67,28 @@ export class UsersController {
   async joinUser(@Body() signupUserDto: SignupLocalRequestDto) {
     const user = await this.usersService.signupLocal(signupUserDto);
     return new UserInfoDto(user);
+  }
+
+  @ApiOperation({
+    summary: "유저 정보 조회",
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "유저 닉네임",
+  })
+  @ApiNotFoundResponse({
+    description: "없는 유저",
+  })
+  @ApiOkResponse({
+    description: "유저 정보 조회 성공",
+    type: UserInfoDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get(":nickname")
+  getUserDetail(@Param("nickname") nickname: string) {
+    return this.queryBus.execute(new GetUserInfoQuery(nickname)) as ReturnType<
+      GetUserInfoHandler["execute"]
+    >;
   }
 
   @ApiQuery({
@@ -205,7 +229,7 @@ export class UsersController {
   })
   @ApiOkResponse({
     description: "팔로잉하는 유저들 정보 조회 완료",
-    type: [FollowingUsersInfoDto],
+    type: FollowingUsersInfoDto,
   })
   @Get(":nickname/followings")
   getFollowings(@Param("nickname") nickname: string) {
@@ -226,7 +250,7 @@ export class UsersController {
   })
   @ApiOkResponse({
     description: "팔로우하는 유저들 정보 조회 완료",
-    type: [FollowerUsersInfoDto],
+    type: FollowerUsersInfoDto,
   })
   @Get(":nickname/followers")
   getFollowers(@Param("nickname") nickname: string) {
