@@ -1,19 +1,19 @@
 import { PassportSerializer } from "@nestjs/passport";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { User } from "../schemas/user.schema";
-import { UsersService } from "../users/users.service";
+import { UsersRepository } from "../users/users.repository";
+import { User } from "../models/user.model";
 
 @Injectable()
 export class LocalSerializer extends PassportSerializer {
   private readonly logger = new Logger(LocalSerializer.name);
 
-  constructor(private readonly usersService: UsersService) {
+  constructor(private readonly userRepository: UsersRepository) {
     super();
   }
 
   async deserializeUser(email: any, done: CallableFunction) {
     try {
-      const user = await this.usersService.findUserByEmail(email);
+      const user = await this.userRepository.findByEmail(email);
       this.logger.log(`deserialize User ${email}`);
       if (user) done(null, user);
       else throw new NotFoundException();

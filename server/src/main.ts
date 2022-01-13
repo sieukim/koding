@@ -20,14 +20,14 @@ async function bootstrap() {
       resave: false,
       saveUninitialized: false,
       cookie: { httpOnly: true },
-      name: configService.get<string>("session.cookie-name")
+      name: configService.get<string>("session.cookie-name"),
     }),
     passport.initialize(),
-    passport.session()
+    passport.session(),
   );
   app.enableCors({
     origin: true,
-    credentials: true
+    credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   const config = new DocumentBuilder()

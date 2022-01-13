@@ -8,6 +8,7 @@ import { UsersModule } from "./users/users.module";
 import { EmailModule } from "./email/email.module";
 import { UploadModule } from "./upload/upload.module";
 import { PostsModule } from "./posts/posts.module";
+import { CommentsModule } from "./comments/comments.module";
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { PostsModule } from "./posts/posts.module";
       isGlobal: true,
       load: [configuration],
       expandVariables: true,
-      cache: true
+      cache: true,
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
@@ -26,17 +27,18 @@ import { PostsModule } from "./posts/posts.module";
         //   username: 'user1',
         //   password: 'secret',
         // },
-        uri: configService.get<string>("database.mongodb.uri")
-      })
+        uri: configService.get<string>("database.mongodb.uri"),
+      }),
     }),
     AuthModule,
     UsersModule,
     EmailModule,
     UploadModule,
-    PostsModule
+    PostsModule,
+    CommentsModule,
   ],
   controllers: [],
-  providers: []
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {

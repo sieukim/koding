@@ -3,15 +3,13 @@ import { MulterModule } from "@nestjs/platform-express";
 import { MulterConfigService } from "./multer-config.service";
 import { UploadController } from "./upload.controller";
 
-
 @Module({
   imports: [
     MulterModule.registerAsync({
-      useClass: MulterConfigService
-    })
+      useClass: MulterConfigService,
+    }),
   ],
   providers: [MulterConfigService],
-  controllers: [UploadController]
+  controllers: [UploadController],
 })
-export class UploadModule {
-}
+export class UploadModule {}

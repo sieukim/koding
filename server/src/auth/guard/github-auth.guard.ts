@@ -1,4 +1,9 @@
-import { BadRequestException, ExecutionContext, Injectable, Logger } from "@nestjs/common";
+import {
+  BadRequestException,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 
 @Injectable()
@@ -14,10 +19,8 @@ export class GithubAuthGuard extends AuthGuard("github") {
   }
 
   handleRequest(err: any, user: any, info: any, context: any, status: any) {
-    if (err)
-      this.logger.error(err);
-    if (err || !user)
-      throw new BadRequestException();
+    if (err) this.logger.error(err);
+    if (err || !user) throw new BadRequestException();
     return user;
   }
 }

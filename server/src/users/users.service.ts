@@ -1,40 +1,36 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { GithubRepositoryInfo, GithubUserInfo, User } from "../schemas/user.schema";
+import { UserDocument } from "../schemas/user.schema";
 import { FilterQuery, Model } from "mongoose";
-import { SignupLocalDto } from "./dto/signup-local.dto";
+import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
 import { EmailService } from "../email/email.service";
-import axios from "axios";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { SignupLocalCommand } from "./commands/signup-local.command";
+import { SignupGithubCommand } from "./commands/signup-github.command";
+import { SignupGithubRequestDto } from "../auth/dto/signup-github-request.dto";
+import { validateOrReject } from "class-validator";
+import { VerifyEmailSignupCommand } from "./commands/verify-email-signup.command";
+import { CheckExistenceQuery } from "./queries/check-existence.query";
+import { CheckExistenceHandler } from "./queries/handlers/check-existence.handler";
+import { FollowUserCommand } from "./commands/follow-user.command";
+import { FollowUserHandler } from "./commands/handlers/follow-user.handler";
+import { UnfollowUserCommand } from "./commands/unfollow-user.command";
+import { UnfollowUserHandler } from "./commands/handlers/unfollow-user.handler";
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
-    @InjectModel(User.name) private readonly userModel: Model<User>,
-    private readonly emailService: EmailService
-  ) {
-  }
+    @InjectModel(UserDocument.name)
+    private readonly userModel: Model<UserDocument>,
+    private readonly emailService: EmailService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
-  async signupLocal(signupLocalDto: SignupLocalDto) {
-    const { email, nickname } = signupLocalDto;
-    let user = await this.userModel
-      .findOne({
-        $or: [{ email }, { nickname }]
-      })
-      .exec();
-
-    if (user) throw new ConflictException("이미 존재하는 사용자입니다");
-    user = new this.userModel(signupLocalDto);
-    user.isEmailUser = true;
-    user.setNewEmailSignupVerifyToken();
-    await user.hashPassword();
-    await user.save();
-
-    await this.emailService.sendVerificationEmail(
-      user.nickname,
-      user.email,
-      user.emailSignupVerifyToken
-    );
-    return user as User;
+  async signupLocal(signupLocalDto: SignupLocalRequestDto) {
+    return this.commandBus.execute(new SignupLocalCommand(signupLocalDto));
   }
 
   async signupGithub(profile: any) {
@@ -44,65 +40,37 @@ export class UsersService {
       email,
       name,
       avatar_url: avatarUrl,
-      repos_url
+      repos_url,
     } = profile._json;
 
     const githubUserIdentifier = id as number;
-
-    let user = await this.findUserByField({ githubUserIdentifier });
-    if (user)
-      return user as User;
-
-
-    const rawRepositories: Array<any> = (await axios.get(repos_url)).data;
-
-    const repositories = rawRepositories.map(
-      ({ name, html_url: htmlUrl, description, stargazers_count: starCount }) =>
-        ({ name, htmlUrl, description, starCount } as GithubRepositoryInfo)
-    );
-
-    const githubUserInfo = {
+    const signupGithubRequest = new SignupGithubRequestDto({
       githubId,
       email,
       name,
+      reposUrl: repos_url,
       avatarUrl,
-      repositories
-    } as GithubUserInfo;
-
-    user = await this.findUserByEmail(email, false);
-
-    if (user) {
-      user.githubUserIdentifier = githubUserIdentifier;
-      user.githubUserInfo = githubUserInfo;
-      user.githubSignupVerified = true;
-      user.isGithubUser = true;
-      await user.save();
-    } else {
-      user = new this.userModel({
-        email,
-        githubSignupVerified: false,
-        githubUserInfo,
-        githubUserIdentifier: githubUserIdentifier,
-        isGithubUser: true
-      });
-      user.setNewGithubSignupVerifyToken();
-      await user.save();
-    }
-    return user as User;
+      githubUserIdentifier,
+    });
+    console.log(signupGithubRequest);
+    await validateOrReject(signupGithubRequest);
+    console.log("validate fin");
+    return await this.commandBus.execute(
+      new SignupGithubCommand(signupGithubRequest),
+    );
   }
 
   async verifyEmailSignup(nickname: string, verifyToken: string) {
-    const user = await this.findUserByNickname(nickname);
-    if (!user) throw new NotFoundException("없는 사용자입니다");
-    if (user.emailSignupVerifyToken !== verifyToken)
-      throw new BadRequestException("잘못된 인증 토큰입니다");
-    user.emailSignupVerifyToken = undefined;
-    user.emailSignupVerified = true;
-    await user.save();
+    return this.commandBus.execute(
+      new VerifyEmailSignupCommand(nickname, verifyToken),
+    );
   }
 
-
-  findUserByNickname(nickname: string, includePassword = false, populate: (keyof User)[] = []) {
+  findUserByNickname(
+    nickname: string,
+    includePassword = false,
+    populate: (keyof UserDocument)[] = [],
+  ) {
     if (populate.length <= 0)
       return this.findUserByField({ nickname }, includePassword);
     else return this.findUserByField({ nickname }, includePassword, populate);
@@ -112,58 +80,32 @@ export class UsersService {
     return this.findUserByField({ email }, includePassword);
   }
 
-  async checkExistence(key: "nickname" | "email", value: string) {
-    const user = await this.userModel.findOne({ [key]: value }).exec();
-    if (user) return true;
-    return false;
+  checkExistence(key: "nickname" | "email", value: string) {
+    return this.queryBus.execute(
+      new CheckExistenceQuery(key, value),
+    ) as ReturnType<CheckExistenceHandler["execute"]>;
   }
 
-  async followUser(from: { nickname: string }, to: { nickname: string }) {
-    const users = await this.userModel.find({
-      nickname: {
-        $in: [from.nickname, to.nickname]
-      }
-    }).exec();
-    if (users.length != 2)
-      throw new NotFoundException("잘못된 유저 정보입니다");
-    const fromUser = users.find(user => user.nickname === from.nickname);
-    const toUser = users.find(user => user.nickname === to.nickname);
-
-    await fromUser.update({ $addToSet: { followings: toUser._id } }).exec();
-    await toUser.update({ $addToSet: { followers: fromUser._id } }).exec();
-
-    return {
-      from: fromUser,
-      to: toUser
-    };
+  followUser(from: { nickname: string }, to: { nickname: string }) {
+    return this.commandBus.execute(
+      new FollowUserCommand(from.nickname, to.nickname),
+    ) as ReturnType<FollowUserHandler["execute"]>;
   }
 
-  async unfollowUser(from: { nickname: string }, to: { nickname: string }) {
-    const users = await this.userModel.find({
-      nickname: {
-        $in: [from.nickname, to.nickname]
-      }
-    }).exec();
-    if (users.length != 2)
-      throw new NotFoundException("잘못된 유저 정보입니다");
-    const fromUser = users.find(user => user.nickname === from.nickname);
-    const toUser = users.find(user => user.nickname === to.nickname);
-
-    await fromUser.update({ $pull: { followings: toUser._id } }).exec();
-    await toUser.update({ $pull: { followers: fromUser._id } }).exec();
-
-    return {
-      from: fromUser,
-      to: toUser
-    };
+  unfollowUser(from: { nickname: string }, to: { nickname: string }) {
+    return this.commandBus.execute(
+      new UnfollowUserCommand(from.nickname, to.nickname),
+    ) as ReturnType<UnfollowUserHandler["execute"]>;
   }
 
-  private findUserByField(condition: FilterQuery<User>, includePassword = false, populate: (keyof User)[] = []) {
+  private findUserByField(
+    condition: FilterQuery<UserDocument>,
+    includePassword = false,
+    populate: (keyof UserDocument)[] = [],
+  ) {
     let query = this.userModel.findOne(condition);
-    if (!includePassword)
-      query = query.select("-password");
-    if (populate.length > 0)
-      query = query.populate(populate);
+    if (!includePassword) query = query.select("-password");
+    if (populate.length > 0) query = query.populate(populate);
     return query.exec();
   }
 }

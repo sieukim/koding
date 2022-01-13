@@ -8,13 +8,13 @@ import { UsersService } from "../../users/users.service";
 export class GithubStrategy extends PassportStrategy(Strategy, "github") {
   constructor(
     private readonly usersService: UsersService,
-    configService: ConfigService
+    configService: ConfigService,
   ) {
     super({
       clientID: configService.get<string>("auth.social.github.client_id"),
       clientSecret: configService.get<string>(
-        "auth.social.github.client_secret"
-      )
+        "auth.social.github.client_secret",
+      ),
     });
   }
 

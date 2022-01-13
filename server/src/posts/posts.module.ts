@@ -2,16 +2,30 @@ import { Module } from "@nestjs/common";
 import { PostsController } from "./posts.controller";
 import { PostsService } from "./posts.service";
 import { MongooseModule } from "@nestjs/mongoose";
-import { Post, PostSchema } from "../schemas/post.schema";
-import { User, UserSchema } from "../schemas/user.schema";
+import { PostDocument, PostSchema } from "../schemas/post.schema";
+import { PostCommandHandlers } from "./commands/handlers";
+import { PostEventHandlers } from "./events/handlers";
+import { PostQueryHandlers } from "./query/handlers";
+import { CqrsModule } from "@nestjs/cqrs";
+import { PostsRepository } from "./posts.repository";
+import { UsersModule } from "../users/users.module";
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }, {
-    name: User.name,
-    schema: UserSchema
-  }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: PostDocument.name, schema: PostSchema },
+    ]),
+    CqrsModule,
+    UsersModule,
+  ],
   controllers: [PostsController],
-  providers: [PostsService]
+  providers: [
+    PostsRepository,
+    PostsService,
+    ...PostCommandHandlers,
+    ...PostEventHandlers,
+    ...PostQueryHandlers,
+  ],
+  exports: [PostsRepository],
 })
-export class PostsModule {
-}
+export class PostsModule {}

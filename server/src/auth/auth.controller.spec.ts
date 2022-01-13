@@ -7,8 +7,10 @@ describe("AuthController", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AuthController]
-    }).useMocker(() => createMock()).compile();
+      controllers: [AuthController],
+    })
+      .useMocker(() => createMock())
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
   });

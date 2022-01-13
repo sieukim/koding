@@ -1,19 +1,19 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { LoginResultDto } from "../../auth/dto/login-result.dto";
-import { User } from "../../schemas/user.schema";
+import { UserInfoDto } from "../../auth/dto/user-info.dto";
+import { User } from "../../models/user.model";
 
 export class FollowUserResultDto {
   @ApiProperty({
-    description: "팔로우를 요청한 유저"
+    description: "팔로우를 요청한 유저",
   })
-  from: LoginResultDto;
+  from: UserInfoDto;
   @ApiProperty({
-    description: "팔로우한 유저"
+    description: "팔로우한 유저",
   })
-  to: LoginResultDto;
+  to: UserInfoDto;
 
   constructor(from: User, to: User) {
-    this.from = new LoginResultDto(from);
-    this.to = new LoginResultDto(to);
+    this.from = new UserInfoDto(from);
+    this.to = new UserInfoDto(to);
   }
 }

@@ -1,86 +1,41 @@
-import { Document, Types } from "mongoose";
+import { Document, Model, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { User } from "./user.schema";
+import { UserDocument } from "./user.schema";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsIn, IsNotEmpty, IsString } from "class-validator";
-import { NotFoundException } from "@nestjs/common";
-import { schemaLoadClass } from "../common/utils/schema-load-class.util";
+import { IsIn, IsString } from "class-validator";
 import { currentTime } from "../common/utils/current-time.util";
+import { Post } from "../models/post.model";
+import { PartialUser } from "../models/user.model";
 
-@Schema({ versionKey: false, timestamps: { createdAt: true, updatedAt: false, currentTime: currentTime } })
-export class Comment extends Types.Subdocument {
-  _id: Types.ObjectId;
-
-  @Prop({
-    type: {
-      _id: { type: Types.ObjectId, ref: User.name, index: true },
-      nickname: String
-    }
-  })
-  writer: {
-    _id: Types.ObjectId | User,
-    nickname: string
-  };
-
-  @IsNotEmpty()
-  @IsString()
-  @ApiProperty({
-    description: "댓글 내용"
-  })
-  @Prop()
-  content: string;
-
-  @ApiProperty({
-    description: "댓글 생성 시간"
-  })
-  createdAt: Date;
-
-  @Prop({
-    type: [{
-      type: {
-        _id: { type: Types.ObjectId, ref: User.name },
-        nickname: String
-      }
-    }]
-  })
-  mentionedUsers: {
-    _id: Types.ObjectId | User,
-    nickname: string
-  }[];
-
-  isOwner(user: User) {
-    if (!user)
-      return false;
-    if (this.writer._id instanceof User)
-      return this.writer._id._id.toString() === user._id.toString();
-    else return this.writer._id.toString() === user._id.toString();
-  }
-
-  modifyComment({ content, mentionedUsers }: { content?: string, mentionedUsers?: User[] }) {
-    this.content = content ?? this.content;
-    if (mentionedUsers)
-      this.mentionedUsers = mentionedUsers.map(({ _id, nickname }) => ({ _id, nickname }));
-
-  }
-}
-
-export const CommentSchema = SchemaFactory.createForClass(Comment);
-schemaLoadClass(CommentSchema, Comment);
-
-export type PostDocument = Post & Document;
-export const postBoardTypes = ["common", "question", "career", "recruit", "study-group", "column"] as const;
+export const postBoardTypes = [
+  "common",
+  "question",
+  "career",
+  "recruit",
+  "study-group",
+  "column",
+] as const;
 export type PostBoardType = typeof postBoardTypes[number];
+
 @Schema({
-  id: false, _id: true, autoIndex: true, versionKey: false, timestamps: {
-    createdAt: true, updatedAt: false,
-    currentTime: currentTime
-  }
+  id: false,
+  _id: true,
+  autoIndex: true,
+  versionKey: false,
+  timestamps: {
+    createdAt: true,
+    updatedAt: false,
+    currentTime: currentTime,
+  },
 })
-export class Post extends Document {
-  _id: Types.ObjectId;
+export class PostDocument extends Document {
+  // @Prop({ type: Types.ObjectId })
+  // _id: Types.ObjectId;
+
+  postId: Types.ObjectId;
 
   @ApiProperty({
-    description: "게시글 제목"
+    description: "게시글 제목",
   })
   @IsString()
   @Prop()
@@ -90,95 +45,109 @@ export class Post extends Document {
   @ApiProperty({
     description: "게시판 타입",
     example: "common",
-    enum: postBoardTypes
+    enum: postBoardTypes,
   })
-  @Prop({ type: String, index: true, default: "common" })
+  @Prop({ type: String, default: "common" })
   boardType: PostBoardType;
 
   @Prop({
-    type: {
-      _id: { type: Types.ObjectId, ref: User.name, index: true },
-      nickname: String
-    }
+    type: String,
   })
-  writer: {
-    _id: User | Types.ObjectId,
-    nickname: string
-  };
+  writerNickname: string;
+
+  writer?: UserDocument;
 
   @IsString({ each: true })
   @ApiProperty({
     description: "게시글 태그",
-    type: [String]
+    type: [String],
   })
-  @Prop({ type: [String], index: true })
+  @Prop({ type: [String] })
   tags: string[];
 
   @IsString()
   @ApiProperty({
-    description: "마크다운 형식의 게시글 내용"
+    description: "마크다운 형식의 게시글 내용",
   })
   @Prop()
   markdownContent: string;
 
   @ApiProperty({
-    description: "조회수"
+    description: "조회수",
   })
   @Prop({ type: Number, default: 0, min: 0 })
   readCount: number;
 
-  @Prop({ type: [CommentSchema] })
-  comments: Types.DocumentArray<Comment>;
-
   @ApiProperty({
-    description: "게시글 생성 시간"
+    description: "게시글 생성 시간",
   })
   createdAt: Date;
 
-  modifyPost({
-               title,
-               tags,
-               markdownContent
-             }: { title?: string, markdownContent?: string, tags?: string[] }) {
-    this.title = title ?? this.title;
-    this.tags = tags ?? this.tags;
-    this.markdownContent = markdownContent ?? this.markdownContent;
-  }
-
-  isOwner(user: User) {
-    if (this.writer._id instanceof User)
-      return this.writer._id._id.toString() === user._id.toString();
-    else
-      return this.writer._id.toString() === user._id.toString();
-  }
-
-  addComment(writer: User, { content, mentionedUsers = [] }: { content: string, mentionedUsers: User[] }) {
-    const comment = this.comments.create({
-      writer: { _id: writer._id, nickname: writer.nickname },
-      content,
-      mentionedUsers: mentionedUsers.map(({ _id, nickname }) => ({ _id, nickname }))
+  static toModel(postDocument: PostDocument): Post {
+    const {
+      postId,
+      boardType,
+      writerNickname,
+      writer,
+      readCount,
+      tags,
+      markdownContent,
+      createdAt,
+      title,
+    } = postDocument;
+    return new Post({
+      title,
+      postId: postId.toString(),
+      boardType,
+      writer: writer
+        ? UserDocument.toModel(writer)
+        : new PartialUser({ nickname: writerNickname }),
+      tags,
+      markdownContent,
+      readCount,
+      createdAt,
     });
-    this.comments.push(comment);
   }
 
-  getComment(commentId: string) {
-    const comment = this.comments.id(commentId);
-    if (!comment)
-      throw new NotFoundException("잘못된 댓글 아이디입니다");
-    return comment;
+  static fromModel(post: Post, model: Model<PostDocument>): PostDocument {
+    const {
+      postId,
+      boardType,
+      writer,
+      tags,
+      markdownContent,
+      createdAt,
+      readCount,
+      title,
+    } = post;
+    return new model({
+      postId: new Types.ObjectId(postId),
+      boardType,
+      writerNickname: writer.nickname,
+      tags,
+      markdownContent,
+      createdAt,
+      readCount,
+      title,
+    });
   }
-
-  deleteComment(commentId: string) {
-    const comment = this.getComment(commentId);
-    this.comments.pull(comment);
-  }
-
 }
 
-export type PostIdentifier = {
-  boardType: PostBoardType,
-  postId: string
-}
-export const PostSchema = SchemaFactory.createForClass(Post);
-schemaLoadClass(PostSchema, Post);
-PostSchema.index({ _id: 1, boardType: 1 });
+export const PostSchema = SchemaFactory.createForClass(PostDocument);
+PostSchema.index({ boardType: 1, _id: 1 });
+PostSchema.virtual("writer", {
+  ref: UserDocument.name,
+  localField: "writerNickname",
+  foreignField: "nickname",
+  justOne: true,
+});
+PostSchema.virtual("postId")
+  .get(function () {
+    return this._id;
+  })
+  .set(function (value) {
+    if (value instanceof Types.ObjectId) this._id = value;
+    else this._id = new Types.ObjectId(value);
+  });
+PostSchema.set("toObject", { virtuals: true });
+PostSchema.set("toJSON", { virtuals: true });

@@ -7,22 +7,18 @@ import { LocalStrategy } from "./strategy/local.strategy";
 import { GithubStrategy } from "./strategy/github.strategy";
 import { LocalSerializer } from "./local.serializer";
 import { EmailModule } from "../email/email.module";
+import { CqrsModule } from "@nestjs/cqrs";
 
 @Module({
   imports: [
     UsersModule,
     PassportModule.register({
-      session: true
+      session: true,
     }),
-    EmailModule
+    EmailModule,
+    CqrsModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    LocalSerializer,
-    LocalStrategy,
-    GithubStrategy
-  ]
+  providers: [AuthService, LocalSerializer, LocalStrategy, GithubStrategy],
 })
-export class AuthModule {
-}
+export class AuthModule {}

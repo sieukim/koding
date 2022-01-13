@@ -1,11 +1,11 @@
-import { LoginResultDto } from "./login-result.dto";
-import { User } from "../../schemas/user.schema";
+import { UserInfoDto } from "./user-info.dto";
 import { ApiProperty } from "@nestjs/swagger";
+import { User } from "../../models/user.model";
 
-export class SignupGithubResult extends LoginResultDto {
+export class SignupGithubResult extends UserInfoDto {
   @ApiProperty({
     description: "신규 유저의 깃허브 회원가입 인증 시 사용할 인증 토큰",
-    example: "9ad4af90-6976-11ec-9730-131e1ddb758c"
+    example: "9ad4af90-6976-11ec-9730-131e1ddb758c",
   })
   verifyToken: string;
 

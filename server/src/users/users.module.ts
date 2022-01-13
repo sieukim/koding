@@ -1,18 +1,34 @@
-import { Module } from "@nestjs/common";
+import { Global, Module } from "@nestjs/common";
 import { UsersController } from "./users.controller";
 import { MongooseModule } from "@nestjs/mongoose";
-import { User, UserSchema } from "../schemas/user.schema";
+import { UserDocument, UserSchema } from "../schemas/user.schema";
 import { UsersService } from "./users.service";
 import { EmailModule } from "../email/email.module";
+import { UsersRepository } from "./users.repository";
+import { UserCommandHandlers } from "./commands/handlers";
+import { UserEventHandlers } from "./events/handlers";
+import { UserQueryHandlers } from "./queries/handlers";
+import { CqrsModule } from "@nestjs/cqrs";
+import { EmailSagas } from "./sagas/email.sagas";
 
+@Global()
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    EmailModule
+    MongooseModule.forFeature([
+      { name: UserDocument.name, schema: UserSchema },
+    ]),
+    EmailModule,
+    CqrsModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService],
-  exports: [UsersService]
+  providers: [
+    UsersService,
+    UsersRepository,
+    EmailSagas,
+    ...UserCommandHandlers,
+    ...UserEventHandlers,
+    ...UserQueryHandlers,
+  ],
+  exports: [UsersRepository, UsersService],
 })
-export class UsersModule {
-}
+export class UsersModule {}
