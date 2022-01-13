@@ -15,11 +15,14 @@ const keys = [
 ] as const;
 
 export class UserInfoDto extends PickType(User, keys) {
+  followersCount: number;
+  followingsCount: number;
+
   constructor(user: User) {
     super();
-    for (const key in user) {
-      if ((keys as readonly (keyof User)[]).includes(key as keyof User))
-        this[key] = user[key];
+    console.log(user);
+    for (const key of keys) {
+      if (user[key] !== undefined) this[key as keyof User] = user[key];
     }
   }
 }

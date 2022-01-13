@@ -130,9 +130,8 @@ export class UserDocument extends Document {
   @Prop({ default: false })
   githubSignupVerified: boolean;
 
-  @Prop()
+  @Prop({ required: false })
   passwordResetToken?: string;
-  글;
 
   createdAt: Date;
 

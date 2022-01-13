@@ -4,6 +4,7 @@ import {
   ConflictException,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Head,
   HttpCode,
@@ -12,6 +13,7 @@ import {
   Param,
   Post,
   Query,
+  UseGuards,
 } from "@nestjs/common";
 import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
 import { UsersService } from "./users.service";
@@ -19,6 +21,7 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -41,10 +44,17 @@ import { GetFollowerUsersQuery } from "./queries/get-follower-users.query";
 import { GetFollowerUsersHandler } from "./queries/handlers/get-follower-users.handler";
 import { GetUserInfoQuery } from "./queries/get-user-info.query";
 import { GetUserInfoHandler } from "./queries/handlers/get-user-info.handler";
+import { CheckFollowingQuery } from "./queries/check-following.query";
+import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
+import { LoginUser } from "../common/decorator/login-user.decorator";
+import { User } from "../models/user.model";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
   description: "인증 실패",
+})
+@ApiForbiddenResponse({
+  description: "권한 없음",
 })
 @Controller("api/users")
 export class UsersController {
@@ -173,12 +183,16 @@ export class UsersController {
     description: "팔로우 완료(원래 이미 팔로우하고 있었던 경우도 포함)",
     type: FollowUserResultDto,
   })
+  @UseGuards(VerifiedUserGuard)
   @HttpCode(HttpStatus.OK)
   @Post(":nickname/followings")
   async followUser(
     @Param("nickname") nickname: string,
     @Body() body: FollowUserDto,
+    @LoginUser() loginUser: User,
   ) {
+    if (nickname !== loginUser.nickname)
+      throw new ForbiddenException("팔로우할 권한이 없습니다");
     const { from, to } = await this.usersService.followUser(
       { nickname },
       { nickname: body.nickname },
@@ -204,17 +218,49 @@ export class UsersController {
     description: "언팔로우 완료(원래 팔로우하지 않았던 경우도 포함)",
     type: UnfollowUserResultDto,
   })
+  @UseGuards(VerifiedUserGuard)
   @HttpCode(HttpStatus.OK)
   @Delete(":nickname/followings/:followNickname")
   async unfollowUser(
     @Param("nickname") nickname: string,
     @Param("followNickname") followNickname: string,
+    @LoginUser() loginUser: User,
   ) {
+    if (nickname !== loginUser.nickname)
+      throw new ForbiddenException("언팔로우할 권한이 없습니다");
     const { from, to } = await this.usersService.unfollowUser(
       { nickname },
       { nickname: followNickname },
     );
     return new UnfollowUserResultDto(from, to);
+  }
+
+  @ApiOperation({
+    summary: "유저 팔로우 여부 조회",
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "팔로우를 하는지 확인할 유저 닉네임",
+  })
+  @ApiParam({
+    name: "followNickname",
+    description: "팔로우를 당하는지 확인할 유저 닉네임",
+  })
+  @ApiNotFoundResponse({
+    description: "팔로우하지 않고 있거나 잘못된 닉네임",
+  })
+  @ApiNoContentResponse({
+    description: "팔로우 중",
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Head(":nickname/followings/:followNickname")
+  checkFollowing(
+    @Param("nickname") nickname: string,
+    @Param("followNickname") followNickname: string,
+  ) {
+    return this.queryBus.execute(
+      new CheckFollowingQuery(nickname, followNickname),
+    );
   }
 
   @ApiOperation({
@@ -231,6 +277,7 @@ export class UsersController {
     description: "팔로잉하는 유저들 정보 조회 완료",
     type: FollowingUsersInfoDto,
   })
+  @HttpCode(HttpStatus.OK)
   @Get(":nickname/followings")
   getFollowings(@Param("nickname") nickname: string) {
     return this.queryBus.execute(
@@ -252,6 +299,7 @@ export class UsersController {
     description: "팔로우하는 유저들 정보 조회 완료",
     type: FollowerUsersInfoDto,
   })
+  @HttpCode(HttpStatus.OK)
   @Get(":nickname/followers")
   getFollowers(@Param("nickname") nickname: string) {
     return this.queryBus.execute(

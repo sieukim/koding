@@ -28,11 +28,9 @@ export class SignupGithubHandler
         name,
       },
     } = command;
-    this.logger.log("1");
     let user = await this.userRepository.findOne({
       githubUserIdentifier: { eq: githubUserIdentifier },
     });
-    this.logger.log("2");
     if (user) return user;
 
     const rawRepositories: any[] = (await axios.get(reposUrl)).data;
@@ -54,7 +52,7 @@ export class SignupGithubHandler
     this.logger.log(user);
     if (user) {
       user.linkAccountWithGithub(githubUserIdentifier, githubUserInfo);
-      user = await this.userRepository.update(user);
+      user = await this.userRepository.updateByEmail(user);
     } else {
       user = new User({
         email,

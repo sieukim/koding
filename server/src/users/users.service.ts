@@ -54,7 +54,6 @@ export class UsersService {
     });
     console.log(signupGithubRequest);
     await validateOrReject(signupGithubRequest);
-    console.log("validate fin");
     return await this.commandBus.execute(
       new SignupGithubCommand(signupGithubRequest),
     );

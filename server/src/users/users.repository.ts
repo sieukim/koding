@@ -18,30 +18,88 @@ export class UsersRepository extends MongooseBaseRepository<
   }
 
   async persist(user: User): Promise<User> {
-    const userDocument = UserDocument.fromModel(user, this.userModel);
-    const { _id, nickname, ...rest } = userDocument.toJSON();
-    await this.userModel.updateOne({ nickname }, rest, { upsert: true });
-    return user;
+    return this.updateByField(user, "nickname", true);
   }
 
   async persistByEmail(user: User): Promise<User> {
-    const userDocument = UserDocument.fromModel(user, this.userModel);
-    const { _id, email, ...rest } = userDocument.toJSON();
-    await this.userModel.updateOne({ email }, rest, { upsert: true });
-    return user;
+    return this.updateByField(user, "email", true);
   }
 
   async update(user: User): Promise<User> {
-    const userDocument = UserDocument.fromModel(user, this.userModel);
-    const { _id, email, ...rest } = userDocument.toJSON();
-    await this.userModel.updateOne({ email }, rest).exec();
-    return user;
+    return this.updateByField(user, "nickname", false);
   }
 
   async updateByEmail(user: User): Promise<User> {
+    return this.updateByField(user, "email", false);
+  }
+
+  private async updateByField(
+    user: User,
+    fieldName: keyof UserDocument,
+    upsert: boolean,
+  ): Promise<User> {
     const userDocument = UserDocument.fromModel(user, this.userModel);
-    const { _id, email, ...rest } = userDocument.toJSON();
-    await this.userModel.updateOne({ email }, rest).exec();
+    const {
+      _id,
+      nickname,
+      email,
+      isEmailUser,
+      isGithubUser,
+      githubUserInfo,
+      githubUserIdentifier,
+      githubUrl,
+      followerNicknames,
+      followingNicknames,
+      createdAt,
+      passwordResetToken,
+      githubSignupVerified,
+      githubSignupVerifyToken,
+      password,
+      portfolioUrl,
+      blogUrl,
+      emailSignupVerified,
+      emailSignupVerifyToken,
+    } = userDocument.toJSON();
+    const set = {
+      nickname,
+      email,
+      isEmailUser,
+      isGithubUser,
+      githubUserInfo,
+      githubUserIdentifier,
+      githubUrl,
+      followerNicknames,
+      followingNicknames,
+      createdAt,
+      passwordResetToken,
+      githubSignupVerified,
+      githubSignupVerifyToken,
+      password,
+      portfolioUrl,
+      blogUrl,
+      emailSignupVerified,
+      emailSignupVerifyToken,
+    };
+    const unset = {};
+    if (set[fieldName]) delete set[fieldName];
+    if (upsert === false)
+      for (const key in set) {
+        if (set[key] === undefined) {
+          delete set[key];
+          unset[key] = "";
+        }
+      }
+
+    await this.userModel
+      .updateOne(
+        { [fieldName]: userDocument[fieldName] },
+        {
+          $set: set,
+          $unset: unset,
+        },
+        { upsert },
+      )
+      .exec();
     return user;
   }
 

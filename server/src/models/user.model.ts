@@ -179,11 +179,19 @@ export class User extends AggregateRoot {
   @IsString()
   emailSignupVerifyToken?: string;
 
+  @ApiProperty({
+    description: "이메일 사용자인 경우, 이메일 인증 여부",
+    type: Boolean,
+  })
   emailSignupVerified: boolean;
 
   @IsString()
   githubSignupVerifyToken?: string;
 
+  @ApiProperty({
+    description: "깃허브 사용자인 경우, 닉네임 설정 여부",
+    type: Boolean,
+  })
   githubSignupVerified: boolean;
 
   @IsString()

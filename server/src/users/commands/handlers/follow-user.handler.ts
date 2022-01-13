@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { FollowUserCommand } from "../follow-user.command";
 import { UsersRepository } from "../../users.repository";
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import { User } from "../../../models/user.model";
 
 @CommandHandler(FollowUserCommand)
@@ -10,6 +10,8 @@ export class FollowUserHandler implements ICommandHandler<FollowUserCommand> {
 
   async execute(command: FollowUserCommand): Promise<{ from: User; to: User }> {
     const { fromNickname, toNickname } = command;
+    if (fromNickname === toNickname)
+      throw new BadRequestException("자신은 팔로우할 수 없습니다");
     const users = await this.userRepository.findAll({
       nickname: { in: [fromNickname, toNickname] },
     });
