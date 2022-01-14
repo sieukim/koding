@@ -66,10 +66,12 @@ const StyledProfile = styled.div`
 const ProfilePresenter = ({
   loginUser,
   profileUserNickname,
+  getUserState,
   followState,
   follow,
   unfollowState,
   unfollow,
+  isFollowingState,
   followers,
   followings,
 }) => {
@@ -77,7 +79,7 @@ const ProfilePresenter = ({
   // 팔로우
   const onClickFollow = useCallback(
     (e) => {
-      e.preventDefault();
+      // e.preventDefault();
       follow(loginUser.nickname, profileUserNickname);
     },
     [follow, loginUser, profileUserNickname],
@@ -86,7 +88,7 @@ const ProfilePresenter = ({
   // 언팔로우
   const onClickUnfollow = useCallback(
     (e) => {
-      e.preventDefault();
+      // e.preventDefault();
       unfollow(loginUser.nickname, profileUserNickname);
     },
     [unfollow, loginUser, profileUserNickname],
@@ -103,9 +105,16 @@ const ProfilePresenter = ({
               {loginUser && loginUser.nickname === profileUserNickname && (
                 <button>프로필 편집</button>
               )}
-              {loginUser && loginUser.nickname !== profileUserNickname && (
-                <button onClick={onClickFollow}>팔로우</button>
-              )}
+              {loginUser &&
+                loginUser.nickname !== profileUserNickname &&
+                isFollowingState.error && (
+                  <button onClick={onClickFollow}>팔로우</button>
+                )}
+              {loginUser &&
+                loginUser.nickname !== profileUserNickname &&
+                isFollowingState.success && (
+                  <button onClick={onClickUnfollow}>언팔로우</button>
+                )}
               <PrintState state={followState} />
               <PrintState state={unfollowState} />
             </div>
@@ -132,15 +141,19 @@ const ProfilePresenter = ({
           </div>
           <div className="profile-info-row">
             <div>이메일</div>
-            <div>s2lver@naver.com</div>
+            <div>{getUserState.success?.data?.email}</div>
           </div>
           <div className="profile-info-row">
             <div>깃허브</div>
-            <a href="https://github.com/sieukim">https://github.com/sieukim</a>
+            <a href={getUserState.success?.data?.githubUrl}>
+              {getUserState.success?.data?.githubUrl}
+            </a>
           </div>
           <div className="profile-info-row">
             <div>포트폴리오</div>
-            <a>포트폴리오 주소</a>
+            <a href={getUserState.success?.data?.portfolioUrl}>
+              {getUserState.success?.data?.portfolioUrl}
+            </a>
           </div>
         </div>
       </div>

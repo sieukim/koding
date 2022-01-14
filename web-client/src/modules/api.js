@@ -122,3 +122,13 @@ export const getFollowing = (profileUserNickname) => {
 export const getFollower = (profileUserNickname) => {
   return axios.get(`/api/users/${profileUserNickname}/followers`);
 };
+
+// 유저 팔로우 여부 조회 api 호출
+export const isFollowing = (nickname, followingNickname) => {
+  return axios.head(`/api/users/${nickname}/followings/${followingNickname}`);
+};
+
+// 유저 정보 조회 api 호출
+export const getUser = (nickname) => {
+  return axios.get(`/api/users/${nickname}`);
+};
