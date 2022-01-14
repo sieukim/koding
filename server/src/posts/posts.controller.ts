@@ -34,11 +34,12 @@ import {
   ApiParamBoardType,
   ApiParamPostId,
 } from "../common/decorator/swagger/api-param.decorator";
-import { PostBoardType } from "../schemas/post.schema";
+
 import { CursorPostsDto } from "./dto/cursor-posts.dto";
 import { ReadPostWithAroundDto } from "./dto/read-post-with-around.dto";
 import { ReadPostFilter } from "./dto/read-post.filter";
 import { User } from "../models/user.model";
+import { PostBoardType } from "../models/post.model";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({

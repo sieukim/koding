@@ -1,6 +1,6 @@
-import { PostBoardType } from "../../schemas/post.schema";
 import { WritePostRequestDto } from "../dto/write-post-request.dto";
 import { ICommand } from "@nestjs/cqrs";
+import { PostBoardType } from "../../models/post.model";
 
 export class WritePostCommand implements ICommand {
   constructor(

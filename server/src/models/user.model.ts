@@ -5,8 +5,8 @@ import { compare, hash } from "bcrypt";
 import { v1 } from "uuid";
 import { randomInt } from "crypto";
 import { BadRequestException } from "@nestjs/common";
-import { SendVerificationEmailEvent } from "../users/events/send-verification-email.event";
-import { SendPasswordResetEmailEvent } from "../users/events/send-password-reset-email.event";
+import { EmailUserSignedUpEvent } from "../users/events/email-user-signed-up.event";
+import { ResetPasswordRequestedEvent } from "../users/events/reset-password-requested.event";
 import { GithubUserInfo } from "../schemas/user.schema";
 import {
   IsDate,
@@ -206,33 +206,6 @@ export class User extends AggregateRoot {
   followings: (PartialUser | User)[];
   followers: (PartialUser | User)[];
 
-  @ApiProperty({
-    description: "팔로우 하는 사용자 수",
-    type: Number,
-    minimum: 0,
-  })
-  get followingsCount() {
-    return this.followings.length;
-  }
-
-  @ApiProperty({
-    description: "팔로워 수",
-    type: Number,
-    minimum: 0,
-  })
-  get followersCount() {
-    return this.followers.length;
-  }
-
-  @ApiProperty({ description: "회원가입 인증 여부", type: Boolean })
-  get isVerifiedUser(): boolean {
-    // 이메일 유저 & 이메일 인증 완료
-    if (this.isEmailUser && this.emailSignupVerified) return true;
-    // 깃허브 유저 & 깃허브 인증 완료
-    if (this.isGithubUser && this.githubSignupVerified) return true;
-    return false;
-  }
-
   constructor(param: {
     email: string;
     nickname: string;
@@ -312,6 +285,33 @@ export class User extends AggregateRoot {
     this.followers = param.followers ?? [];
   }
 
+  @ApiProperty({
+    description: "팔로우 하는 사용자 수",
+    type: Number,
+    minimum: 0,
+  })
+  get followingsCount() {
+    return this.followings.length;
+  }
+
+  @ApiProperty({
+    description: "팔로워 수",
+    type: Number,
+    minimum: 0,
+  })
+  get followersCount() {
+    return this.followers.length;
+  }
+
+  @ApiProperty({ description: "회원가입 인증 여부", type: Boolean })
+  get isVerifiedUser(): boolean {
+    // 이메일 유저 & 이메일 인증 완료
+    if (this.isEmailUser && this.emailSignupVerified) return true;
+    // 깃허브 유저 & 깃허브 인증 완료
+    if (this.isGithubUser && this.githubSignupVerified) return true;
+    return false;
+  }
+
   async hashPassword() {
     if (this.password) this.password = await hash(this.password, User.round);
     return this;
@@ -362,7 +362,7 @@ export class User extends AggregateRoot {
   sendVerificationEmail() {
     this.setNewEmailSignupVerifyToken();
     this.apply(
-      new SendVerificationEmailEvent(
+      new EmailUserSignedUpEvent(
         this.email,
         this.nickname,
         this.emailSignupVerifyToken,
@@ -373,7 +373,7 @@ export class User extends AggregateRoot {
   sendPasswordResetEmail() {
     this.setNewPasswordResetToken();
     this.apply(
-      new SendPasswordResetEmailEvent(
+      new ResetPasswordRequestedEvent(
         this.email,
         this.nickname,
         this.passwordResetToken,

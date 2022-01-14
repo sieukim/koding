@@ -33,6 +33,52 @@ export class UsersRepository extends MongooseBaseRepository<
     return this.updateByField(user, "email", false);
   }
 
+  async findByNickname(nickname: string, populate?: (keyof User)[]) {
+    return this.findOneWith({ nickname: { eq: nickname } }, populate);
+  }
+
+  async findByEmail(email: string, populate?: (keyof User)[]) {
+    return this.findOneWith({ email: { eq: email } }, populate);
+  }
+
+  async followUser(from: User, to: User) {
+    const fromUserDocument = await this.userModel
+      .findOneAndUpdate(
+        { nickname: from.nickname },
+        { $addToSet: { followingNicknames: to.nickname } },
+      )
+      .exec();
+    const toUserDocument = await this.userModel
+      .findOneAndUpdate(
+        { nickname: to.nickname },
+        { $addToSet: { followerNicknames: from.nickname } },
+      )
+      .exec();
+    return {
+      from: UserDocument.toModel(fromUserDocument),
+      to: UserDocument.toModel(toUserDocument),
+    };
+  }
+
+  async unfollowUser(from: User, to: User) {
+    const fromUserDocument = await this.userModel
+      .findOneAndUpdate(
+        { nickname: from.nickname },
+        { $pull: { followingNicknames: to.nickname } },
+      )
+      .exec();
+    const toUserDocument = await this.userModel
+      .findOneAndUpdate(
+        { nickname: to.nickname },
+        { $pull: { followerNicknames: from.nickname } },
+      )
+      .exec();
+    return {
+      from: UserDocument.toModel(fromUserDocument),
+      to: UserDocument.toModel(toUserDocument),
+    };
+  }
+
   private async updateByField(
     user: User,
     fieldName: keyof UserDocument,
@@ -101,51 +147,5 @@ export class UsersRepository extends MongooseBaseRepository<
       )
       .exec();
     return user;
-  }
-
-  async findByNickname(nickname: string, populate?: (keyof User)[]) {
-    return this.findOneWith({ nickname: { eq: nickname } }, populate);
-  }
-
-  async findByEmail(email: string, populate?: (keyof User)[]) {
-    return this.findOneWith({ email: { eq: email } }, populate);
-  }
-
-  async followUser(from: User, to: User) {
-    const fromUserDocument = await this.userModel
-      .findOneAndUpdate(
-        { nickname: from.nickname },
-        { $addToSet: { followingNicknames: to.nickname } },
-      )
-      .exec();
-    const toUserDocument = await this.userModel
-      .findOneAndUpdate(
-        { nickname: to.nickname },
-        { $addToSet: { followerNicknames: from.nickname } },
-      )
-      .exec();
-    return {
-      from: UserDocument.toModel(fromUserDocument),
-      to: UserDocument.toModel(toUserDocument),
-    };
-  }
-
-  async unfollowUser(from: User, to: User) {
-    const fromUserDocument = await this.userModel
-      .findOneAndUpdate(
-        { nickname: from.nickname },
-        { $pull: { followingNicknames: to.nickname } },
-      )
-      .exec();
-    const toUserDocument = await this.userModel
-      .findOneAndUpdate(
-        { nickname: to.nickname },
-        { $pull: { followerNicknames: from.nickname } },
-      )
-      .exec();
-    return {
-      from: UserDocument.toModel(fromUserDocument),
-      to: UserDocument.toModel(toUserDocument),
-    };
   }
 }

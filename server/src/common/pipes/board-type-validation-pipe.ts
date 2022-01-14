@@ -4,7 +4,7 @@ import {
   PipeTransform,
 } from "@nestjs/common";
 import { isIn } from "class-validator";
-import { postBoardTypes } from "src/schemas/post.schema";
+import { postBoardTypes } from "../../models/post.model";
 
 export class BoardTypeValidationPipe implements PipeTransform<string, string> {
   transform(value: string, metadata: ArgumentMetadata): string {

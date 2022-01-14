@@ -1,11 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { ICommand, ofType, Saga } from "@nestjs/cqrs";
 import { map, Observable } from "rxjs";
-import { SendVerificationEmailEvent } from "../events/send-verification-email.event";
+import { EmailUserSignedUpEvent } from "../events/email-user-signed-up.event";
 import { SendEmailCommand } from "../../email/commands/send-email.command";
 import { ConfigService } from "@nestjs/config";
 import { URLSearchParams } from "url";
-import { SendPasswordResetEmailEvent } from "../events/send-password-reset-email.event";
+import { ResetPasswordRequestedEvent } from "../events/reset-password-requested.event";
 
 @Injectable()
 export class EmailSagas {
@@ -19,7 +19,7 @@ export class EmailSagas {
   @Saga()
   sendVerificationEmail = (events$: Observable<any>): Observable<ICommand> =>
     events$.pipe(
-      ofType(SendVerificationEmailEvent),
+      ofType(EmailUserSignedUpEvent),
       map(({ verifyToken, email, nickname }) => {
         const verificationUrl = `${
           this.baseUrl
@@ -40,7 +40,7 @@ export class EmailSagas {
   @Saga()
   sendPasswordResetEmail = (events$: Observable<any>): Observable<ICommand> =>
     events$.pipe(
-      ofType(SendPasswordResetEmailEvent),
+      ofType(ResetPasswordRequestedEvent),
       map(
         ({ verifyToken, email, nickname }) =>
           new SendEmailCommand(

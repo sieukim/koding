@@ -9,6 +9,8 @@ import { EmailModule } from "./email/email.module";
 import { UploadModule } from "./upload/upload.module";
 import { PostsModule } from "./posts/posts.module";
 import { CommentsModule } from "./comments/comments.module";
+import { ScheduleModule } from "@nestjs/schedule";
+import { TagsModule } from "./tags/tags.module";
 
 @Module({
   imports: [
@@ -30,12 +32,14 @@ import { CommentsModule } from "./comments/comments.module";
         uri: configService.get<string>("database.mongodb.uri"),
       }),
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UsersModule,
     EmailModule,
     UploadModule,
     PostsModule,
     CommentsModule,
+    TagsModule,
   ],
   controllers: [],
   providers: [],

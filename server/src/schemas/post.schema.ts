@@ -4,18 +4,8 @@ import { UserDocument } from "./user.schema";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsIn, IsString } from "class-validator";
 import { currentTime } from "../common/utils/current-time.util";
-import { Post } from "../models/post.model";
+import { Post, PostBoardType, postBoardTypes } from "../models/post.model";
 import { PartialUser } from "../models/user.model";
-
-export const postBoardTypes = [
-  "common",
-  "question",
-  "career",
-  "recruit",
-  "study-group",
-  "column",
-] as const;
-export type PostBoardType = typeof postBoardTypes[number];
 
 @Schema({
   id: false,

@@ -1,6 +1,6 @@
 import { IEvent } from "@nestjs/cqrs";
 
-export class SendVerificationEmailEvent implements IEvent {
+export class EmailUserSignedUpEvent implements IEvent {
   constructor(
     public readonly email: string,
     public readonly nickname: string,

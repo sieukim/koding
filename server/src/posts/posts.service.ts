@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PostBoardType } from "../schemas/post.schema";
+
 import { ModifyPostRequestDto } from "./dto/modify-post-request.dto";
 import { WritePostRequestDto } from "./dto/write-post-request.dto";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
@@ -13,7 +13,7 @@ import { GetPostListHandler } from "./query/handlers/get-post-list.handler";
 import { ReadPostHandler } from "./query/handlers/read-post.handler";
 import { ModifyPostHandler } from "./commands/handlers/modify-post.handler";
 import { DeletePostHandler } from "./commands/handlers/delete-post.handler";
-import { PostIdentifier } from "../models/post.model";
+import { PostBoardType, PostIdentifier } from "../models/post.model";
 import { User } from "../models/user.model";
 
 @Injectable()

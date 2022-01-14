@@ -107,11 +107,13 @@ CommentSchema.virtual("post", {
   ref: PostDocument.name,
   localField: "postId",
   foreignField: "_id",
+  justOne: true,
 });
 CommentSchema.virtual("writer", {
   ref: UserDocument.name,
   localField: "writerNickname",
   foreignField: "nickname",
+  justOne: true,
 });
 CommentSchema.virtual("mentionedUsers", {
   ref: UserDocument.name,

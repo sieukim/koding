@@ -29,7 +29,6 @@ import { AddCommentRequestDto } from "./dto/add-comment-request.dto";
 import { CommentInfoDto } from "./dto/comment-info.dto";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { BoardTypeValidationPipe } from "../common/pipes/board-type-validation-pipe";
-import { PostBoardType } from "../schemas/post.schema";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../models/user.model";
 import { ModifyCommentRequestDto } from "./dto/modify-comment-request.dto";
@@ -38,6 +37,7 @@ import { ReadCommentDto } from "./dto/read-comment.dto";
 import { QueryBus } from "@nestjs/cqrs";
 import { ReadCommentQuery } from "./queries/read-comment.query";
 import { ReadCommentHandler } from "./queries/handler/read-comment.handler";
+import { PostBoardType } from "../models/post.model";
 
 @ApiTags("POST/COMMENT")
 @ApiBadRequestResponse({
