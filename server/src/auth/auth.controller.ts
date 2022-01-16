@@ -39,7 +39,7 @@ import { PasswordResetRequestDto } from "./dto/password-reset.request.dto";
 import { PasswordResetTokenVerifyRequestDto } from "./dto/password-reset-token-verify-request.dto";
 import { User } from "../models/user.model";
 import { QueryBus } from "@nestjs/cqrs";
-import { GetUserInfoQuery } from "src/users/queries/get-user-info.query";
+import { GetMyUserInfoQuery } from "../users/queries/get-my-user-info.query";
 
 @ApiTags("AUTH")
 @Controller("api/auth")
@@ -146,7 +146,7 @@ export class AuthController {
   @UseGuards(LoggedInGuard)
   @Get()
   getCurrentUser(@LoginUser() user: User) {
-    return this.queryBus.execute(new GetUserInfoQuery(user.nickname));
+    return this.queryBus.execute(new GetMyUserInfoQuery(user.nickname));
   }
 
   @ApiOperation({

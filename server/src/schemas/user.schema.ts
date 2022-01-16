@@ -94,11 +94,20 @@ export class UserDocument extends Document {
   @Prop()
   password?: string;
 
+  @Prop({ type: Boolean, default: false })
+  isBlogUrlPublic: boolean;
+
   @Prop({ required: false })
   blogUrl?: string;
 
+  @Prop({ type: Boolean, default: false })
+  isGithubUrlPublic: boolean;
+
   @Prop({ required: false })
   githubUrl?: string;
+
+  @Prop({ type: Boolean, default: false })
+  isPortfolioUrlPublic: boolean;
 
   @Prop({ required: false })
   portfolioUrl?: string;
@@ -181,6 +190,9 @@ export class UserDocument extends Document {
       githubSignupVerified,
       portfolioUrl,
       createdAt,
+      isBlogUrlPublic,
+      isGithubUrlPublic,
+      isPortfolioUrlPublic,
     } = userDocument;
     return new User({
       password,
@@ -199,6 +211,9 @@ export class UserDocument extends Document {
       githubSignupVerified,
       portfolioUrl,
       createdAt,
+      isBlogUrlPublic,
+      isGithubUrlPublic,
+      isPortfolioUrlPublic,
       followings: followings
         ? followings.map(UserDocument.toModel)
         : followingNicknames.map((nickname) => new PartialUser({ nickname })),
@@ -228,6 +243,9 @@ export class UserDocument extends Document {
       portfolioUrl,
       password,
       passwordResetToken,
+      isBlogUrlPublic,
+      isGithubUrlPublic,
+      isPortfolioUrlPublic,
     } = user;
     return new model({
       emailSignupVerifyToken,
@@ -246,6 +264,9 @@ export class UserDocument extends Document {
       portfolioUrl,
       password,
       passwordResetToken,
+      isBlogUrlPublic,
+      isGithubUrlPublic,
+      isPortfolioUrlPublic,
       followingNicknames: followings.map(({ nickname }) => nickname),
       followerNicknames: followers.map(({ nickname }) => nickname),
     });

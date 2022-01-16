@@ -5,6 +5,9 @@ const keys = [
   "email",
   "nickname",
   "emailSignupVerified",
+  "isPortfolioUrlPublic",
+  "isGithubUrlPublic",
+  "isBlogUrlPublic",
   "portfolioUrl",
   "githubUrl",
   "blogUrl",
@@ -20,9 +23,12 @@ export class UserInfoDto extends PickType(User, keys) {
 
   constructor(user: User) {
     super();
-    console.log(user);
     for (const key of keys) {
       if (user[key] !== undefined) this[key as keyof User] = user[key];
     }
+    // TODO: 유저 정보 조회 도메인 모델 따로 만들기
+    if (!user.isBlogUrlPublic) delete this.blogUrl;
+    if (!user.isGithubUrlPublic) delete this.githubUrl;
+    if (!user.isPortfolioUrlPublic) delete this.portfolioUrl;
   }
 }

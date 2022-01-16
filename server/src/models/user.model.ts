@@ -4,20 +4,12 @@ import { currentTime } from "../common/utils/current-time.util";
 import { compare, hash } from "bcrypt";
 import { v1 } from "uuid";
 import { randomInt } from "crypto";
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { EmailUserSignedUpEvent } from "../users/events/email-user-signed-up.event";
 import { ResetPasswordRequestedEvent } from "../users/events/reset-password-requested.event";
 import { GithubUserInfo } from "../schemas/user.schema";
-import {
-  IsDate,
-  IsEmail,
-  IsNumber,
-  IsOptional,
-  IsString,
-  IsUrl,
-  Length,
-  Matches,
-} from "class-validator";
+import { IsBoolean, IsDate, IsEmail, IsNumber, IsOptional, IsString, IsUrl, Length, Matches } from "class-validator";
+import { ChangeProfileRequestDto } from "../users/dto/change-profile-request.dto";
 
 // export class GithubRepositoryInfo {
 //   @ApiProperty({
@@ -122,29 +114,53 @@ export class User extends AggregateRoot {
   })
   password?: string;
 
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: "유저 블로그 주소 공개여부",
+    type: Boolean,
+    default: false,
+  })
+  isBlogUrlPublic: boolean;
+
   @IsOptional()
   @IsUrl()
   @ApiPropertyOptional({
     example: "https://blog.naver.com/test",
-    description: "유저 블로그 주소",
+    description: "유저 블로그 주소. 공개 여부에 따라 값이 없을 수 있음",
     type: String,
   })
   blogUrl?: string;
+
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: "유저 깃허브 주소 공개여부",
+    type: Boolean,
+    default: false,
+  })
+  isGithubUrlPublic: boolean;
 
   @IsOptional()
   @IsUrl()
   @ApiPropertyOptional({
     example: "https://test.github.com",
-    description: "유저 깃허브 주소",
+    description: "유저 깃허브 주소. 공개 여부에 따라 값이 없을 수 있음",
     type: String,
   })
   githubUrl?: string;
+
+  @IsBoolean()
+  @ApiPropertyOptional({
+    description: "유저 포트폴리오 주소 공개여부",
+    type: Boolean,
+    default: false,
+  })
+  isPortfolioUrlPublic: boolean;
 
   @IsOptional()
   @IsUrl()
   @ApiPropertyOptional({
     example: "https://linktr.ee/test",
-    description: "유저 포트폴리오 주소",
+    description: "유저 포트폴리오 주소. 공개 여부에 따라 값이 없을 수 있음",
     type: String,
   })
   portfolioUrl?: string;
@@ -227,8 +243,11 @@ export class User extends AggregateRoot {
     email: string;
     nickname: string;
     password?: string;
+    isBlogUrlPublic: boolean;
     blogUrl?: string;
+    isGithubUrlPublic: boolean;
     githubUrl?: string;
+    isPortfolioUrlPublic: boolean;
     portfolioUrl?: string;
     isGithubUser: boolean;
     isEmailUser: boolean;
@@ -248,8 +267,11 @@ export class User extends AggregateRoot {
     email: string;
     nickname: string;
     password?: string;
+    isBlogUrlPublic?: boolean;
     blogUrl?: string;
+    isGithubUrlPublic?: boolean;
     githubUrl?: string;
+    isPortfolioUrlPublic?: boolean;
     portfolioUrl?: string;
     isGithubUser: boolean;
     isEmailUser: boolean;
@@ -268,8 +290,11 @@ export class User extends AggregateRoot {
     this.email = param.email;
     this.nickname = param.nickname;
     this.password = param.password;
+    this.isBlogUrlPublic = param.isBlogUrlPublic ?? false;
     this.blogUrl = param.blogUrl;
+    this.isGithubUrlPublic = param.isGithubUrlPublic ?? false;
     this.githubUrl = param.githubUrl;
+    this.isPortfolioUrlPublic = param.isPortfolioUrlPublic ?? false;
     this.portfolioUrl = param.portfolioUrl;
     this.isGithubUser = param.isGithubUser;
     this.isEmailUser = param.isEmailUser;
@@ -319,6 +344,32 @@ export class User extends AggregateRoot {
 
   async comparePassword(password: string) {
     return compare(password, this.password);
+  }
+
+  async changeProfile(requestUser: User, request: ChangeProfileRequestDto) {
+    this.verifySameUser(requestUser);
+    if (!(await this.comparePassword(request.currentPassword)))
+      throw new BadRequestException("잘못된 확인 비밀번호");
+    const {
+      githubUrl,
+      isGithubUrlPublic,
+      isBlogUrlPublic,
+      blogUrl,
+      isPortfolioUrlPublic,
+      portfolioUrl,
+    } = request;
+    this.githubUrl = githubUrl ?? this.githubUrl;
+    this.blogUrl = blogUrl ?? this.blogUrl;
+    this.portfolioUrl = portfolioUrl ?? this.portfolioUrl;
+    this.isGithubUrlPublic = isGithubUrlPublic ?? this.isGithubUrlPublic;
+    this.isBlogUrlPublic = isBlogUrlPublic ?? this.isBlogUrlPublic;
+    this.isPortfolioUrlPublic =
+      isPortfolioUrlPublic ?? this.isPortfolioUrlPublic;
+  }
+
+  private verifySameUser(user: User) {
+    if (this.nickname !== user.nickname)
+      throw new ForbiddenException("사용자에 대한 권한이 없습니다");
   }
 
   setNewGithubSignupVerifyToken() {
@@ -413,6 +464,16 @@ export class User extends AggregateRoot {
 
   private setNewEmailSignupVerifyToken() {
     this.emailSignupVerifyToken = v1();
+  }
+
+  async changePassword(
+    requestUser: User,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    this.verifySameUser(requestUser);
+    if (!(await this.comparePassword(currentPassword)))
+      throw new BadRequestException("잘못된 확인 비밀번호");
   }
 }
 

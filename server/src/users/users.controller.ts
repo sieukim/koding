@@ -11,6 +11,7 @@ import {
   HttpStatus,
   Logger,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -18,6 +19,7 @@ import {
 import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
 import { UsersService } from "./users.service";
 import {
+  ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -35,7 +37,7 @@ import { UserInfoDto } from "./dto/user-info.dto";
 import { FollowUserDto } from "./dto/follow-user.dto";
 import { FollowUserResultDto } from "./dto/follow-user-result.dto";
 import { UnfollowUserResultDto } from "./dto/unfollow-user-result.dto";
-import { QueryBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { GetFollowingUsersQuery } from "./queries/get-following-users.query";
 import { GetFollowingUsersHandler } from "./queries/handlers/get-following-users.handler";
 import { FollowingUsersInfoDto } from "./dto/following-users-info.dto";
@@ -48,6 +50,14 @@ import { CheckFollowingQuery } from "./queries/check-following.query";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../models/user.model";
+import { MyUserInfoDto } from "./dto/my-user-info.dto";
+import { ChangeProfileRequestDto } from "./dto/change-profile-request.dto";
+import { ChangeProfileCommand } from "./commands/change-profile.command";
+import { LoggedInGuard } from "../auth/guard/authorization/logged-in.guard";
+import { ChangeProfileHandler } from "./commands/handlers/change-profile.handler";
+import { ChangePasswordRequestDto } from "./dto/change-password-request.dto";
+import { ChangePasswordCommand } from "./commands/change-password.command";
+import { ChangePasswordHandler } from "./commands/handlers/change-password.handler";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -62,6 +72,7 @@ export class UsersController {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
 
@@ -95,10 +106,81 @@ export class UsersController {
   })
   @HttpCode(HttpStatus.OK)
   @Get(":nickname")
-  getUserDetail(@Param("nickname") nickname: string) {
+  getUserInfo(@Param("nickname") nickname: string) {
     return this.queryBus.execute(new GetUserInfoQuery(nickname)) as ReturnType<
       GetUserInfoHandler["execute"]
     >;
+  }
+
+  @ApiOperation({
+    summary: "유저 프로필 정보 변경",
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "유저 닉네임",
+  })
+  @ApiBody({
+    type: ChangeProfileRequestDto,
+  })
+  @ApiNotFoundResponse({
+    description: "없는 유저",
+  })
+  @ApiBadRequestResponse({
+    description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
+  })
+  @ApiOkResponse({
+    description: "유저 프로필 정보 변경 성공",
+    type: MyUserInfoDto,
+  })
+  @UseGuards(LoggedInGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(":nickname")
+  changeProfile(
+    @Param("nickname") nickname: string,
+    @Body() body: ChangeProfileRequestDto,
+    @LoginUser() loginUser: User,
+  ) {
+    return this.commandBus.execute(
+      new ChangeProfileCommand(loginUser.nickname, nickname, body),
+    ) as ReturnType<ChangeProfileHandler["execute"]>;
+  }
+
+  @ApiOperation({
+    summary: "유저 비밀번호 변경",
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "유저 닉네임",
+  })
+  @ApiBody({
+    type: ChangeProfileRequestDto,
+  })
+  @ApiNotFoundResponse({
+    description: "없는 유저",
+  })
+  @ApiBadRequestResponse({
+    description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
+  })
+  @ApiNoContentResponse({
+    description: "유저 비밀번호 변경 성공",
+  })
+  @UseGuards(LoggedInGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch(":nickname/password")
+  changePassword(
+    @Param("nickname") nickname: string,
+    @Body() body: ChangePasswordRequestDto,
+    @LoginUser() loginUser: User,
+  ) {
+    const { currentPassword, newPassword } = body;
+    return this.commandBus.execute(
+      new ChangePasswordCommand(
+        loginUser.nickname,
+        nickname,
+        currentPassword,
+        newPassword,
+      ),
+    ) as ReturnType<ChangePasswordHandler["execute"]>;
   }
 
   @ApiQuery({
