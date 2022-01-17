@@ -346,7 +346,7 @@ export class User extends AggregateRoot {
     return compare(password, this.password);
   }
 
-  async changeProfile(requestUser: User, request: ChangeProfileRequestDto) {
+  changeProfile(requestUser: User, request: ChangeProfileRequestDto) {
     this.verifySameUser(requestUser);
     const {
       githubUrl,

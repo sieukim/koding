@@ -105,6 +105,9 @@ export class UsersRepository extends MongooseBaseRepository<
       blogUrl,
       emailSignupVerified,
       emailSignupVerifyToken,
+      isGithubUrlPublic,
+      isPortfolioUrlPublic,
+      isBlogUrlPublic,
     } = userDocument.toJSON();
     const set = {
       nickname,
@@ -125,6 +128,9 @@ export class UsersRepository extends MongooseBaseRepository<
       blogUrl,
       emailSignupVerified,
       emailSignupVerifyToken,
+      isGithubUrlPublic,
+      isPortfolioUrlPublic,
+      isBlogUrlPublic,
     };
     const unset = {};
     if (set[fieldName]) delete set[fieldName];

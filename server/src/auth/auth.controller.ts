@@ -40,6 +40,7 @@ import { PasswordResetTokenVerifyRequestDto } from "./dto/password-reset-token-v
 import { User } from "../models/user.model";
 import { QueryBus } from "@nestjs/cqrs";
 import { GetMyUserInfoQuery } from "../users/queries/get-my-user-info.query";
+import { MyUserInfoDto } from "../users/dto/my-user-info.dto";
 
 @ApiTags("AUTH")
 @Controller("api/auth")
@@ -57,7 +58,7 @@ export class AuthController {
   @ApiBody({ type: LoginLocalRequest })
   @ApiOkResponse({
     description: "로그인 & 회원가입 성공",
-    type: UserInfoDto,
+    type: MyUserInfoDto,
   })
   @ApiUnauthorizedResponse({
     description: "로그인 실패",
@@ -66,7 +67,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post()
   public localLogin(@LoginUser() user: User) {
-    return new UserInfoDto(user);
+    return new MyUserInfoDto(user);
   }
 
   @ApiOperation({
