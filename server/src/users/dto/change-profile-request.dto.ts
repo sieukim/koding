@@ -1,6 +1,6 @@
-import { ApiProperty, PartialType, PickType } from "@nestjs/swagger";
+import { PartialType, PickType } from "@nestjs/swagger";
 import { User } from "../../models/user.model";
-import { IsBoolean, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsOptional } from "class-validator";
 
 const keys = [
   "blogUrl",
@@ -25,11 +25,4 @@ export class ChangeProfileRequestDto extends PartialType<
   @IsOptional()
   @IsBoolean()
   isPortfolioUrlPublic?: boolean;
-
-  @IsString()
-  @ApiProperty({
-    description: "본인 확인용 현재 비밀번호",
-    type: String,
-  })
-  currentPassword: string;
 }

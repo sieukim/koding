@@ -348,8 +348,6 @@ export class User extends AggregateRoot {
 
   async changeProfile(requestUser: User, request: ChangeProfileRequestDto) {
     this.verifySameUser(requestUser);
-    if (!(await this.comparePassword(request.currentPassword)))
-      throw new BadRequestException("잘못된 확인 비밀번호");
     const {
       githubUrl,
       isGithubUrlPublic,
