@@ -153,7 +153,7 @@ export class UsersController {
     description: "유저 닉네임",
   })
   @ApiBody({
-    type: ChangeProfileRequestDto,
+    type: ChangePasswordRequestDto,
   })
   @ApiNotFoundResponse({
     description: "없는 유저",

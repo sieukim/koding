@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -17,6 +18,7 @@ import {
   ApiNoContentResponse,
   ApiOperation,
   ApiQuery,
+  ApiTags,
 } from "@nestjs/swagger";
 import { ApiParamBoardType } from "../common/decorator/swagger/api-param.decorator";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
@@ -26,6 +28,7 @@ import { AddCertifiedTagsRequestDto } from "./dto/add-certified-tags-request.dto
 import { AddCertifiedTagsCommand } from "./commands/add-certified-tags.command";
 import { RemoveCertifiedTagsCommand } from "./commands/remove-certified-tags.command";
 
+@ApiTags("CERTIFIED_TAG")
 @Controller("api/tags")
 export class TagsController {
   constructor(
@@ -95,7 +98,7 @@ export class TagsController {
     description: "인증된 태그 삭제 성공",
   })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Post(":boardType")
+  @Delete(":boardType")
   async removeCertifiedTags(
     @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
     @Query("tags") tags?: string[],
