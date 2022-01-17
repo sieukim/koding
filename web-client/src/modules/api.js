@@ -128,7 +128,17 @@ export const isFollowing = (nickname, followingNickname) => {
   return axios.head(`/api/users/${nickname}/followings/${followingNickname}`);
 };
 
+// 로그인 유저 정보 조회 api 호출
+export const getLoginUser = () => {
+  return axios.get(`/api/auth`);
+};
+
 // 유저 정보 조회 api 호출
 export const getUser = (nickname) => {
   return axios.get(`/api/users/${nickname}`);
+};
+
+// 유저 정보 변경 api 호출
+export const changeUserInfo = (nickname, userInfo) => {
+  return axios.patch(`/api/users/${nickname}`, userInfo);
 };

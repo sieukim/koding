@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useCallback } from 'react';
 import { FollowListLink, PrintState } from '../../../utils/MyComponents';
+import { useNavigate } from 'react-router-dom';
 
 const StyledProfile = styled.div`
   display: flex;
@@ -76,23 +77,22 @@ const ProfilePresenter = ({
   followings,
 }) => {
   /* 팔로우 */
+  // 프로필 편집
+  const navigate = useNavigate();
+
+  const onClickEditProfile = useCallback(() => {
+    navigate(`/user/${profileUserNickname}/profile/edit`);
+  });
+
   // 팔로우
-  const onClickFollow = useCallback(
-    (e) => {
-      // e.preventDefault();
-      follow(loginUser.nickname, profileUserNickname);
-    },
-    [follow, loginUser, profileUserNickname],
-  );
+  const onClickFollow = useCallback(() => {
+    follow(loginUser.nickname, profileUserNickname);
+  }, [follow, loginUser, profileUserNickname]);
 
   // 언팔로우
-  const onClickUnfollow = useCallback(
-    (e) => {
-      // e.preventDefault();
-      unfollow(loginUser.nickname, profileUserNickname);
-    },
-    [unfollow, loginUser, profileUserNickname],
-  );
+  const onClickUnfollow = useCallback(() => {
+    unfollow(loginUser.nickname, profileUserNickname);
+  }, [unfollow, loginUser, profileUserNickname]);
 
   return (
     <StyledProfile>
@@ -103,7 +103,7 @@ const ProfilePresenter = ({
             <div className="profile-nickname">{profileUserNickname}</div>
             <div className="profile-button">
               {loginUser && loginUser.nickname === profileUserNickname && (
-                <button>프로필 편집</button>
+                <button onClick={onClickEditProfile}>프로필 편집</button>
               )}
               {loginUser &&
                 loginUser.nickname !== profileUserNickname &&
@@ -143,18 +143,30 @@ const ProfilePresenter = ({
             <div>이메일</div>
             <div>{getUserState.success?.data?.email}</div>
           </div>
-          <div className="profile-info-row">
-            <div>깃허브</div>
-            <a href={getUserState.success?.data?.githubUrl}>
-              {getUserState.success?.data?.githubUrl}
-            </a>
-          </div>
-          <div className="profile-info-row">
-            <div>포트폴리오</div>
-            <a href={getUserState.success?.data?.portfolioUrl}>
-              {getUserState.success?.data?.portfolioUrl}
-            </a>
-          </div>
+          {getUserState.success?.data?.isBlogUrlPublic && (
+            <div className="profile-info-row">
+              <div>블로그</div>
+              <a href={getUserState.success.data.blogUrl}>
+                {getUserState.success.data.blogUrl}
+              </a>
+            </div>
+          )}
+          {getUserState.success?.data?.isGithubUrlPublic && (
+            <div className="profile-info-row">
+              <div>깃허브</div>
+              <a href={getUserState.success?.data?.githubUrl}>
+                {getUserState.success?.data?.githubUrl}
+              </a>
+            </div>
+          )}
+          {getUserState.success?.data?.isPortfolioUrlPublic && (
+            <div className="profile-info-row">
+              <div>포트폴리오</div>
+              <a href={getUserState.success?.data?.portfolioUrl}>
+                {getUserState.success?.data?.portfolioUrl}
+              </a>
+            </div>
+          )}
         </div>
       </div>
     </StyledProfile>
