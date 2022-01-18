@@ -78,6 +78,7 @@ const LoginPresenter = ({ login, loginState, url }) => {
           placeholder="이메일"
           required
           onChange={onChangeInputs}
+          autoComplete="email"
         />
       </div>
 
@@ -91,6 +92,7 @@ const LoginPresenter = ({ login, loginState, url }) => {
           maxLength="16"
           required
           onChange={onChangeInputs}
+          autoComplete="current-password"
         />
       </div>
 

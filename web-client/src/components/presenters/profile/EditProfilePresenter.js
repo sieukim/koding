@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { PrintState } from '../../../utils/MyComponents';
 
 const StyledEditProfile = styled.div`
@@ -50,30 +50,24 @@ const StyledEditProfile = styled.div`
     width: 100%;
     margin: 6px auto;
   }
+
+  .password-container {
+    input {
+      padding: 2px;
+      margin: 5px 0;
+    }
+  }
 `;
 
 const EditProfilePresenter = ({
   getLoginUserState,
   changeUserInfoState,
   changeUserInfoFetch,
+  changePasswordState,
+  changePasswordFetch,
 }) => {
   /* 유저 정보 변경 */
   const [userInfo, setUserInfo] = useState({});
-
-  useEffect(() => {
-    // 초기값 설정
-    if (getLoginUserState.success) {
-      setUserInfo({
-        isBlogUrlPublic: getLoginUserState.success?.data?.isBlogUrlPublic,
-        blogUrl: getLoginUserState.success?.data?.blogUrl,
-        isGithubUrlPublic: getLoginUserState.success?.data?.isGithubUrlPublic,
-        githubUrl: getLoginUserState.success?.data?.githubUrl,
-        isPortfolioUrlPublic:
-          getLoginUserState.success?.data?.isPortfolioUrlPublic,
-        portfolioUrl: getLoginUserState.success?.data?.portfolioUrl,
-      });
-    }
-  }, [getLoginUserState.success]);
 
   // Input 관리
   const onChangeInput = useCallback((e) => {
@@ -102,14 +96,29 @@ const EditProfilePresenter = ({
     [changeUserInfoFetch, userInfo],
   );
 
+  /* 비밀번호 변경 */
+  const onSubmitPassword = useCallback(
+    (e) => {
+      e.preventDefault();
+      if (userInfo['newPassword'] === userInfo['newPassword-check']) {
+        changePasswordFetch(userInfo);
+      }
+      setUserInfo((userInfo) => ({
+        ...userInfo,
+        currentPassword: '',
+        newPassword: '',
+        'newPassword-check': '',
+      }));
+    },
+    [changePasswordFetch, userInfo],
+  );
+
   return (
     <StyledEditProfile>
       <div>닉네임</div>
       <div>{getLoginUserState.success?.data?.nickname}</div>
-
       <div>이메일</div>
       <div>{getLoginUserState.success?.data?.email}</div>
-
       <form onSubmit={onSubmitUserInfo}>
         <div>블로그</div>
         <div className="url-container">
@@ -119,6 +128,7 @@ const EditProfilePresenter = ({
             defaultValue={getLoginUserState.success?.data?.blogUrl}
             onChange={onChangeInput}
             className="url"
+            placeholder="블로그 주소를 입력하세요."
           />
           <label>
             <input
@@ -131,7 +141,6 @@ const EditProfilePresenter = ({
             공개
           </label>
         </div>
-        <PrintState state={changeUserInfoState} />
 
         <div>깃허브</div>
         <div className="url-container">
@@ -141,6 +150,7 @@ const EditProfilePresenter = ({
             defaultValue={getLoginUserState.success?.data?.githubUrl}
             onChange={onChangeInput}
             className="url"
+            placeholder="깃허브 주소를 입력하세요."
           />
           <label>
             <input
@@ -155,7 +165,6 @@ const EditProfilePresenter = ({
             공개
           </label>
         </div>
-        <PrintState state={changeUserInfoState} />
 
         <div>포트폴리오</div>
         <div className="url-container">
@@ -165,6 +174,7 @@ const EditProfilePresenter = ({
             defaultValue={getLoginUserState.success?.data?.portfolioUrl}
             onChange={onChangeInput}
             className="url"
+            placeholder="포트폴리오 주소를 입력하세요."
           />
           <label>
             <input
@@ -181,8 +191,50 @@ const EditProfilePresenter = ({
         </div>
         <button>변경</button>
         <PrintState state={changeUserInfoState} />
-        {changeUserInfoState.success && <div>URL 정보가 변경되었습니다.</div>}
+        {changeUserInfoState.success && <div>변경되었습니다.</div>}
       </form>
+
+      {getLoginUserState.success?.data?.isEmailUser && (
+        <>
+          <form className="password-container" onSubmit={onSubmitPassword}>
+            <div>현재 비밀번호</div>
+            <input
+              type="password"
+              name="currentPassword"
+              value={userInfo['currentPassword'] ?? ''}
+              placeholder="현재 비밀번호를 입력하세요."
+              minLength="8"
+              maxLength="16"
+              autoComplete="current-password"
+              onChange={onChangeInput}
+            />
+            <div>변경 비밀번호</div>
+            <input
+              type="password"
+              name="newPassword"
+              value={userInfo['newPassword'] ?? ''}
+              placeholder="8 ~ 16자 영문 대소문자, 숫자, 특수문자를 사용하세요. "
+              minLength="8"
+              maxLength="16"
+              autoComplete="new-password"
+              onChange={onChangeInput}
+            />
+            <div>변경 비밀번호 확인</div>
+            <input
+              type="password"
+              name="newPassword-check"
+              value={userInfo['newPassword-check'] ?? ''}
+              placeholder="변경 비밀번호를 다시 입력하세요. "
+              minLength="8"
+              maxLength="16"
+              onChange={onChangeInput}
+            />
+            <button>변경</button>
+          </form>
+          <PrintState state={changePasswordState} />
+          {changePasswordState.success && <div>변경되었습니다.</div>}
+        </>
+      )}
     </StyledEditProfile>
   );
 };

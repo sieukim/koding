@@ -45,6 +45,11 @@ export const resetPassword = (user) => {
   return axios.post(`/api/auth/email/password`, user);
 };
 
+// 비밀번호 변경 api 호출
+export const changePassword = (user, password) => {
+  return axios.patch(`/api/users/${user}/password`, password);
+};
+
 // 게시글 작성 api 호출
 export const writePost = (boardType, post) => {
   return axios.post(`/api/posts/${boardType}`, post);

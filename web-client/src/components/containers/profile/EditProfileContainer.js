@@ -17,11 +17,20 @@ const EditProfileContainer = ({ profileNickname }) => {
     true,
   );
 
+  // 비밀번호 변경
+  const [changePasswordState, changePasswordFetch] = useAsync(
+    (password) => api.changePassword(profileNickname, password),
+    [profileNickname],
+    true,
+  );
+
   return (
     <EditProfilePresenter
       getLoginUserState={getLoginUserState}
       changeUserInfoState={changeUserInfoState}
       changeUserInfoFetch={changeUserInfoFetch}
+      changePasswordState={changePasswordState}
+      changePasswordFetch={changePasswordFetch}
     />
   );
 };
