@@ -55,6 +55,13 @@ const BoardContainer = ({ boardType, cursor, tags }) => {
     [navigate],
   );
 
+  /* 태그 목록 조회 */
+  const [getTagListState] = useAsync(
+    () => api.getTagList(boardType),
+    [boardType],
+    false,
+  );
+
   return (
     <BoardPresenter
       boardType={boardType}
@@ -65,6 +72,7 @@ const BoardContainer = ({ boardType, cursor, tags }) => {
       onClickPrevCursor={onClickPrevCursor}
       onClickWritePost={onClickWritePost}
       onChangeTag={onChangeTag}
+      getTagListState={getTagListState}
     />
   );
 };

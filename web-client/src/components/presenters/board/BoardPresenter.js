@@ -7,7 +7,6 @@ import {
   PrintState,
 } from '../../../utils/MyComponents';
 import TagPresenter from '../post/TagPresenter';
-import { autoCompleteTags } from '../../../utils/tag';
 
 const StyledBoard = styled.div`
   display: flex;
@@ -66,6 +65,7 @@ const BoardPresenter = ({
   onClickPrevCursor,
   onClickWritePost,
   onChangeTag,
+  getTagListState,
 }) => {
   // 로그인 유저 정보
   const user = useSelector((state) => state.auth.user);
@@ -73,7 +73,12 @@ const BoardPresenter = ({
   return (
     <StyledBoard>
       <PrintState state={readBoardState} />
-      <TagPresenter tags={autoCompleteTags} onChangeTag={onChangeTag} />
+      {getTagListState.success?.data && (
+        <TagPresenter
+          tags={getTagListState.success?.data}
+          onChangeTag={onChangeTag}
+        />
+      )}
       {readBoardState.success && (
         <div className="board">
           {readBoardState.success.data.posts.map((post) => (

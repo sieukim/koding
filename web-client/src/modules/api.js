@@ -147,3 +147,8 @@ export const getUser = (nickname) => {
 export const changeUserInfo = (nickname, userInfo) => {
   return axios.patch(`/api/users/${nickname}`, userInfo);
 };
+
+// 태그 목록 조회 api 호출
+export const getTagList = (boardType) => {
+  return axios.get(`/api/tags/${boardType}`);
+};
