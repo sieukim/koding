@@ -1,3 +1,3 @@
-import { GetCertifiedTagsHandler } from "./get-certified-tags.handler";
+import { GetAllTagsHandler } from "./get-all-tags.handler";
 
-export const TagQueryHandlers = [GetCertifiedTagsHandler];
+export const TagQueryHandlers = [GetAllTagsHandler];

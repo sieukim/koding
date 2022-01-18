@@ -135,14 +135,15 @@ export class UsersController {
   @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.OK)
   @Patch(":nickname")
-  changeProfile(
+  async changeProfile(
     @Param("nickname") nickname: string,
     @Body() body: ChangeProfileRequestDto,
     @LoginUser() loginUser: User,
   ) {
-    return this.commandBus.execute(
+    const result = (await this.commandBus.execute(
       new ChangeProfileCommand(loginUser.nickname, nickname, body),
-    ) as ReturnType<ChangeProfileHandler["execute"]>;
+    )) as Awaited<ReturnType<ChangeProfileHandler["execute"]>>;
+    return new MyUserInfoDto(result);
   }
 
   @ApiOperation({

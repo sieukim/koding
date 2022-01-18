@@ -5,10 +5,7 @@ import { TagsRepository } from "./tags.repository";
 import { TagEventHandlers } from "./events/handlers";
 import { TagQueryHandlers } from "./queries/handlers";
 import { MongooseModule } from "@nestjs/mongoose";
-import {
-  CertifiedTagDocument,
-  CertifiedTagSchema,
-} from "src/schemas/certified-tag.schema";
+import { TagDocument, TagSchema } from "src/schemas/tag.schema";
 import { TagCommandHandlers } from "./commands/handlers";
 
 @Module({
@@ -16,8 +13,8 @@ import { TagCommandHandlers } from "./commands/handlers";
     CqrsModule,
     MongooseModule.forFeature([
       {
-        name: CertifiedTagDocument.name,
-        schema: CertifiedTagSchema,
+        name: TagDocument.name,
+        schema: TagSchema,
       },
     ]),
   ],

@@ -6,6 +6,7 @@ import { PartialUser, User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
 import { IncreasePostReadCountEvent } from "../posts/events/increase-post-read-count.event";
 import { Types } from "mongoose";
+import { TagChangedEvent } from "../tags/events/tag-changed.event";
 
 export const postBoardTypes = [
   "common",
@@ -104,6 +105,7 @@ export class Post extends AggregateRoot {
       markdownContent,
     }: { title?: string; markdownContent?: string; tags?: string[] },
   ) {
+    this.apply(new TagChangedEvent(this.boardType, this.tags, tags));
     this.verifyOwner(requestUser);
     this.title = title ?? this.title;
     this.tags = tags ?? this.tags;

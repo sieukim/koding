@@ -22,13 +22,14 @@ import {
 } from "@nestjs/swagger";
 import { ApiParamBoardType } from "../common/decorator/swagger/api-param.decorator";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { GetCertifiedTagsQuery } from "./queries/get-certified-tags.query";
-import { GetCertifiedTagsHandler } from "./queries/handlers/get-certified-tags.handler";
+import { GetAllTagsQuery } from "./queries/get-all-tags.query";
+import { GetAllTagsHandler } from "./queries/handlers/get-all-tags.handler";
 import { AddCertifiedTagsRequestDto } from "./dto/add-certified-tags-request.dto";
 import { AddCertifiedTagsCommand } from "./commands/add-certified-tags.command";
 import { RemoveCertifiedTagsCommand } from "./commands/remove-certified-tags.command";
 
-@ApiTags("CERTIFIED_TAG")
+// TODO: 권한 가드 추가
+@ApiTags("TAG")
 @Controller("api/tags")
 export class TagsController {
   constructor(
@@ -37,7 +38,7 @@ export class TagsController {
   ) {}
 
   @ApiOperation({
-    summary: "게시판의 인증된 태그 조회",
+    summary: "게시판의 모든 태그 조회",
   })
   @ApiParamBoardType({ description: "태그를 조회할 게시판" })
   @HttpCode(HttpStatus.OK)
@@ -45,9 +46,9 @@ export class TagsController {
   getCertifiedTagsForBoard(
     @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
   ) {
-    return this.queryBus.execute(
-      new GetCertifiedTagsQuery(boardType),
-    ) as ReturnType<GetCertifiedTagsHandler["execute"]>;
+    return this.queryBus.execute(new GetAllTagsQuery(boardType)) as ReturnType<
+      GetAllTagsHandler["execute"]
+    >;
   }
 
   @ApiOperation({

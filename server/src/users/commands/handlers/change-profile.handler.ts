@@ -1,18 +1,18 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ChangeProfileCommand } from "../change-profile.command";
 import { UsersRepository } from "../../users.repository";
-import { MyUserInfoDto } from "../../dto/my-user-info.dto";
 import { Logger, NotFoundException } from "@nestjs/common";
+import { User } from "../../../models/user.model";
 
 @CommandHandler(ChangeProfileCommand)
 export class ChangeProfileHandler
-  implements ICommandHandler<ChangeProfileCommand, MyUserInfoDto>
+  implements ICommandHandler<ChangeProfileCommand, User>
 {
   private readonly logger = new Logger(ChangeProfileHandler.name);
 
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async execute(command: ChangeProfileCommand): Promise<MyUserInfoDto> {
+  async execute(command: ChangeProfileCommand): Promise<User> {
     const { nickname, requestUserNickname, request } = command;
 
     const [requestUser, user] = await Promise.all([
@@ -25,6 +25,6 @@ export class ChangeProfileHandler
     console.log("before profile change", user);
     user.changeProfile(requestUser, request);
     console.log("after profile change", user);
-    return new MyUserInfoDto(await this.usersRepository.update(user));
+    return this.usersRepository.update(user);
   }
 }

@@ -1,12 +1,16 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { WritePostCommand } from "../write-post.command";
 import { Post } from "../../../models/post.model";
 import { PartialUser } from "../../../models/user.model";
 import { PostsRepository } from "../../posts.repository";
+import { TagChangedEvent } from "../../../tags/events/tag-changed.event";
 
 @CommandHandler(WritePostCommand)
 export class WritePostHandler implements ICommandHandler<WritePostCommand> {
-  constructor(private readonly postRepository: PostsRepository) {}
+  constructor(
+    private readonly postRepository: PostsRepository,
+    private readonly eventBus: EventBus,
+  ) {}
 
   async execute(command: WritePostCommand) {
     const {
@@ -21,6 +25,8 @@ export class WritePostHandler implements ICommandHandler<WritePostCommand> {
       title,
       markdownContent,
     });
-    return await this.postRepository.persist(post);
+    const resultPost = await this.postRepository.persist(post);
+    this.eventBus.publish(new TagChangedEvent(boardType, [], tags));
+    return resultPost;
   }
 }
