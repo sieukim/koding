@@ -41,6 +41,7 @@ import { User } from "../models/user.model";
 import { QueryBus } from "@nestjs/cqrs";
 import { GetMyUserInfoQuery } from "../users/queries/get-my-user-info.query";
 import { MyUserInfoDto } from "../users/dto/my-user-info.dto";
+import { GetMyUserInfoHandler } from "../users/queries/handlers/get-my-user-info.handler";
 
 @ApiTags("AUTH")
 @Controller("api/auth")
@@ -81,7 +82,7 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: "기존 사용자 로그인 성공",
-    type: UserInfoDto,
+    type: MyUserInfoDto,
   })
   @ApiCreatedResponse({
     description: "신규 사용자 회원가입 & 로그인 성공",
@@ -99,7 +100,7 @@ export class AuthController {
     if (user.githubSignupVerified) {
       // 기존 유저
       res.status(HttpStatus.OK);
-      return new UserInfoDto(user);
+      return new MyUserInfoDto(user);
     } else {
       // 신규 유저
       res.status(HttpStatus.CREATED);
@@ -116,7 +117,7 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: "닉네임 설정 성공",
-    type: UserInfoDto,
+    type: MyUserInfoDto,
   })
   @ApiBadRequestResponse({
     description: "유효하지 않은 토큰",
@@ -141,13 +142,15 @@ export class AuthController {
   })
   @ApiOkResponse({
     description: "유저 정보 확인 성공",
-    type: UserInfoDto,
+    type: MyUserInfoDto,
   })
   @HttpCode(HttpStatus.OK)
   @UseGuards(LoggedInGuard)
   @Get()
   getCurrentUser(@LoginUser() user: User) {
-    return this.queryBus.execute(new GetMyUserInfoQuery(user.nickname));
+    return this.queryBus.execute(
+      new GetMyUserInfoQuery(user.nickname),
+    ) as ReturnType<GetMyUserInfoHandler["execute"]>;
   }
 
   @ApiOperation({

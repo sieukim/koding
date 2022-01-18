@@ -79,7 +79,7 @@ export class UsersController {
   @ApiOperation({ summary: "회원가입" })
   @ApiCreatedResponse({
     description: "회원가입 성공, 확인 이메일 발송",
-    type: UserInfoDto,
+    type: MyUserInfoDto,
   })
   @ApiConflictResponse({
     description: "회원가입 실패. 중복 있음",
@@ -87,7 +87,7 @@ export class UsersController {
   @Post()
   async joinUser(@Body() signupUserDto: SignupLocalRequestDto) {
     const user = await this.usersService.signupLocal(signupUserDto);
-    return new UserInfoDto(user);
+    return new MyUserInfoDto(user);
   }
 
   @ApiOperation({

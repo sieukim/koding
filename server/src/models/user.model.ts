@@ -8,76 +8,18 @@ import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { EmailUserSignedUpEvent } from "../users/events/email-user-signed-up.event";
 import { ResetPasswordRequestedEvent } from "../users/events/reset-password-requested.event";
 import { GithubUserInfo } from "../schemas/user.schema";
-import { IsBoolean, IsDate, IsEmail, IsNumber, IsOptional, IsString, IsUrl, Length, Matches } from "class-validator";
+import {
+  IsBoolean,
+  IsDate,
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Length,
+  Matches,
+} from "class-validator";
 import { ChangeProfileRequestDto } from "../users/dto/change-profile-request.dto";
-
-// export class GithubRepositoryInfo {
-//   @ApiProperty({
-//     description: "리포지토리 이름",
-//     example: "koding",
-//   })
-//   @Prop()
-//   name: string;
-//
-//   @IsUrl()
-//   @ApiProperty({
-//     description: "리포지토리 주소",
-//     example: "koding",
-//   })
-//   @Prop()
-//   htmlUrl: string;
-//
-//   @ApiProperty({
-//     description: "리포지토리 설명",
-//     example: "개발자 커뮤니티 🐾",
-//   })
-//   @Prop()
-//   description?: string;
-//
-//   @Min(0)
-//   @IsNumber()
-//   @ApiProperty({
-//     description: "리포지토리 스타 수",
-//     example: 23,
-//   })
-//   @Prop()
-//   starCount: number;
-// }
-//
-// export class GithubUserInfo {
-//   @Prop()
-//   githubId: string;
-//
-//   @IsUrl()
-//   @ApiProperty({
-//     description: "깃허브 프로필 사진 url",
-//     example: "https://avatars.githubusercontent.com/u/11111111",
-//   })
-//   @Prop()
-//   avatarUrl: string;
-//
-//   @ApiProperty({
-//     description: "유저 이름",
-//     example: "홍길동",
-//   })
-//   @Prop()
-//   name?: string;
-//
-//   @IsEmail()
-//   @ApiProperty({
-//     description: "깃허브 회원가입 이메일",
-//     example: "test@test.com",
-//   })
-//   @Prop()
-//   email: string;
-//
-//   @ApiProperty({
-//     description: "소유한 리포지토리들의 정보",
-//     type: [GithubRepositoryInfo],
-//   })
-//   @Prop({ type: [GithubRepositoryInfo] })
-//   repositories: GithubRepositoryInfo[];
-// }
 
 export class User extends AggregateRoot {
   private static readonly round = 10;
@@ -472,6 +414,8 @@ export class User extends AggregateRoot {
     this.verifySameUser(requestUser);
     if (!(await this.comparePassword(currentPassword)))
       throw new BadRequestException("잘못된 확인 비밀번호");
+    this.password = newPassword;
+    await this.hashPassword();
   }
 }
 

@@ -15,6 +15,8 @@ const keys = [
   "githubSignupVerified",
   "followersCount",
   "followingsCount",
+  "isGithubUser",
+  "isEmailUser",
 ] as const;
 
 export class MyUserInfoDto extends PickType(User, keys) {
