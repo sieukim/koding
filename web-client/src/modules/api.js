@@ -45,6 +45,11 @@ export const resetPassword = (user) => {
   return axios.post(`/api/auth/email/password`, user);
 };
 
+// 비밀번호 변경 api 호출
+export const changePassword = (user, password) => {
+  return axios.patch(`/api/users/${user}/password`, password);
+};
+
 // 게시글 작성 api 호출
 export const writePost = (boardType, post) => {
   return axios.post(`/api/posts/${boardType}`, post);
@@ -121,4 +126,29 @@ export const getFollowing = (profileUserNickname) => {
 // 팔로워 정보 조회 api 호출
 export const getFollower = (profileUserNickname) => {
   return axios.get(`/api/users/${profileUserNickname}/followers`);
+};
+
+// 유저 팔로우 여부 조회 api 호출
+export const isFollowing = (nickname, followingNickname) => {
+  return axios.head(`/api/users/${nickname}/followings/${followingNickname}`);
+};
+
+// 로그인 유저 정보 조회 api 호출
+export const getLoginUser = () => {
+  return axios.get(`/api/auth`);
+};
+
+// 유저 정보 조회 api 호출
+export const getUser = (nickname) => {
+  return axios.get(`/api/users/${nickname}`);
+};
+
+// 유저 정보 변경 api 호출
+export const changeUserInfo = (nickname, userInfo) => {
+  return axios.patch(`/api/users/${nickname}`, userInfo);
+};
+
+// 태그 목록 조회 api 호출
+export const getTagList = (boardType) => {
+  return axios.get(`/api/tags/${boardType}`);
 };

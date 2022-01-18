@@ -7,8 +7,22 @@ import { useSelector } from 'react-redux';
 const ProfileContainer = ({ profileUserNickname }) => {
   const loginUser = useSelector((state) => state.auth.user);
 
-  const [followers, setFollowers] = useState(0);
-  const [followings, setFollowings] = useState(0);
+  /* 프로필 유저 정보 조회 */
+  const [getUserState] = useAsync(
+    () => api.getUser(profileUserNickname),
+    [profileUserNickname],
+    false,
+  );
+
+  const [followers, setFollowers] = useState();
+  const [followings, setFollowings] = useState();
+
+  useEffect(() => {
+    if (getUserState.success) {
+      setFollowings(getUserState.success.data.followingsCount);
+      setFollowers(getUserState.success.data.followersCount);
+    }
+  }, [getUserState.success]);
 
   /* 팔로우 */
   // 팔로우 버튼
@@ -65,6 +79,17 @@ const ProfileContainer = ({ profileUserNickname }) => {
     false,
   );
 
+  // 팔로우 여부 조회
+  const [isFollowingState] = useAsync(
+    async () => {
+      if (loginUser.nickname !== profileUserNickname) {
+        return api.isFollowing(loginUser.nickname, profileUserNickname);
+      }
+    },
+    [loginUser.nickname, profileUserNickname, followers, followings],
+    false,
+  );
+
   useEffect(() => {
     if (getFollowingState.success) {
       setFollowings(getFollowingState.success.data.count);
@@ -78,10 +103,12 @@ const ProfileContainer = ({ profileUserNickname }) => {
     <ProfilePresenter
       loginUser={loginUser}
       profileUserNickname={profileUserNickname}
+      getUserState={getUserState}
       followState={followState}
       follow={follow}
       unfollowState={unfollowState}
       unfollow={unfollow}
+      isFollowingState={isFollowingState}
       followers={followers}
       followings={followings}
     />

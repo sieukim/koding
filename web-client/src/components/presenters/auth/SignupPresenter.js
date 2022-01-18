@@ -129,6 +129,7 @@ const SignupPresenter = ({
           placeholder="이메일을 입력하세요."
           required
           onChange={onChangeInput}
+          autoComplete="email"
         />
         <button
           data-name="email"
@@ -152,6 +153,7 @@ const SignupPresenter = ({
           maxLength="16"
           required
           onChange={onChangeInput}
+          autoComplete="new-password"
         />
       </div>
 
