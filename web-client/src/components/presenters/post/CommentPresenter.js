@@ -63,6 +63,7 @@ const StyledComment = styled.div`
     background: white;
     width: 80%;
     outline: none;
+    padding: 5px;
   }
 `;
 
@@ -82,12 +83,9 @@ const CommentPresenter = ({
   // 댓글 내용
   const [comment, setComment] = useState('');
 
-  const onChangeInput = useCallback(
-    (e) => {
-      setComment(e.target.value);
-    },
-    [setComment],
-  );
+  const onChangeInput = useCallback((e) => {
+    setComment(e.target.value);
+  }, []);
 
   // 댓글 등록
   const onSubmitButton = useCallback(
@@ -111,13 +109,10 @@ const CommentPresenter = ({
   const [editCommentId, setEditCommentId] = useState('');
 
   // 수정 버튼 & 등록 버튼 토글
-  const onClickEdit = useCallback(
-    (e) => {
-      const commentId = e.target.dataset.commentid;
-      setEditCommentId(commentId);
-    },
-    [setEditCommentId],
-  );
+  const onClickEdit = useCallback((e) => {
+    const commentId = e.target.dataset.commentid;
+    setEditCommentId(commentId);
+  }, []);
 
   const innerRef = useRef();
 

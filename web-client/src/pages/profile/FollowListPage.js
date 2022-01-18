@@ -1,4 +1,4 @@
-import FollowListContainer from '../components/containers/profile/FollowListContainer';
+import FollowListContainer from '../../components/containers/profile/FollowListContainer';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 

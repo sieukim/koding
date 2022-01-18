@@ -67,7 +67,7 @@ const StyledProfile = styled.div`
 const ProfilePresenter = ({
   loginUser,
   profileUserNickname,
-  getUserState,
+  getUserData = {},
   followState,
   follow,
   unfollowState,
@@ -77,12 +77,22 @@ const ProfilePresenter = ({
   followings,
 }) => {
   /* 팔로우 */
+  const {
+    email = '',
+    blogUrl = '',
+    githubUrl = '',
+    portfolioUrl = '',
+    isBlogUrlPublic = false,
+    isGithubUrlPublic = false,
+    isPortfolioUrlPublic = false,
+  } = getUserData;
+
   // 프로필 편집
   const navigate = useNavigate();
 
   const onClickEditProfile = useCallback(() => {
     navigate(`/user/${profileUserNickname}/profile/edit`);
-  });
+  }, [navigate, profileUserNickname]);
 
   // 팔로우
   const onClickFollow = useCallback(() => {
@@ -141,30 +151,24 @@ const ProfilePresenter = ({
           </div>
           <div className="profile-info-row">
             <div>이메일</div>
-            <div>{getUserState.success?.data?.email}</div>
+            <div>{email}</div>
           </div>
-          {getUserState.success?.data?.isBlogUrlPublic && (
+          {isBlogUrlPublic && (
             <div className="profile-info-row">
               <div>블로그</div>
-              <a href={getUserState.success.data.blogUrl}>
-                {getUserState.success.data.blogUrl}
-              </a>
+              <a href={blogUrl}>{blogUrl}</a>
             </div>
           )}
-          {getUserState.success?.data?.isGithubUrlPublic && (
+          {isGithubUrlPublic && (
             <div className="profile-info-row">
               <div>깃허브</div>
-              <a href={getUserState.success?.data?.githubUrl}>
-                {getUserState.success?.data?.githubUrl}
-              </a>
+              <a href={githubUrl}>{githubUrl}</a>
             </div>
           )}
-          {getUserState.success?.data?.isPortfolioUrlPublic && (
+          {isPortfolioUrlPublic && (
             <div className="profile-info-row">
               <div>포트폴리오</div>
-              <a href={getUserState.success?.data?.portfolioUrl}>
-                {getUserState.success?.data?.portfolioUrl}
-              </a>
+              <a href={portfolioUrl}>{portfolioUrl}</a>
             </div>
           )}
         </div>

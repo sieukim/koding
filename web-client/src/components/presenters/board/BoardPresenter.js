@@ -65,7 +65,8 @@ const BoardPresenter = ({
   onClickPrevCursor,
   onClickWritePost,
   onChangeTag,
-  getTagListState,
+  tagList = [],
+  posts = [],
 }) => {
   // 로그인 유저 정보
   const user = useSelector((state) => state.auth.user);
@@ -73,42 +74,35 @@ const BoardPresenter = ({
   return (
     <StyledBoard>
       <PrintState state={readBoardState} />
-      {getTagListState.success?.data && (
-        <TagPresenter
-          tags={getTagListState.success?.data}
-          onChangeTag={onChangeTag}
-        />
-      )}
-      {readBoardState.success && (
-        <div className="board">
-          {readBoardState.success.data.posts.map((post) => (
-            <div className="post-item" key={post.postId}>
-              <PostLink
-                boardType={boardType}
-                postId={post.postId}
-                postTitle={post.title}
-              />
-              <div className="post-info">
-                <MyPageLink nickname={post.writerNickname} />
-                <GetDate date={post.createdAt} className="post-createdAt" />
-              </div>
+      <TagPresenter tags={tagList} onChangeTag={onChangeTag} />
+      <div className="board">
+        {posts.map((post) => (
+          <div className="post-item" key={post.postId}>
+            <PostLink
+              boardType={boardType}
+              postId={post.postId}
+              postTitle={post.title}
+            />
+            <div className="post-info">
+              <MyPageLink nickname={post.writerNickname} />
+              <GetDate date={post.createdAt} className="post-createdAt" />
             </div>
-          ))}
-          <div className="paging-button">
-            <button onClick={onClickPrevCursor} disabled={!hasPrevPage}>
-              이전
-            </button>
-            <button onClick={onClickNextCursor} disabled={!hasNextPage}>
-              다음
-            </button>
           </div>
-          {user && (
-            <button onClick={onClickWritePost} className="post-write">
-              글 쓰기
-            </button>
-          )}
+        ))}
+        <div className="paging-button">
+          <button onClick={onClickPrevCursor} disabled={!hasPrevPage}>
+            이전
+          </button>
+          <button onClick={onClickNextCursor} disabled={!hasNextPage}>
+            다음
+          </button>
         </div>
-      )}
+        {user && (
+          <button onClick={onClickWritePost} className="post-write">
+            글 쓰기
+          </button>
+        )}
+      </div>
     </StyledBoard>
   );
 };

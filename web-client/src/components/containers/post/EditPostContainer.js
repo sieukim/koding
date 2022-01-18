@@ -30,6 +30,13 @@ const EditPostContainer = ({ boardType, postId }) => {
     [editPostFetch],
   );
 
+  /* 태그 목록 조회 */
+  const [getTagListState] = useAsync(
+    () => api.getTagList(boardType),
+    [boardType],
+    false,
+  );
+
   return (
     <>
       {editPostState.success && (
@@ -37,8 +44,10 @@ const EditPostContainer = ({ boardType, postId }) => {
       )}
       <EditPostPresenter
         readPostState={readPostState}
+        post={readPostState.success?.data?.post}
         editPost={editPost}
         editPostState={editPostState}
+        tagList={getTagListState.success?.data}
       />
     </>
   );

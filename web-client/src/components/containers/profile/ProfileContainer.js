@@ -103,7 +103,7 @@ const ProfileContainer = ({ profileUserNickname }) => {
     <ProfilePresenter
       loginUser={loginUser}
       profileUserNickname={profileUserNickname}
-      getUserState={getUserState}
+      getUserData={getUserState.success?.data}
       followState={followState}
       follow={follow}
       unfollowState={unfollowState}

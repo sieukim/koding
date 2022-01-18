@@ -22,6 +22,13 @@ const WritePostContainer = ({ boardType }) => {
     [writePostFetch],
   );
 
+  /* 태그 목록 조회 */
+  const [getTagListState] = useAsync(
+    () => api.getTagList(boardType),
+    [boardType],
+    false,
+  );
+
   return (
     <>
       {writePostState.success && (
@@ -32,6 +39,7 @@ const WritePostContainer = ({ boardType }) => {
       <WritePostPresenter
         writePost={writePost}
         writePostState={writePostState}
+        tagList={getTagListState.success?.data}
       />
     </>
   );

@@ -81,10 +81,7 @@ const SignupContainer = () => {
   /* 로그인 */
 
   const dispatch = useDispatch();
-  const onSetLogin = useCallback(
-    (user) => dispatch(setLogin(user)),
-    [dispatch],
-  );
+  const onSetLogin = useCallback((user) => dispatch(setLogin(user)), []);
 
   // login state에 저장된 user를 이용하여 로그인 상태로 변경
   useEffect(() => {

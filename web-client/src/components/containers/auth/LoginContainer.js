@@ -17,10 +17,7 @@ const LoginContainer = () => {
   );
 
   const dispatch = useDispatch();
-  const onSetLogin = useCallback(
-    (user) => dispatch(setLogin(user)),
-    [dispatch],
-  );
+  const onSetLogin = useCallback((user) => dispatch(setLogin(user)), []);
 
   // 로그인 api 호출
   const login = useCallback(
@@ -58,15 +55,11 @@ const LoginContainer = () => {
 
   useEffect(() => {
     if (loginState.success) {
-      navigate(-1);
+      navigate('/');
     }
   }, [loginState.success, navigate]);
 
-  return (
-    <>
-      <LoginPresenter login={login} loginState={loginState} url={url} />
-    </>
-  );
+  return <LoginPresenter login={login} loginState={loginState} url={url} />;
 };
 
 export default LoginContainer;

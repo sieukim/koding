@@ -61,6 +61,7 @@ const StyledEditProfile = styled.div`
 
 const EditProfilePresenter = ({
   getLoginUserState,
+  getLoginUserData = {},
   changeUserInfoState,
   changeUserInfoFetch,
   changePasswordState,
@@ -116,16 +117,16 @@ const EditProfilePresenter = ({
   return (
     <StyledEditProfile>
       <div>닉네임</div>
-      <div>{getLoginUserState.success?.data?.nickname}</div>
+      <div>{getLoginUserData.nickname}</div>
       <div>이메일</div>
-      <div>{getLoginUserState.success?.data?.email}</div>
+      <div>{getLoginUserData.email}</div>
       <form onSubmit={onSubmitUserInfo}>
         <div>블로그</div>
         <div className="url-container">
           <input
             type="url"
             name="blogUrl"
-            defaultValue={getLoginUserState.success?.data?.blogUrl}
+            defaultValue={getLoginUserData.blogUrl}
             onChange={onChangeInput}
             className="url"
             placeholder="블로그 주소를 입력하세요."
@@ -135,7 +136,7 @@ const EditProfilePresenter = ({
               type="checkbox"
               name="isBlogUrlPublic"
               value="isBlogUrlPublic"
-              defaultChecked={getLoginUserState.success?.data?.isBlogUrlPublic}
+              defaultChecked={getLoginUserData.isBlogUrlPublic}
               onChange={onChangeInput}
             />
             공개
@@ -147,7 +148,7 @@ const EditProfilePresenter = ({
           <input
             type="url"
             name="githubUrl"
-            defaultValue={getLoginUserState.success?.data?.githubUrl}
+            defaultValue={getLoginUserData.githubUrl}
             onChange={onChangeInput}
             className="url"
             placeholder="깃허브 주소를 입력하세요."
@@ -157,9 +158,7 @@ const EditProfilePresenter = ({
               type="checkbox"
               name="isGithubUrlPublic"
               value="isGithubUrlPublic"
-              defaultChecked={
-                getLoginUserState.success?.data?.isGithubUrlPublic
-              }
+              defaultChecked={getLoginUserData.isGithubUrlPublic}
               onChange={onChangeInput}
             />
             공개
@@ -171,7 +170,7 @@ const EditProfilePresenter = ({
           <input
             type="url"
             name="portfolioUrl"
-            defaultValue={getLoginUserState.success?.data?.portfolioUrl}
+            defaultValue={getLoginUserData.portfolioUrl}
             onChange={onChangeInput}
             className="url"
             placeholder="포트폴리오 주소를 입력하세요."
@@ -181,9 +180,7 @@ const EditProfilePresenter = ({
               type="checkbox"
               name="isPortfolioUrlPublic"
               value="isPortfolioUrlPublic"
-              defaultChecked={
-                getLoginUserState.success?.data?.isPortfolioUrlPublic
-              }
+              defaultChecked={getLoginUserData.isPortfolioUrlPublic}
               onChange={onChangeInput}
             />
             공개
@@ -194,7 +191,7 @@ const EditProfilePresenter = ({
         {changeUserInfoState.success && <div>변경되었습니다.</div>}
       </form>
 
-      {getLoginUserState.success?.data?.isEmailUser && (
+      {getLoginUserData.isEmailUser && (
         <>
           <form className="password-container" onSubmit={onSubmitPassword}>
             <div>현재 비밀번호</div>

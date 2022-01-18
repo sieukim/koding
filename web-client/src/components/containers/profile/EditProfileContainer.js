@@ -27,6 +27,7 @@ const EditProfileContainer = ({ profileNickname }) => {
   return (
     <EditProfilePresenter
       getLoginUserState={getLoginUserState}
+      getLoginUserData={getLoginUserState.success?.data}
       changeUserInfoState={changeUserInfoState}
       changeUserInfoFetch={changeUserInfoFetch}
       changePasswordState={changePasswordState}

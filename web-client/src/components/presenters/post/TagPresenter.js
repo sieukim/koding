@@ -4,13 +4,13 @@ import { Chip, TextField } from '@material-ui/core';
 
 const StyledTag = styled.div``;
 
-const TagPresenter = ({ onChangeTag, tags }) => {
+const TagPresenter = ({ onChangeTag, tags = [], defaultValue = [] }) => {
   return (
     <StyledTag>
       <Autocomplete
         id="tags"
         options={tags.map((tag) => tag)}
-        defaultValue={[]}
+        defaultValue={defaultValue}
         multiple
         freeSolo
         renderTags={(value, getTagProps) =>

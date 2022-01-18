@@ -3,13 +3,21 @@ import * as api from '../../../modules/api';
 import useAsync from '../../../hooks/useAsync';
 import { useCallback, useEffect, useState } from 'react';
 
-const CommentContainer = ({ boardType, postId }) => {
+const CommentContainer = ({
+  boardType,
+  postId,
+  setCommentSuccess,
+  success,
+}) => {
   /* 게시글 댓글 가져오기 */
 
   const [comments, setComments] = useState([]);
 
   const [readCommentState] = useAsync(
-    () => api.readComment(boardType, postId),
+    () => {
+      setCommentSuccess(false);
+      return api.readComment(boardType, postId);
+    },
     [boardType, postId],
     false,
   );
@@ -17,8 +25,9 @@ const CommentContainer = ({ boardType, postId }) => {
   useEffect(() => {
     if (readCommentState.success) {
       setComments(readCommentState.success.data.comments);
+      setCommentSuccess(true);
     }
-  }, [readCommentState.success, setComments]);
+  }, [readCommentState.success]);
 
   /* 댓글 작성 api */
 
@@ -36,7 +45,7 @@ const CommentContainer = ({ boardType, postId }) => {
         return newComments;
       });
     }
-  }, [writeCommentState.success, setComments]);
+  }, [writeCommentState.success]);
 
   const writeComment = useCallback(
     async (comment) => await writeCommentFetch(comment),
@@ -76,15 +85,19 @@ const CommentContainer = ({ boardType, postId }) => {
   );
 
   return (
-    <CommentPresenter
-      comments={comments}
-      writeCommentState={writeCommentState}
-      writeComment={writeComment}
-      editCommentState={editCommentState}
-      editComment={editComment}
-      removeCommentState={removeCommentState}
-      removeComment={removeComment}
-    />
+    <>
+      {success && (
+        <CommentPresenter
+          comments={comments}
+          writeCommentState={writeCommentState}
+          writeComment={writeComment}
+          editCommentState={editCommentState}
+          editComment={editComment}
+          removeCommentState={removeCommentState}
+          removeComment={removeComment}
+        />
+      )}
+    </>
   );
 };
 

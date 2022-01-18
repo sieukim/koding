@@ -20,8 +20,8 @@ const FollowListContainer = ({ profileNickname, type }) => {
 
   return (
     <FollowListPresenter
-      getFollowingState={getFollowingState}
-      getFollowerState={getFollowerState}
+      followingsList={getFollowingState.success?.data?.followings}
+      followersList={getFollowerState.success?.data?.followers}
       type={type}
     />
   );

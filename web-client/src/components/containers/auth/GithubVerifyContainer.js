@@ -40,10 +40,7 @@ const GithubVerifyContainer = () => {
   );
 
   const dispatch = useDispatch();
-  const onSetLogin = useCallback(
-    (user) => dispatch(setLogin(user)),
-    [dispatch],
-  );
+  const onSetLogin = useCallback((user) => dispatch(setLogin(user)), []);
 
   // github user 정보 가져오기
   const githubUser = useSelector((state) => state.github.user);

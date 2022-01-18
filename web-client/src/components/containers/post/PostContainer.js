@@ -1,18 +1,27 @@
 import PostPresenter from '../../presenters/post/PostPresenter';
 import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-const PostContainer = ({ boardType, postId }) => {
+const PostContainer = ({ boardType, postId, setPostSuccess, success }) => {
   /* 읽을 게시글 가져오기 */
 
   // read post state
   const [readPostState] = useAsync(
-    () => api.readPost(boardType, postId),
+    () => {
+      setPostSuccess(false);
+      return api.readPost(boardType, postId);
+    },
     [boardType, postId],
     false,
   );
+
+  useEffect(() => {
+    if (readPostState.success) {
+      setPostSuccess(true);
+    }
+  }, [readPostState.success]);
 
   /* 게시글 삭제 */
 
@@ -60,16 +69,20 @@ const PostContainer = ({ boardType, postId }) => {
   return (
     <>
       {removePostState.success && <Navigate to={`/board/${boardType}`} />}
-      <PostPresenter
-        boardType={boardType}
-        readPostState={readPostState}
-        removePost={removePost}
-        removePostState={removePostState}
-        onClickRemove={onClickRemove}
-        onClickEdit={onClickEdit}
-        onClickList={onClickList}
-        onClickTag={onClickTag}
-      />
+      {success && (
+        <PostPresenter
+          readPostState={readPostState}
+          removePost={removePost}
+          removePostState={removePostState}
+          onClickRemove={onClickRemove}
+          onClickEdit={onClickEdit}
+          onClickList={onClickList}
+          onClickTag={onClickTag}
+          post={readPostState.success?.data?.post}
+          prevPostInfo={readPostState.success?.data?.prevPostInfo}
+          nextPostInfo={readPostState.success?.data?.nextPostInfo}
+        />
+      )}
     </>
   );
 };

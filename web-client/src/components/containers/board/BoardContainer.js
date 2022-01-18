@@ -72,7 +72,8 @@ const BoardContainer = ({ boardType, cursor, tags }) => {
       onClickPrevCursor={onClickPrevCursor}
       onClickWritePost={onClickWritePost}
       onChangeTag={onChangeTag}
-      getTagListState={getTagListState}
+      tagList={getTagListState.success?.data}
+      posts={readBoardState.success?.data?.posts}
     />
   );
 };
