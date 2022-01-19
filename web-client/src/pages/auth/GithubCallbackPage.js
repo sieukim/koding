@@ -39,14 +39,14 @@ const GithubCallbackPage = () => {
 
         // 기존 사용자 로그인
         if (loggedUser.status === 200) {
-          onSetLogin(loggedUser.data);
           setExistingUser(true);
+          onSetLogin(loggedUser.data);
         }
 
         // 신규 사용자 회원가입 & 로그인
         if (loggedUser.status === 201) {
-          onGithubSignup(loggedUser.data);
           setNewUser(true);
+          onGithubSignup(loggedUser.data);
         }
       } catch (e) {}
     })();

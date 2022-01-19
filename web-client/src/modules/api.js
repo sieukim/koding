@@ -157,3 +157,10 @@ export const changeUserInfo = (nickname, userInfo) => {
 export const getTagList = (boardType) => {
   return axios.get(`/api/tags/${boardType}`);
 };
+
+// 이미지 업로드 api 호출
+export const uploadImage = (image) => {
+  const body = new FormData();
+  body.set('image', image);
+  return axios.post(`/api/upload/posts`, body);
+};

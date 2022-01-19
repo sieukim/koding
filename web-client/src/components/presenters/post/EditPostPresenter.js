@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Editor, PrintState } from '../../../utils/MyComponents';
 import TagPresenter from './TagPresenter';
+import * as api from '../../../modules/api';
 
 const StyledEdit = styled.form`
   display: flex;
@@ -47,6 +48,25 @@ const EditPostPresenter = ({
     setTags(value);
   }, []);
 
+  /* 이미지 업로드 */
+
+  const [imageUrls, setImageUrls] = useState([]);
+
+  useEffect(() => {
+    if (readPostState.success) {
+      setImageUrls(readPostState.success.data.post.imageUrls);
+    }
+  }, [readPostState.success]);
+
+  const uploadImage = useCallback(async (blob, callback) => {
+    const response = await api.uploadImage(blob);
+    const url = response.data.imageUrl;
+
+    setImageUrls((imageUrl) => [...imageUrl, url]);
+
+    callback(url, 'alt_text');
+  }, []);
+
   /* 게시글 수정 */
 
   const onSubmitButton = useCallback(
@@ -62,9 +82,12 @@ const EditPostPresenter = ({
         markdownContent: markdownContent,
         htmlContent: htmlContent,
         tags: tags,
+        imageUrls: imageUrls.filter((imageUrl) =>
+          markdownContent.includes(imageUrl),
+        ),
       });
     },
-    [editorRef, editPost, title, tags],
+    [editorRef, editPost, title, tags, imageUrls],
   );
 
   return (
@@ -84,7 +107,12 @@ const EditPostPresenter = ({
             tags={tagList}
             defaultValue={readPostState.success.data.post.tags}
           />
-          <Editor innerRef={editorRef} />
+          <Editor
+            innerRef={editorRef}
+            hooks={{
+              addImageBlobHook: uploadImage,
+            }}
+          />
           <button>수정</button>
           <PrintState state={editPostState} />
         </StyledEdit>
