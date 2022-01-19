@@ -1,3 +1,3 @@
-import { ReadCommentHandler } from "./read-comment.handler";
+import { ReadCommentsHandler } from "./read-comments.handler";
 
-export const CommentQueryHandlers = [ReadCommentHandler];
+export const CommentQueryHandlers = [ReadCommentsHandler];

@@ -4,13 +4,14 @@ import { Post } from "../../models/post.model";
 const keys = [
   "postId",
   "title",
-  "readCount",
+  "markdownContent",
   "tags",
-  "createdAt",
+  "readCount",
   "boardType",
+  "createdAt",
 ] as const;
 
-export class ReadPostMetadataDto extends PickType(Post, keys) {
+export class PostInfoDto extends PickType(Post, keys) {
   @ApiProperty({
     description: "게시글 작성자 닉네임",
   })

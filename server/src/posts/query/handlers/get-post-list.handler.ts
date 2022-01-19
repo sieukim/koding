@@ -3,6 +3,7 @@ import { GetPostListQuery } from "../get-post-list.query";
 import { PostsRepository } from "../../posts.repository";
 import { Post } from "../../../models/post.model";
 import { SortType } from "../../../common/repository/sort-option";
+import { PostListDto } from "../../dto/post-list.dto";
 
 @QueryHandler(GetPostListQuery)
 export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
@@ -58,10 +59,6 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
       const nextCursorPost = posts.pop();
       nextPageCursor = nextCursorPost.postId;
     }
-    return {
-      posts,
-      prevPageCursor,
-      nextPageCursor,
-    } as { posts: Post[]; prevPageCursor?: string; nextPageCursor?: string };
+    return new PostListDto(posts, prevPageCursor, nextPageCursor);
   }
 }
