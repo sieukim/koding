@@ -37,7 +37,7 @@ export class ReadCommentsHandler
       comments = await this.commentsRepository.findAll(
         {
           postId: { eq: postIdentifier.postId },
-          commentId: { eq: cursorCommentId },
+          commentId: { lte: cursorCommentId },
         },
         {
           commentId: SortType.DESC,
