@@ -80,8 +80,13 @@ export const removePost = (boardType, postId) => {
 };
 
 // 댓글 읽기 api 호출
-export const readComment = (boardType, postId) => {
-  return axios.get(`/api/posts/${boardType}/${postId}/comments`);
+export const readComment = (boardType, postId, cursor) => {
+  const query = new URLSearchParams();
+  if (cursor) query.set('cursor', cursor);
+
+  return axios.get(
+    `/api/posts/${boardType}/${postId}/comments?${query.toString()}`,
+  );
 };
 
 // 댓글 작성 api 호출

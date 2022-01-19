@@ -1,6 +1,6 @@
 import PostContainer from '../../components/containers/post/PostContainer';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import CommentContainer from '../../components/containers/post/CommentContainer';
 import { useState } from 'react';
 
@@ -16,6 +16,10 @@ const PostPage = () => {
   const params = useParams();
   const boardType = params.boardType;
   const postId = params.postId;
+
+  const { search } = useLocation();
+  const searchParams = new URLSearchParams(search);
+  const cursor = searchParams.get('cursor');
 
   const [postSuccess, setPostSuccess] = useState(false);
   const [commentSuccess, setCommentSuccess] = useState(false);
@@ -33,6 +37,7 @@ const PostPage = () => {
         postId={postId}
         setCommentSuccess={setCommentSuccess}
         success={postSuccess && commentSuccess}
+        cursor={cursor}
       />
     </StyledPost>
   );

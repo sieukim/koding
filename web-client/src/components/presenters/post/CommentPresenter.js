@@ -65,6 +65,12 @@ const StyledComment = styled.div`
     outline: none;
     padding: 5px;
   }
+
+  .paging-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
 `;
 
 const CommentPresenter = ({
@@ -75,6 +81,10 @@ const CommentPresenter = ({
   editComment,
   removeCommentState,
   removeComment,
+  hasPrevPage,
+  hasNextPage,
+  onClickPrevCursor,
+  onClickNextCursor,
 }) => {
   const user = useSelector((state) => state.auth.user);
 
@@ -208,6 +218,14 @@ const CommentPresenter = ({
           </div>
         </div>
       ))}
+      <div className="paging-button">
+        <button onClick={onClickPrevCursor} disabled={!hasPrevPage}>
+          이전
+        </button>
+        <button onClick={onClickNextCursor} disabled={!hasNextPage}>
+          다음
+        </button>
+      </div>
     </StyledComment>
   );
 };
