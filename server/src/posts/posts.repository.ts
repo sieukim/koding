@@ -34,6 +34,7 @@ export class PostsRepository extends MongooseBaseRepository<
       title,
       readCount,
       tags,
+      imageUrls,
     } = postDocument.toJSON();
     await this.postModel.updateOne(
       { _id },
@@ -45,6 +46,7 @@ export class PostsRepository extends MongooseBaseRepository<
         title,
         readCount,
         tags,
+        imageUrls,
       },
       { upsert: true },
     );
@@ -62,6 +64,7 @@ export class PostsRepository extends MongooseBaseRepository<
       title,
       readCount,
       tags,
+      imageUrls,
     } = postDocument.toJSON();
     await this.postModel.updateOne(
       { _id },
@@ -73,6 +76,7 @@ export class PostsRepository extends MongooseBaseRepository<
         title,
         readCount,
         tags,
+        imageUrls,
       },
     );
     return PostDocument.toModel(postDocument);

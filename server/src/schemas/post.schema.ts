@@ -1,10 +1,8 @@
 import { Document, Model, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "./user.schema";
-import { ApiProperty } from "@nestjs/swagger";
-import { IsIn, IsString } from "class-validator";
 import { currentTime } from "../common/utils/current-time.util";
-import { Post, PostBoardType, postBoardTypes } from "../models/post.model";
+import { Post, PostBoardType } from "../models/post.model";
 import { PartialUser } from "../models/user.model";
 
 @Schema({
@@ -24,19 +22,9 @@ export class PostDocument extends Document {
 
   postId: Types.ObjectId;
 
-  @ApiProperty({
-    description: "게시글 제목",
-  })
-  @IsString()
   @Prop()
   title: string;
 
-  @IsIn(postBoardTypes)
-  @ApiProperty({
-    description: "게시판 타입",
-    example: "common",
-    enum: postBoardTypes,
-  })
   @Prop({ type: String, default: "common" })
   boardType: PostBoardType;
 
@@ -47,31 +35,19 @@ export class PostDocument extends Document {
 
   writer?: UserDocument;
 
-  @IsString({ each: true })
-  @ApiProperty({
-    description: "게시글 태그",
-    type: [String],
-  })
   @Prop({ type: [String] })
   tags: string[];
 
-  @IsString()
-  @ApiProperty({
-    description: "마크다운 형식의 게시글 내용",
-  })
   @Prop()
   markdownContent: string;
 
-  @ApiProperty({
-    description: "조회수",
-  })
   @Prop({ type: Number, default: 0, min: 0 })
   readCount: number;
 
-  @ApiProperty({
-    description: "게시글 생성 시간",
-  })
   createdAt: Date;
+
+  @Prop({ type: [String] })
+  imageUrls: string[];
 
   static toModel(postDocument: PostDocument): Post {
     const {
@@ -84,6 +60,7 @@ export class PostDocument extends Document {
       markdownContent,
       createdAt,
       title,
+      imageUrls,
     } = postDocument;
     return new Post({
       title,
@@ -96,6 +73,7 @@ export class PostDocument extends Document {
       markdownContent,
       readCount,
       createdAt,
+      imageUrls,
     });
   }
 
@@ -109,6 +87,7 @@ export class PostDocument extends Document {
       createdAt,
       readCount,
       title,
+      imageUrls,
     } = post;
     return new model({
       postId: new Types.ObjectId(postId),
@@ -119,6 +98,7 @@ export class PostDocument extends Document {
       createdAt,
       readCount,
       title,
+      imageUrls,
     });
   }
 }

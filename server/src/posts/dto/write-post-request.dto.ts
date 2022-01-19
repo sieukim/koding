@@ -5,4 +5,5 @@ export class WritePostRequestDto extends PickType(Post, [
   "title",
   "markdownContent",
   "tags",
-]) {}
+  "imageUrls",
+] as const) {}

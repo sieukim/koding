@@ -9,6 +9,7 @@ import { PostQueryHandlers } from "./query/handlers";
 import { CqrsModule } from "@nestjs/cqrs";
 import { PostsRepository } from "./posts.repository";
 import { UsersModule } from "../users/users.module";
+import { UploadModule } from "../upload/upload.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from "../users/users.module";
     ]),
     CqrsModule,
     UsersModule,
+    UploadModule,
   ],
   controllers: [PostsController],
   providers: [

@@ -10,7 +10,7 @@ export class TagChangedHandler implements IEventHandler<TagChangedEvent> {
   constructor(private readonly tagsRepository: TagsRepository) {}
 
   async handle(event: TagChangedEvent): Promise<any> {
-    const { changedTags, prevTags, boardType } = event;
+    const { changedTags = [], prevTags = [], boardType } = event;
     this.logger.log(`prevTags: ${prevTags}, changedTags: ${changedTags}`);
     const prevTagSet = new Set(prevTags);
     const changedTagSet = new Set(changedTags);

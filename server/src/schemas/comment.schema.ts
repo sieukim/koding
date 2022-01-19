@@ -15,9 +15,6 @@ import { PostDocument } from "./post.schema";
   timestamps: { createdAt: true, updatedAt: false, currentTime: currentTime },
 })
 export class CommentDocument extends Document {
-  // @Prop({ type: Types.ObjectId })
-  // _id: Types.ObjectId;
-
   commentId: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId })

@@ -2,9 +2,9 @@ import { ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
 import { IsOptional } from "class-validator";
 import { Post } from "../../models/post.model";
 
-const keys = ["title", "markdownContent", "tags"] as const;
-
-export class ModifyPostRequestDto extends PartialType(PickType(Post, keys)) {
+export class ModifyPostRequestDto extends PartialType(
+  PickType(Post, ["title", "markdownContent", "tags", "imageUrls"] as const),
+) {
   @ApiPropertyOptional({
     description: "바꿀 제목. 그대로 둘 경우엔 기재하지 않음",
   })
@@ -22,4 +22,11 @@ export class ModifyPostRequestDto extends PartialType(PickType(Post, keys)) {
   })
   @IsOptional()
   tags?: string[];
+
+  @ApiPropertyOptional({
+    description:
+      "바꿀 내용에 있는 이미지 url들. 바꾸지 않을 경우 사용하지 않음",
+    type: [String],
+  })
+  imageUrls?: string[];
 }

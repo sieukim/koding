@@ -9,6 +9,7 @@ const keys = [
   "readCount",
   "boardType",
   "createdAt",
+  "imageUrls",
 ] as const;
 
 export class PostInfoDto extends PickType(Post, keys) {

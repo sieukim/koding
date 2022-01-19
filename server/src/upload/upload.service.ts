@@ -2,7 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { CommandBus } from "@nestjs/cqrs";
 import { DeleteUnusedFilesCommand } from "./commands/delete-unused-files.command";
-import { TemporaryUploadedFile } from "../schemas/temporary-uploaded-file.schema";
+import { S3Image } from "../schemas/s3-image.schema";
 
 @Injectable()
 export class UploadService {
@@ -14,7 +14,7 @@ export class UploadService {
   async deleteUnusedTemporaryFile() {
     await this.commandBus.execute(new DeleteUnusedFilesCommand());
     this.logger.log(
-      `unused(during ${TemporaryUploadedFile.EXPIRE_HOUR} hour) temporary files deleted`,
+      `unused(during ${S3Image.EXPIRE_HOUR} hour) temporary files deleted`,
     );
   }
 }
