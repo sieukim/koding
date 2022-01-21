@@ -82,11 +82,11 @@ const ProfileContainer = ({ profileUserNickname }) => {
   // 팔로우 여부 조회
   const [isFollowingState] = useAsync(
     async () => {
-      if (loginUser.nickname !== profileUserNickname) {
+      if (loginUser && loginUser.nickname !== profileUserNickname) {
         return api.isFollowing(loginUser.nickname, profileUserNickname);
       }
     },
-    [loginUser.nickname, profileUserNickname, followers, followings],
+    [loginUser, profileUserNickname, followers, followings],
     false,
   );
 

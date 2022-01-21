@@ -1,6 +1,9 @@
 import styled from 'styled-components';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { PrintState } from '../../../utils/MyComponents';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setLogout } from '../../../modules/auth';
 
 const StyledEditProfile = styled.div`
   display: flex;
@@ -60,12 +63,13 @@ const StyledEditProfile = styled.div`
 `;
 
 const EditProfilePresenter = ({
-  getLoginUserState,
   getLoginUserData = {},
   changeUserInfoState,
   changeUserInfoFetch,
   changePasswordState,
   changePasswordFetch,
+  revokeState,
+  revokeFetch,
 }) => {
   /* 유저 정보 변경 */
   const [userInfo, setUserInfo] = useState({});
@@ -98,6 +102,7 @@ const EditProfilePresenter = ({
   );
 
   /* 비밀번호 변경 */
+
   const onSubmitPassword = useCallback(
     (e) => {
       e.preventDefault();
@@ -113,6 +118,29 @@ const EditProfilePresenter = ({
     },
     [changePasswordFetch, userInfo],
   );
+
+  /* 유저 탈퇴 */
+
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  // 로그 아웃 api 호출하는 함수
+  const logout = useCallback(() => {
+    dispatch(setLogout());
+  }, [setLogout]);
+
+  const onClickRevoke = useCallback(() => {
+    revokeFetch(getLoginUserData.nickname);
+  }, [revokeFetch, getLoginUserData]);
+
+  useEffect(() => {
+    if (revokeState.success) {
+      logout();
+      navigate('/');
+    }
+  }, [logout, navigate, revokeState.success]);
+
+  console.log(revokeState);
 
   return (
     <StyledEditProfile>
@@ -232,6 +260,8 @@ const EditProfilePresenter = ({
           {changePasswordState.success && <div>변경되었습니다.</div>}
         </>
       )}
+      <button onClick={onClickRevoke}>계정 삭제</button>
+      <PrintState state={revokeState} />
     </StyledEditProfile>
   );
 };

@@ -24,6 +24,13 @@ const EditProfileContainer = ({ profileNickname }) => {
     true,
   );
 
+  // 유저 탈퇴
+  const [revokeState, revokeFetch] = useAsync(
+    (nickname) => api.revokeUser(nickname),
+    [],
+    true,
+  );
+
   return (
     <EditProfilePresenter
       getLoginUserState={getLoginUserState}
@@ -32,6 +39,8 @@ const EditProfileContainer = ({ profileNickname }) => {
       changeUserInfoFetch={changeUserInfoFetch}
       changePasswordState={changePasswordState}
       changePasswordFetch={changePasswordFetch}
+      revokeState={revokeState}
+      revokeFetch={revokeFetch}
     />
   );
 };

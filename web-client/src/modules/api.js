@@ -164,3 +164,8 @@ export const uploadImage = (image) => {
   body.set('image', image);
   return axios.post(`/api/upload/posts`, body);
 };
+
+// 유저 탈퇴
+export const revokeUser = (nickname) => {
+  return axios.delete(`/api/users/${nickname}`);
+};
