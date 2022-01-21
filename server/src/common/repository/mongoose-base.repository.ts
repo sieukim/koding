@@ -21,6 +21,8 @@ export abstract class MongooseBaseRepository<
 
   abstract update(model: DomainModel): Promise<DomainModel>;
 
+  abstract remove(mode: DomainModel): Promise<boolean>;
+
   async findAll(
     findOption: FindOption<DomainModel>,
     sortOption?: SortOption<DomainModel>,

@@ -23,6 +23,23 @@ export class PostsRepository extends MongooseBaseRepository<
     );
   }
 
+  async renameWriter(nickname: string, newNickname: string | null) {
+    if (newNickname !== null)
+      await this.postModel
+        .updateMany(
+          { writerNickname: nickname },
+          { $set: { writerNickname: newNickname } },
+        )
+        .exec();
+    else
+      await this.postModel.updateMany(
+        {
+          writerNickname: nickname,
+        },
+        { $unset: { writerNickname: null } },
+      );
+  }
+
   async persist(model: Post): Promise<Post> {
     const postDocument = PostDocument.fromModel(model, this.postModel);
     const {

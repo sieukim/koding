@@ -3,6 +3,7 @@ import { PostImageChangedEvent } from "../post-image-changed.event";
 import { S3Image } from "../../../schemas/s3-image.schema";
 import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
+import { S3Service } from "../../s3.service";
 
 @EventsHandler(PostImageChangedEvent)
 export class PostImageChangedHandler
@@ -11,6 +12,7 @@ export class PostImageChangedHandler
   constructor(
     @InjectModel(S3Image.name)
     private readonly imageModel: Model<S3Image>,
+    private readonly s3Service: S3Service,
   ) {}
 
   async handle(event: PostImageChangedEvent): Promise<any> {
@@ -38,6 +40,7 @@ export class PostImageChangedHandler
           $set: { postId },
         },
       ),
+      this.s3Service.deleteS3PostImageFiles(removedImages),
     ]);
   }
 }

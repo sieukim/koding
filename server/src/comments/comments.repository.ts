@@ -23,6 +23,23 @@ export class CommentsRepository extends MongooseBaseRepository<
     );
   }
 
+  async renameWriter(nickname: string, newNickname: string | null) {
+    if (newNickname !== null)
+      await this.commentModel
+        .updateMany(
+          { writerNickname: nickname },
+          { $set: { writerNickname: newNickname } },
+        )
+        .exec();
+    else
+      await this.commentModel.updateMany(
+        {
+          writerNickname: nickname,
+        },
+        { $unset: { writerNickname: null } },
+      );
+  }
+
   async persist(model: Comment): Promise<Comment> {
     const commentDocument = CommentDocument.fromModel(model, this.commentModel);
     const {

@@ -58,6 +58,7 @@ import { ChangeProfileHandler } from "./commands/handlers/change-profile.handler
 import { ChangePasswordRequestDto } from "./dto/change-password-request.dto";
 import { ChangePasswordCommand } from "./commands/change-password.command";
 import { ChangePasswordHandler } from "./commands/handlers/change-password.handler";
+import { DeleteAccountCommand } from "./commands/delete-account.command";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -113,6 +114,32 @@ export class UsersController {
   }
 
   @ApiOperation({
+    summary: "유저 탈퇴",
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "유저 닉네임",
+  })
+  @ApiNotFoundResponse({
+    description: "없는 유저",
+  })
+  @ApiNoContentResponse({
+    description: "유저 삭제 성공",
+  })
+  @UseGuards(LoggedInGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":nickname")
+  async deleteAccount(
+    @Param("nickname") nickname: string,
+    @LoginUser() loginUser: User,
+  ) {
+    await this.commandBus.execute(
+      new DeleteAccountCommand(loginUser.nickname, nickname),
+    );
+    return;
+  }
+
+  @ApiOperation({
     summary: "유저 프로필 정보 변경",
   })
   @ApiParam({
@@ -128,7 +155,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
   })
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: "유저 프로필 정보 변경 성공",
     type: MyUserInfoDto,
   })

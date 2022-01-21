@@ -30,8 +30,9 @@ export class PostDocument extends Document {
 
   @Prop({
     type: String,
+    required: false,
   })
-  writerNickname: string;
+  writerNickname?: string;
 
   writer?: UserDocument;
 

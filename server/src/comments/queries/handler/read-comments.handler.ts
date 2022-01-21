@@ -29,7 +29,7 @@ export class ReadCommentsHandler
           postId: { eq: postIdentifier.postId },
         },
         {
-          commentId: SortType.DESC,
+          commentId: SortType.ASC,
         },
         pageSize + 1,
       );
@@ -40,7 +40,7 @@ export class ReadCommentsHandler
           commentId: { lte: cursorCommentId },
         },
         {
-          commentId: SortType.DESC,
+          commentId: SortType.ASC,
         },
         pageSize + 1,
       );
@@ -49,7 +49,7 @@ export class ReadCommentsHandler
           postId: { eq: postIdentifier.postId },
           commentId: { gt: cursorCommentId },
         },
-        { commentId: SortType.ASC },
+        { commentId: SortType.DESC },
         pageSize,
       );
       if (prevComments.length > 0) {

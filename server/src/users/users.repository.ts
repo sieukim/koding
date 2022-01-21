@@ -79,6 +79,13 @@ export class UsersRepository extends MongooseBaseRepository<
     };
   }
 
+  async remove(user: User): Promise<boolean> {
+    const deleteResult = await this.userModel
+      .deleteOne({ nickname: user.nickname })
+      .exec();
+    return deleteResult.deletedCount === 1;
+  }
+
   private async updateByField(
     user: User,
     fieldName: keyof UserDocument,
@@ -86,7 +93,6 @@ export class UsersRepository extends MongooseBaseRepository<
   ): Promise<User> {
     const userDocument = UserDocument.fromModel(user, this.userModel);
     const {
-      _id,
       nickname,
       email,
       isEmailUser,

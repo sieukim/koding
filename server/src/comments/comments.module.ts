@@ -9,6 +9,7 @@ import { CommentCommandHandlers } from "./commands/handlers";
 import { CommentQueryHandlers } from "./queries/handler";
 import { UsersModule } from "../users/users.module";
 import { PostsModule } from "../posts/posts.module";
+import { CommentsSaga } from "./sagas/comments.saga";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PostsModule } from "../posts/posts.module";
   providers: [
     CommentsRepository,
     CommentsService,
+    CommentsSaga,
     ...CommentCommandHandlers,
     ...CommentQueryHandlers,
   ],

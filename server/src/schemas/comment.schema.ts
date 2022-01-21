@@ -22,8 +22,8 @@ export class CommentDocument extends Document {
 
   post?: PostDocument;
 
-  @Prop({ type: String })
-  writerNickname: string;
+  @Prop({ type: String, required: false })
+  writerNickname?: string;
 
   writer?: UserDocument;
 

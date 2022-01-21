@@ -307,7 +307,7 @@ export class User extends AggregateRoot {
       isPortfolioUrlPublic ?? this.isPortfolioUrlPublic;
   }
 
-  private verifySameUser(user: User) {
+  verifySameUser(user: User) {
     if (this.nickname !== user.nickname)
       throw new ForbiddenException("사용자에 대한 권한이 없습니다");
   }

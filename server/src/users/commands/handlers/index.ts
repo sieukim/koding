@@ -9,6 +9,7 @@ import { ResetPasswordRequestHandler } from "./reset-password-request.handler";
 import { VerifyGithubSignupHandler } from "./verify-github-signup.handler";
 import { ChangeProfileHandler } from "./change-profile.handler";
 import { ChangePasswordHandler } from "./change-password.handler";
+import { DeleteAccountHandler } from "./delete-account.handler";
 
 export const UserCommandHandlers = [
   SignupLocalHandler,
@@ -22,4 +23,5 @@ export const UserCommandHandlers = [
   ResetPasswordRequestHandler,
   ChangeProfileHandler,
   ChangePasswordHandler,
+  DeleteAccountHandler,
 ];

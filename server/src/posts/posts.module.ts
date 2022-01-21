@@ -10,6 +10,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { PostsRepository } from "./posts.repository";
 import { UsersModule } from "../users/users.module";
 import { UploadModule } from "../upload/upload.module";
+import { PostsSaga } from "./sagas/posts.saga";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UploadModule } from "../upload/upload.module";
   providers: [
     PostsRepository,
     PostsService,
+    PostsSaga,
     ...PostCommandHandlers,
     ...PostEventHandlers,
     ...PostQueryHandlers,

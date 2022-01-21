@@ -28,14 +28,14 @@ export class S3Service {
     return this.s3;
   }
 
-  async deleteS3Files(fileInfos: { bucketName: string; fileKey: string }[]) {
+  async deleteS3PostImageFiles(fileKeys: string[]) {
     return new Promise<string[]>((res, rej) => {
       this.s3.deleteObjects(
         {
           Bucket: this.postImageBucketName,
           Delete: {
             Quiet: false,
-            Objects: fileInfos.map(({ fileKey }) => ({ Key: fileKey })),
+            Objects: fileKeys.map((fileKey) => ({ Key: fileKey })),
           },
         },
         (err, data) => {
