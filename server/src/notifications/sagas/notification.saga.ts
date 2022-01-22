@@ -66,8 +66,10 @@ export class NotificationSaga {
       map(
         (event) =>
           new AddNotificationCommand(
-            event.fromNickname,
-            new FollowNotificationData({ followerNickname: event.toNickname }),
+            event.toNickname,
+            new FollowNotificationData({
+              followerNickname: event.fromNickname,
+            }),
           ),
       ),
     );
