@@ -40,7 +40,7 @@ export class PostImageChangedHandler
           $set: { postId },
         },
       ),
-      this.s3Service.deleteS3PostImageFiles(removedImages),
+      // this.s3Service.deleteS3PostImageFiles(removedImages),
     ]);
   }
 }

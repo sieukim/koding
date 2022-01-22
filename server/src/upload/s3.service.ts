@@ -30,25 +30,27 @@ export class S3Service {
 
   async deleteS3PostImageFiles(fileKeys: string[]) {
     return new Promise<string[]>((res, rej) => {
-      this.s3.deleteObjects(
-        {
-          Bucket: this.postImageBucketName,
-          Delete: {
-            Quiet: false,
-            Objects: fileKeys.map((fileKey) => ({ Key: fileKey })),
+      if (fileKeys.length <= 0) res([]);
+      else
+        this.s3.deleteObjects(
+          {
+            Bucket: this.postImageBucketName.split("/")[1],
+            Delete: {
+              Quiet: false,
+              Objects: fileKeys.map((fileKey) => ({ Key: fileKey })),
+            },
           },
-        },
-        (err, data) => {
-          if (data)
-            this.logger.log(
-              `${
-                data.Deleted.length
-              } Image deleted from AWS S3, ${data.Deleted.toString()}`,
-            );
-          if (err) rej(err);
-          else res(data.Deleted.map(({ Key }) => Key));
-        },
-      );
+          (err, data) => {
+            if (data)
+              this.logger.log(
+                `${
+                  data.Deleted.length
+                } Image deleted from AWS S3, ${data.Deleted.toString()}`,
+              );
+            if (err) rej(err);
+            else res(data.Deleted.map(({ Key }) => Key));
+          },
+        );
     });
   }
 }
