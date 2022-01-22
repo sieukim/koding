@@ -38,9 +38,17 @@ export class CommentNotificationData extends NotificationData {
   @Expose()
   @IsString()
   @ApiProperty({
-    description: "댓글이 달린 게시글 아이디",
+    description: "댓글이 달린 게시글의 아이디",
   })
   postId: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "댓글이 달린 게시글의 제목",
+  })
+  postTitle: string;
+
   @Expose()
   @IsString()
   @ApiProperty({

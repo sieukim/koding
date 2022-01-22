@@ -40,6 +40,7 @@ export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
     this.eventBus.publish(
       new CommentAddedEvent(
         postIdentifier,
+        post.title,
         post.writer.nickname,
         comment.commentId,
         comment.writerNickname,

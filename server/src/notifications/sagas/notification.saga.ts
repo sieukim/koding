@@ -17,14 +17,21 @@ export class NotificationSaga {
     $events.pipe(
       ofType(CommentAddedEvent),
       map(
-        (event) =>
+        ({
+          commentContent,
+          commentWriterNickname,
+          postWriterNickname,
+          postIdentifier: { postId, boardType },
+          postTitle,
+        }) =>
           new AddNotificationCommand(
-            event.postWriterNickname,
+            postWriterNickname,
             new CommentNotificationData({
-              boardType: event.postIdentifier.boardType,
-              postId: event.postIdentifier.postId,
-              commentContent: event.commentContent,
-              commentWriterNickname: event.commentWriterNickname,
+              postTitle,
+              boardType,
+              postId,
+              commentContent,
+              commentWriterNickname,
             }),
           ),
       ),
@@ -39,7 +46,7 @@ export class NotificationSaga {
           mentionedUserNicknames,
           commentWriterNickname,
           commentContent,
-          postWriterNickname,
+          postTitle,
           postIdentifier: { postId, boardType },
           commentId,
         }) =>
@@ -49,6 +56,7 @@ export class NotificationSaga {
                 mentionedNickname,
                 new MentionNotificationData({
                   postId,
+                  postTitle,
                   commentContent,
                   commentId,
                   commentWriterNickname,
