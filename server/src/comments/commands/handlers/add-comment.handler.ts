@@ -1,10 +1,11 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { AddCommentCommand } from "../add-comment.command";
 import { PostsRepository } from "../../../posts/posts.repository";
 import { Comment } from "../../../models/comment.model";
 import { UsersRepository } from "../../../users/users.repository";
 import { CommentsRepository } from "../../comments.repository";
 import { Logger, NotFoundException } from "@nestjs/common";
+import { CommentAddedEvent } from "../../events/comment-added.event";
 
 @CommandHandler(AddCommentCommand)
 export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
@@ -14,6 +15,7 @@ export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
     private readonly postRepository: PostsRepository,
     private readonly userRepository: UsersRepository,
     private readonly commentRepository: CommentsRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: AddCommentCommand): Promise<Comment> {
@@ -35,6 +37,16 @@ export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
     this.logger.log(`before commentId: ${comment.commentId}`);
     const returned = await this.commentRepository.persist(comment);
     this.logger.log(`after commentId: ${returned.commentId}`);
+    this.eventBus.publish(
+      new CommentAddedEvent(
+        postIdentifier,
+        post.writer.nickname,
+        comment.commentId,
+        comment.writerNickname,
+        comment.content,
+        comment.mentionedUsers.map(({ nickname }) => nickname),
+      ),
+    );
     return returned;
   }
 }

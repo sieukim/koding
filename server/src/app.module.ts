@@ -11,6 +11,7 @@ import { PostsModule } from "./posts/posts.module";
 import { CommentsModule } from "./comments/comments.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TagsModule } from "./tags/tags.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TagsModule } from "./tags/tags.module";
     PostsModule,
     CommentsModule,
     TagsModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [],

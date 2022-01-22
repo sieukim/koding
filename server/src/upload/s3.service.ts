@@ -39,11 +39,12 @@ export class S3Service {
           },
         },
         (err, data) => {
-          this.logger.log(
-            `${
-              data.Deleted.length
-            } Image deleted from AWS S3, ${data.Deleted.toString()}`,
-          );
+          if (data)
+            this.logger.log(
+              `${
+                data.Deleted.length
+              } Image deleted from AWS S3, ${data.Deleted.toString()}`,
+            );
           if (err) rej(err);
           else res(data.Deleted.map(({ Key }) => Key));
         },
