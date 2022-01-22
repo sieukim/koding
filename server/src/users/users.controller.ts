@@ -138,7 +138,7 @@ export class UsersController {
     @Param("nickname") nickname: string,
     @LoginUser() loginUser: User,
     @Req() req: Request,
-    @Res() res: Response,
+    @Res({ passthrough: true }) res: Response,
   ) {
     await this.commandBus.execute(
       new DeleteAccountCommand(loginUser.nickname, nickname),
