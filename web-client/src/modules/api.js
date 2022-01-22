@@ -169,3 +169,13 @@ export const uploadImage = (image) => {
 export const revokeUser = (nickname) => {
   return axios.delete(`/api/users/${nickname}`);
 };
+
+// 알림 조회
+export const getNotifications = (nickname, cursor) => {
+  const query = new URLSearchParams();
+  if (cursor) {
+    query.set('cursor', cursor);
+  }
+
+  return axios.get(`/api/notifications/${nickname}?${query.toString()}`);
+};

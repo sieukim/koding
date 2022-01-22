@@ -15,6 +15,7 @@ import EditPostPage from './pages/post/EditPostPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import FollowListPage from './pages/profile/FollowListPage';
 import EditProfilePage from './pages/profile/EditProfilePage';
+import NotificationPage from './pages/profile/NotificationPage';
 
 function App() {
   return (
@@ -46,6 +47,10 @@ function App() {
           <Route
             path="/user/:nickname/profile/edit"
             element={<EditProfilePage />}
+          />
+          <Route
+            path="/user/:nickname/notification"
+            element={<NotificationPage />}
           />
         </Routes>
       </div>

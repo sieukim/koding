@@ -85,7 +85,7 @@ const Header = () => {
         {user && (
           <>
             <li>
-              <a>알림</a>
+              <NavLink to={`/user/${user.nickname}/notification`}>알림</NavLink>
             </li>
             <li>
               <MyPageLink nickname={user.nickname} str={'마이페이지'} />
