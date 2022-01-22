@@ -14,6 +14,8 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  Res,
   UseGuards,
 } from "@nestjs/common";
 import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
@@ -58,6 +60,9 @@ import { ChangeProfileHandler } from "./commands/handlers/change-profile.handler
 import { ChangePasswordRequestDto } from "./dto/change-password-request.dto";
 import { ChangePasswordCommand } from "./commands/change-password.command";
 import { ChangePasswordHandler } from "./commands/handlers/change-password.handler";
+import { DeleteAccountCommand } from "./commands/delete-account.command";
+import { ConfigService } from "@nestjs/config";
+import { Request, Response } from "express";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -72,6 +77,7 @@ export class UsersController {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
@@ -113,6 +119,36 @@ export class UsersController {
   }
 
   @ApiOperation({
+    summary: "유저 탈퇴 & 로그아웃",
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "유저 닉네임",
+  })
+  @ApiNotFoundResponse({
+    description: "없는 유저",
+  })
+  @ApiNoContentResponse({
+    description: "유저 삭제 성공 & 로그아웃 완료",
+  })
+  @UseGuards(LoggedInGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":nickname")
+  async deleteAccount(
+    @Param("nickname") nickname: string,
+    @LoginUser() loginUser: User,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    await this.commandBus.execute(
+      new DeleteAccountCommand(loginUser.nickname, nickname),
+    );
+    req.logout();
+    res.clearCookie(this.configService.get("session.cookie-name"));
+    return;
+  }
+
+  @ApiOperation({
     summary: "유저 프로필 정보 변경",
   })
   @ApiParam({
@@ -128,7 +164,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
   })
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: "유저 프로필 정보 변경 성공",
     type: MyUserInfoDto,
   })

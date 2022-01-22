@@ -307,9 +307,16 @@ export class User extends AggregateRoot {
       isPortfolioUrlPublic ?? this.isPortfolioUrlPublic;
   }
 
-  private verifySameUser(user: User) {
-    if (this.nickname !== user.nickname)
-      throw new ForbiddenException("사용자에 대한 권한이 없습니다");
+  verifySameUser(nickname: string);
+  verifySameUser(user: User);
+  verifySameUser(userOrNickname: User | string) {
+    if (userOrNickname instanceof User) {
+      if (this.nickname !== userOrNickname.nickname)
+        throw new ForbiddenException("사용자에 대한 권한이 없습니다");
+    } else {
+      if (this.nickname !== userOrNickname)
+        throw new ForbiddenException("사용자에 대한 권한이 없습니다");
+    }
   }
 
   setNewGithubSignupVerifyToken() {

@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -19,6 +20,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
 import {
@@ -33,10 +35,10 @@ import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../models/user.model";
 import { ModifyCommentRequestDto } from "./dto/modify-comment-request.dto";
 import { CommentsService } from "./comments.service";
-import { ReadCommentDto } from "./dto/read-comment.dto";
+import { ReadCommentsDto } from "./dto/read-comments.dto";
 import { QueryBus } from "@nestjs/cqrs";
-import { ReadCommentQuery } from "./queries/read-comment.query";
-import { ReadCommentHandler } from "./queries/handler/read-comment.handler";
+import { ReadCommentsQuery } from "./queries/read-comments.query";
+import { ReadCommentsHandler } from "./queries/handler/read-comments.handler";
 import { PostBoardType } from "../models/post.model";
 
 @ApiTags("POST/COMMENT")
@@ -58,25 +60,38 @@ export class CommentsController {
   })
   @ApiParamBoardType()
   @ApiParamPostId()
+  @ApiQuery({
+    name: "cursor",
+    description:
+      "조회를 시작할 기준이 되는 게시글 아이디. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
+    type: String,
+    required: false,
+  })
   @ApiNotFoundResponse({
     description: "잘못된 게시글 아이디",
   })
   @ApiOkResponse({
     description: "댓글 조회 성공",
-    type: ReadCommentDto,
+    type: ReadCommentsDto,
   })
   @HttpCode(HttpStatus.OK)
   @Get()
   readComments(
     @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
     @Param("postId") postId: string,
+    @Query("cursor") cursor?: string,
   ) {
+    const pageSize = 10;
     return this.queryBus.execute(
-      new ReadCommentQuery({
-        postId,
-        boardType,
-      }),
-    ) as ReturnType<ReadCommentHandler["execute"]>;
+      new ReadCommentsQuery(
+        {
+          postId,
+          boardType,
+        },
+        pageSize,
+        cursor,
+      ),
+    ) as ReturnType<ReadCommentsHandler["execute"]>;
   }
 
   @ApiOperation({

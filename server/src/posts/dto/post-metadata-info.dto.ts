@@ -10,7 +10,7 @@ const keys = [
   "boardType",
 ] as const;
 
-export class ReadPostMetadataDto extends PickType(Post, keys) {
+export class PostMetadataInfoDto extends PickType(Post, keys) {
   @ApiProperty({
     description: "게시글 작성자 닉네임",
   })

@@ -1,14 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsOptional, IsString } from "class-validator";
-import { ReadPostMetadataDto } from "./read-post-metadata.dto";
+import { PostMetadataInfoDto } from "./post-metadata-info.dto";
 import { Post } from "../../models/post.model";
 
-export class CursorPostsDto {
+export class PostListDto {
   @ApiProperty({
     description: "게시글 리스트",
-    type: [ReadPostMetadataDto],
+    type: [PostMetadataInfoDto],
   })
-  posts: ReadPostMetadataDto[];
+  posts: PostMetadataInfoDto[];
 
   @IsOptional()
   @IsString()
@@ -31,6 +31,6 @@ export class CursorPostsDto {
   constructor(posts: Post[], prevPageCursor?: string, nextPageCursor?: string) {
     this.prevPageCursor = prevPageCursor;
     this.nextPageCursor = nextPageCursor;
-    this.posts = posts.map((post) => new ReadPostMetadataDto(post));
+    this.posts = posts.map((post) => new PostMetadataInfoDto(post));
   }
 }

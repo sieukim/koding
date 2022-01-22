@@ -1,6 +1,6 @@
 import { EventPublisher, IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { ReadPostQuery } from "../read-post.query";
-import { ReadPostWithAroundDto } from "../../dto/read-post-with-around.dto";
+import { PostWithAroundInfoDto } from "../../dto/post-with-around-info.dto";
 import { PostsRepository } from "../../posts.repository";
 import { NotFoundException } from "@nestjs/common";
 import { Post } from "../../../models/post.model";
@@ -14,7 +14,7 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
     private readonly publisher: EventPublisher,
   ) {}
 
-  async execute(query: ReadPostQuery): Promise<ReadPostWithAroundDto> {
+  async execute(query: ReadPostQuery): Promise<PostWithAroundInfoDto> {
     const {
       postIdentifier: { postId, boardType },
     } = query;
@@ -43,6 +43,6 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
       },
       { postId: SortType.DESC },
     );
-    return new ReadPostWithAroundDto(post, prevPost, nextPost);
+    return new PostWithAroundInfoDto(post, prevPost, nextPost);
   }
 }

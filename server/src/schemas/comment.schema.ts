@@ -15,9 +15,6 @@ import { PostDocument } from "./post.schema";
   timestamps: { createdAt: true, updatedAt: false, currentTime: currentTime },
 })
 export class CommentDocument extends Document {
-  // @Prop({ type: Types.ObjectId })
-  // _id: Types.ObjectId;
-
   commentId: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId })
@@ -25,8 +22,8 @@ export class CommentDocument extends Document {
 
   post?: PostDocument;
 
-  @Prop({ type: String })
-  writerNickname: string;
+  @Prop({ type: String, required: false })
+  writerNickname?: string;
 
   writer?: UserDocument;
 

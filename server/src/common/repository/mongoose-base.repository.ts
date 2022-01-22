@@ -7,19 +7,21 @@ export abstract class MongooseBaseRepository<
   ModelDocument extends Document,
 > {
   protected constructor(
-    private readonly toModel: (document: ModelDocument) => DomainModel,
-    private readonly fromModel: (
+    protected readonly toModel: (document: ModelDocument) => DomainModel,
+    protected readonly fromModel: (
       model: DomainModel,
       mongooseModel: Model<ModelDocument>,
     ) => ModelDocument,
     private readonly mongooseModel: Model<ModelDocument>,
-    private readonly shouldConvertedToObjectIdFields: (keyof DomainModel)[] = [],
-    private readonly virtualPrimaryKeyName?: keyof ModelDocument,
+    protected readonly shouldConvertedToObjectIdFields: (keyof DomainModel)[] = [],
+    protected readonly virtualPrimaryKeyName?: keyof ModelDocument,
   ) {}
 
   abstract persist(model: DomainModel): Promise<DomainModel>;
 
   abstract update(model: DomainModel): Promise<DomainModel>;
+
+  abstract remove(model: DomainModel): Promise<boolean>;
 
   async findAll(
     findOption: FindOption<DomainModel>,

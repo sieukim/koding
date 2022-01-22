@@ -9,13 +9,14 @@ const keys = [
   "readCount",
   "boardType",
   "createdAt",
+  "imageUrls",
 ] as const;
 
-export class ReadPostDto extends PickType(Post, keys) {
+export class PostInfoDto extends PickType(Post, keys) {
   @ApiProperty({
-    description: "게시글 작성자 닉네임",
+    description: "게시글 작성자 닉네임. 탈퇴한 회원인 경우 값 없음",
   })
-  writerNickname: string;
+  writerNickname?: string;
 
   constructor(post: Post) {
     super();

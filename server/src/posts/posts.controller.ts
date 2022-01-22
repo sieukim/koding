@@ -13,7 +13,7 @@ import {
 } from "@nestjs/common";
 import { WritePostRequestDto } from "./dto/write-post-request.dto";
 import { PostsService } from "./posts.service";
-import { ReadPostDto } from "./dto/read-post.dto";
+import { PostInfoDto } from "./dto/post-info.dto";
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -35,11 +35,14 @@ import {
   ApiParamPostId,
 } from "../common/decorator/swagger/api-param.decorator";
 
-import { CursorPostsDto } from "./dto/cursor-posts.dto";
-import { ReadPostWithAroundDto } from "./dto/read-post-with-around.dto";
+import { PostListDto } from "./dto/post-list.dto";
+import { PostWithAroundInfoDto } from "./dto/post-with-around-info.dto";
 import { ReadPostFilter } from "./dto/read-post.filter";
 import { User } from "../models/user.model";
 import { PostBoardType } from "../models/post.model";
+import { QueryBus } from "@nestjs/cqrs";
+import { GetPostListQuery } from "./query/get-post-list.query";
+import { ReadPostQuery } from "./query/read-post.query";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -50,7 +53,10 @@ import { PostBoardType } from "../models/post.model";
 })
 @Controller("api/posts")
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @ApiOperation({
     summary: "게시글 쓰기",
@@ -61,7 +67,7 @@ export class PostsController {
   })
   @ApiCreatedResponse({
     description: "게시글 쓰기 성공",
-    type: ReadPostDto,
+    type: PostInfoDto,
   })
   @UseGuards(VerifiedUserGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -72,7 +78,7 @@ export class PostsController {
     @Body() body: WritePostRequestDto,
   ) {
     const post = await this.postsService.writePost(boardType, user, body);
-    return new ReadPostDto(post);
+    return new PostInfoDto(post);
   }
 
   @ApiOperation({
@@ -101,7 +107,7 @@ export class PostsController {
   })
   @ApiOkResponse({
     description: "게시글 목록 조회 성공",
-    type: CursorPostsDto,
+    type: PostListDto,
   })
   @Get(":boardType")
   async readPosts(
@@ -109,11 +115,9 @@ export class PostsController {
     @Query() { cursor, tags }: ReadPostFilter,
   ) {
     const pageSize = 10;
-    const { posts, prevPageCursor, nextPageCursor } =
-      await this.postsService.getPostsWithCursor(boardType, pageSize, cursor, {
-        tags,
-      });
-    return new CursorPostsDto(posts, prevPageCursor, nextPageCursor);
+    return this.queryBus.execute(
+      new GetPostListQuery(boardType, pageSize, cursor, { tags }),
+    );
   }
 
   @ApiOperation({
@@ -126,7 +130,7 @@ export class PostsController {
   })
   @ApiOkResponse({
     description: "게시글 읽기 성공",
-    type: ReadPostWithAroundDto,
+    type: PostWithAroundInfoDto,
   })
   @HttpCode(HttpStatus.OK)
   @Get(":boardType/:postId")
@@ -134,7 +138,7 @@ export class PostsController {
     @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
     @Param("postId") postId: string,
   ) {
-    return await this.postsService.readPost({ boardType, postId });
+    return this.queryBus.execute(new ReadPostQuery({ boardType, postId }));
   }
 
   @ApiOperation({
@@ -150,7 +154,7 @@ export class PostsController {
   })
   @ApiOkResponse({
     description: "게시글 수정 성공",
-    type: ReadPostDto,
+    type: PostInfoDto,
   })
   @UseGuards(VerifiedUserGuard)
   @HttpCode(HttpStatus.OK)
@@ -166,7 +170,7 @@ export class PostsController {
       { boardType, postId },
       body,
     );
-    return new ReadPostDto(post);
+    return new PostInfoDto(post);
   }
 
   @ApiOperation({

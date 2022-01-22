@@ -23,6 +23,23 @@ export class PostsRepository extends MongooseBaseRepository<
     );
   }
 
+  async renameWriter(nickname: string, newNickname: string | null) {
+    if (newNickname !== null)
+      await this.postModel
+        .updateMany(
+          { writerNickname: nickname },
+          { $set: { writerNickname: newNickname } },
+        )
+        .exec();
+    else
+      await this.postModel.updateMany(
+        {
+          writerNickname: nickname,
+        },
+        { $unset: { writerNickname: null } },
+      );
+  }
+
   async persist(model: Post): Promise<Post> {
     const postDocument = PostDocument.fromModel(model, this.postModel);
     const {
@@ -34,6 +51,7 @@ export class PostsRepository extends MongooseBaseRepository<
       title,
       readCount,
       tags,
+      imageUrls,
     } = postDocument.toJSON();
     await this.postModel.updateOne(
       { _id },
@@ -45,6 +63,7 @@ export class PostsRepository extends MongooseBaseRepository<
         title,
         readCount,
         tags,
+        imageUrls,
       },
       { upsert: true },
     );
@@ -62,6 +81,7 @@ export class PostsRepository extends MongooseBaseRepository<
       title,
       readCount,
       tags,
+      imageUrls,
     } = postDocument.toJSON();
     await this.postModel.updateOne(
       { _id },
@@ -73,6 +93,7 @@ export class PostsRepository extends MongooseBaseRepository<
         title,
         readCount,
         tags,
+        imageUrls,
       },
     );
     return PostDocument.toModel(postDocument);
