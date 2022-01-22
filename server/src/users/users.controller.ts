@@ -14,6 +14,8 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  Res,
   UseGuards,
 } from "@nestjs/common";
 import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
@@ -59,6 +61,8 @@ import { ChangePasswordRequestDto } from "./dto/change-password-request.dto";
 import { ChangePasswordCommand } from "./commands/change-password.command";
 import { ChangePasswordHandler } from "./commands/handlers/change-password.handler";
 import { DeleteAccountCommand } from "./commands/delete-account.command";
+import { ConfigService } from "@nestjs/config";
+import { Request, Response } from "express";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -73,6 +77,7 @@ export class UsersController {
 
   constructor(
     private readonly usersService: UsersService,
+    private readonly configService: ConfigService,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
@@ -114,7 +119,7 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 탈퇴",
+    summary: "유저 탈퇴 & 로그아웃",
   })
   @ApiParam({
     name: "nickname",
@@ -124,7 +129,7 @@ export class UsersController {
     description: "없는 유저",
   })
   @ApiNoContentResponse({
-    description: "유저 삭제 성공",
+    description: "유저 삭제 성공 & 로그아웃 완료",
   })
   @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -132,10 +137,14 @@ export class UsersController {
   async deleteAccount(
     @Param("nickname") nickname: string,
     @LoginUser() loginUser: User,
+    @Req() req: Request,
+    @Res() res: Response,
   ) {
     await this.commandBus.execute(
       new DeleteAccountCommand(loginUser.nickname, nickname),
     );
+    req.logout();
+    res.clearCookie(this.configService.get("session.cookie-name"));
     return;
   }
 
