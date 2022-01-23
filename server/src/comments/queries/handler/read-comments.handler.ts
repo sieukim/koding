@@ -37,7 +37,7 @@ export class ReadCommentsHandler
       comments = await this.commentsRepository.findAll(
         {
           postId: { eq: postIdentifier.postId },
-          commentId: { lte: cursorCommentId },
+          commentId: { gte: cursorCommentId },
         },
         {
           commentId: SortType.ASC,
@@ -47,7 +47,7 @@ export class ReadCommentsHandler
       const prevComments = await this.commentsRepository.findAll(
         {
           postId: { eq: postIdentifier.postId },
-          commentId: { gt: cursorCommentId },
+          commentId: { lt: cursorCommentId },
         },
         { commentId: SortType.DESC },
         pageSize,
