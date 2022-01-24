@@ -3,8 +3,9 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "./user.schema";
 import { currentTime } from "../common/utils/current-time.util";
 import { Post, PostBoardType } from "../models/post.model";
-import { PartialUser } from "../models/user.model";
+import { Expose, plainToClass, Transform, Type } from "class-transformer";
 
+@Expose({ toClassOnly: true })
 @Schema({
   id: false,
   _id: true,
@@ -20,7 +21,7 @@ export class PostDocument extends Document {
   // @Prop({ type: Types.ObjectId })
   // _id: Types.ObjectId;
 
-  postId: Types.ObjectId;
+  postId: string;
 
   @Prop()
   title: string;
@@ -34,8 +35,15 @@ export class PostDocument extends Document {
   })
   writerNickname?: string;
 
+  @Type(() => UserDocument)
+  @Transform(
+    ({ value }) =>
+      value instanceof UserDocument ? UserDocument.toModel(value) : value,
+    { toClassOnly: true },
+  )
   writer?: UserDocument;
 
+  @Type(() => String)
   @Prop({ type: [String] })
   tags: string[];
 
@@ -47,60 +55,22 @@ export class PostDocument extends Document {
 
   createdAt: Date;
 
+  @Type(() => String)
   @Prop({ type: [String] })
   imageUrls: string[];
 
   static toModel(postDocument: PostDocument): Post {
-    const {
-      postId,
-      boardType,
-      writerNickname,
-      writer,
-      readCount,
-      tags,
-      markdownContent,
-      createdAt,
-      title,
-      imageUrls,
-    } = postDocument;
-    return new Post({
-      title,
-      postId: postId.toString(),
-      boardType,
-      writer: writer
-        ? UserDocument.toModel(writer)
-        : new PartialUser({ nickname: writerNickname }),
-      tags,
-      markdownContent,
-      readCount,
-      createdAt,
-      imageUrls,
+    console.log("before: ", postDocument);
+    // TODO: PostDocument를 plainToClass를 이용해 Post로 바꿀 때 postId가 String이 아닌 Types.ObjectId인 문제 해결
+    const result = plainToClass(Post, postDocument, {
+      excludeExtraneousValues: true,
     });
+    console.log("after: ", result);
+    return result;
   }
 
   static fromModel(post: Post, model: Model<PostDocument>): PostDocument {
-    const {
-      postId,
-      boardType,
-      writer,
-      tags,
-      markdownContent,
-      createdAt,
-      readCount,
-      title,
-      imageUrls,
-    } = post;
-    return new model({
-      postId: new Types.ObjectId(postId),
-      boardType,
-      writerNickname: writer.nickname,
-      tags,
-      markdownContent,
-      createdAt,
-      readCount,
-      title,
-      imageUrls,
-    });
+    return new model(post);
   }
 }
 
@@ -114,7 +84,7 @@ PostSchema.virtual("writer", {
 });
 PostSchema.virtual("postId")
   .get(function () {
-    return this._id;
+    return this._id.toString();
   })
   .set(function (value) {
     if (value instanceof Types.ObjectId) this._id = value;

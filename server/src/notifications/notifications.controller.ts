@@ -62,7 +62,6 @@ export class NotificationsController {
     @Query("cursor") cursor?: string,
   ) {
     loginUser.verifySameUser(nickname);
-    console.log("cursor:", cursor);
     const pageSize = 5;
     return this.queryBus.execute(
       new ReadNotificationsQuery(nickname, pageSize, cursor),

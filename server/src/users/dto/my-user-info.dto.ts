@@ -1,7 +1,8 @@
 import { ApiPropertyOptional, PickType } from "@nestjs/swagger";
 import { User } from "../../models/user.model";
+import { Expose, plainToClass } from "class-transformer";
 
-const keys = [
+export class MyUserInfoDto extends PickType(User, [
   "email",
   "nickname",
   "emailSignupVerified",
@@ -17,10 +18,10 @@ const keys = [
   "followingsCount",
   "isGithubUser",
   "isEmailUser",
-] as const;
-
-export class MyUserInfoDto extends PickType(User, keys) {
+] as const) {
+  @Expose()
   followersCount: number;
+  @Expose()
   followingsCount: number;
 
   @ApiPropertyOptional({
@@ -36,10 +37,9 @@ export class MyUserInfoDto extends PickType(User, keys) {
   })
   portfolioUrl?: string;
 
-  constructor(me: User) {
-    super();
-    for (const key of keys) {
-      if (me[key] !== undefined) this[key as keyof User] = me[key];
-    }
+  static fromModel(model: User) {
+    return plainToClass(MyUserInfoDto, model, {
+      excludeExtraneousValues: true,
+    });
   }
 }

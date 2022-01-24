@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   Post,
   Res,
   UseGuards,
@@ -46,8 +45,6 @@ import { GetMyUserInfoHandler } from "../users/queries/handlers/get-my-user-info
 @ApiTags("AUTH")
 @Controller("api/auth")
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name);
-
   constructor(
     private readonly authService: AuthService,
     private readonly queryBus: QueryBus,
@@ -68,7 +65,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post()
   public localLogin(@LoginUser() user: User) {
-    return new MyUserInfoDto(user);
+    return MyUserInfoDto.fromModel(user);
   }
 
   @ApiOperation({
@@ -100,11 +97,11 @@ export class AuthController {
     if (user.githubSignupVerified) {
       // 기존 유저
       res.status(HttpStatus.OK);
-      return new MyUserInfoDto(user);
+      return MyUserInfoDto.fromModel(user);
     } else {
       // 신규 유저
       res.status(HttpStatus.CREATED);
-      return new SignupGithubResult(user);
+      return SignupGithubResult.fromModel(user);
     }
   }
 
@@ -134,7 +131,7 @@ export class AuthController {
       nickname,
       verifyToken,
     });
-    return new UserInfoDto(user);
+    return UserInfoDto.fromModel(user);
   }
 
   @ApiOperation({

@@ -4,10 +4,11 @@ import { Document, Model, Types } from "mongoose";
 import { UserDocument } from "./user.schema";
 import { IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { PartialUser } from "../models/user.model";
 import { Comment } from "../models/comment.model";
 import { PostDocument } from "./post.schema";
+import { Expose, plainToClass, Transform, Type } from "class-transformer";
 
+@Expose({ toClassOnly: true })
 @Schema({
   id: false,
   _id: true,
@@ -15,16 +16,33 @@ import { PostDocument } from "./post.schema";
   timestamps: { createdAt: true, updatedAt: false, currentTime: currentTime },
 })
 export class CommentDocument extends Document {
-  commentId: Types.ObjectId;
+  commentId: string;
 
-  @Prop({ type: Types.ObjectId })
+  @Prop({
+    type: Types.ObjectId,
+    get: (value: Types.ObjectId) => value.toString(),
+    set: (value: Types.ObjectId | string) =>
+      value instanceof Types.ObjectId ? value : new Types.ObjectId(value),
+  })
   postId: Types.ObjectId;
 
+  @Type(() => PostDocument)
+  @Transform(
+    ({ value }) =>
+      value instanceof PostDocument ? PostDocument.toModel(value) : value,
+    { toClassOnly: true },
+  )
   post?: PostDocument;
 
   @Prop({ type: String, required: false })
   writerNickname?: string;
 
+  @Type(() => UserDocument)
+  @Transform(
+    ({ value }) =>
+      value instanceof UserDocument ? UserDocument.toModel(value) : value,
+    { toClassOnly: true },
+  )
   writer?: UserDocument;
 
   @IsNotEmpty()
@@ -43,35 +61,20 @@ export class CommentDocument extends Document {
   @Prop({
     type: [String],
   })
-  mentionedUserNicknames: string[];
+  mentionedNicknames: string[];
 
+  @Type(() => UserDocument)
+  @Transform(
+    ({ value }) =>
+      value instanceof UserDocument ? UserDocument.toModel(value) : value,
+    { toClassOnly: true },
+  )
   mentionedUsers?: UserDocument[];
 
   static toModel(commentDocument: CommentDocument): Comment {
-    const {
-      commentId,
-      postId,
-      writer,
-      post,
-      mentionedUsers,
-      mentionedUserNicknames,
-      content,
-      createdAt,
-      writerNickname,
-    } = commentDocument;
-    return new Comment({
-      content,
-      createdAt,
-      writerNickname,
-      commentId: commentId.toString(),
-      postId: postId.toString(),
-      writer: writer && UserDocument.toModel(writer),
-      post: post && PostDocument.toModel(post),
-      mentionedUsers: mentionedUsers
-        ? mentionedUsers.map(UserDocument.toModel)
-        : mentionedUserNicknames.map(
-            (nickname) => new PartialUser({ nickname }),
-          ),
+    return plainToClass(Comment, commentDocument, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
     });
   }
 
@@ -79,22 +82,7 @@ export class CommentDocument extends Document {
     comment: Comment,
     model: Model<CommentDocument>,
   ): CommentDocument {
-    const {
-      commentId,
-      postId,
-      mentionedUsers,
-      writerNickname,
-      content,
-      createdAt,
-    } = comment;
-    return new model({
-      writerNickname,
-      content,
-      createdAt,
-      commentId: new Types.ObjectId(commentId),
-      postId: new Types.ObjectId(postId),
-      mentionedUserNicknames: mentionedUsers.map(({ nickname }) => nickname),
-    });
+    return new model(comment);
   }
 }
 
@@ -119,11 +107,12 @@ CommentSchema.virtual("mentionedUsers", {
 });
 CommentSchema.virtual("commentId")
   .get(function () {
-    return this._id;
+    return this._id.toString();
   })
   .set(function (value) {
     if (value instanceof Types.ObjectId) this._id = value;
     else this._id = new Types.ObjectId(value);
   });
+
 CommentSchema.set("toObject", { virtuals: true });
 CommentSchema.set("toJSON", { virtuals: true });

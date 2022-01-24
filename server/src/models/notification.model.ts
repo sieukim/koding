@@ -187,7 +187,6 @@ export class Notification {
   constructor(param: Omit<Notification, "notificationId" | "createdAt">);
 
   constructor(param?: Omit<Notification, "notificationId" | "createdAt">) {
-    console.log("param:", param);
     if (param) {
       this.notificationId = new Types.ObjectId().toString();
       this.createdAt = currentTime();

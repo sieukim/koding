@@ -32,7 +32,7 @@ export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
       postId: post.postId,
       writerNickname: writer.nickname,
       content,
-      mentionedUsers,
+      mentionedNicknames: mentionedUsers.map((user) => user.nickname),
     });
     this.logger.log(`before commentId: ${comment.commentId}`);
     const returned = await this.commentRepository.persist(comment);
@@ -41,11 +41,11 @@ export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
       new CommentAddedEvent(
         postIdentifier,
         post.title,
-        post.writer.nickname,
+        post.writerNickname,
         comment.commentId,
         comment.writerNickname,
         comment.content,
-        comment.mentionedUsers.map(({ nickname }) => nickname),
+        comment.mentionedNicknames,
       ),
     );
     return returned;

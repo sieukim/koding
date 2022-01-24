@@ -1,4 +1,4 @@
-import { PartialUser, User } from "./user.model";
+import { User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
 import { IsDate, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
@@ -6,14 +6,18 @@ import { Post } from "./post.model";
 import { Types } from "mongoose";
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { ModifyCommentRequestDto } from "../comments/dto/modify-comment-request.dto";
+import { Expose } from "class-transformer";
 
 export class Comment {
+  @Expose()
   @IsString()
   @ApiProperty({
     description: "댓글의 고유 아이디",
     type: String,
   })
   commentId: string;
+
+  @Expose()
   @IsString()
   @ApiProperty({
     description: "댓글의 부모 게시글 아이디",
@@ -21,15 +25,20 @@ export class Comment {
   })
   postId: string;
 
+  @Expose()
   post?: Post;
 
+  @Expose()
   @ApiProperty({
     description: "댓글 글쓴이 닉네임",
     type: String,
   })
   writerNickname: string;
+
+  @Expose()
   writer?: User;
 
+  @Expose()
   @IsNotEmpty()
   @IsString()
   @ApiProperty({
@@ -37,55 +46,40 @@ export class Comment {
   })
   content: string;
 
+  @Expose()
   @IsDate()
   @ApiProperty({
     description: "댓글 생성 시간",
   })
   createdAt: Date;
-  mentionedUsers: (PartialUser | User)[];
 
+  @Expose()
+  mentionedNicknames: string[];
+
+  @Expose()
+  mentionedUsers?: User[];
+
+  constructor();
   constructor(param: {
     postId: string;
     writerNickname: string;
-    writer?: User;
     content: string;
-    mentionedUsers: (PartialUser | User)[];
+    mentionedNicknames: string[];
   });
-
-  constructor(param: {
+  constructor(param?: {
     postId: string;
-    post?: Post;
-    commentId: string;
     writerNickname: string;
-    writer?: User;
     content: string;
-    mentionedUsers: (PartialUser | User)[];
-    createdAt: Date;
-  });
-
-  constructor(param: {
-    postId: string;
-    post?: Post;
-    commentId?: string;
-    writerNickname: string;
-    writer?: User;
-    content: string;
-    mentionedUsers: (PartialUser | User)[];
-    createdAt?: Date;
+    mentionedNicknames: string[];
   }) {
-    this.commentId = param.commentId ?? new Types.ObjectId().toString();
-    this.postId = param.postId;
-    if (param.post) {
-      this.post = param.post;
+    if (param) {
+      this.commentId = new Types.ObjectId().toString();
+      this.postId = param.postId;
+      this.writerNickname = param.writerNickname;
+      this.content = param.content;
+      this.mentionedNicknames = param.mentionedNicknames ?? [];
+      this.createdAt = currentTime();
     }
-    this.writerNickname = param.writerNickname;
-    if (param.writer) {
-      this.writer = param.writer;
-      this.writerNickname = param.writer.nickname;
-    }
-    this.content = param.content;
-    this.mentionedUsers = param.mentionedUsers ?? [];
-    this.createdAt = param.createdAt ?? currentTime();
   }
 
   verifyOwner(user: User) {
@@ -99,10 +93,7 @@ export class Comment {
   ) {
     this.verifyOwner(requestUser);
     this.content = content ?? this.content;
-    if (mentionedNicknames)
-      this.mentionedUsers = mentionedNicknames.map(
-        (nickname) => new PartialUser({ nickname }),
-      );
+    this.mentionedNicknames = mentionedNicknames ?? this.mentionedNicknames;
   }
 
   verifyOwnerPost(post: Post) {

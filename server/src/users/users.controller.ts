@@ -34,6 +34,7 @@ import {
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
+  refs,
 } from "@nestjs/swagger";
 import { UserInfoDto } from "./dto/user-info.dto";
 import { FollowUserDto } from "./dto/follow-user.dto";
@@ -63,6 +64,8 @@ import { ChangePasswordHandler } from "./commands/handlers/change-password.handl
 import { DeleteAccountCommand } from "./commands/delete-account.command";
 import { ConfigService } from "@nestjs/config";
 import { Request, Response } from "express";
+import { GetMyUserInfoQuery } from "./queries/get-my-user-info.query";
+import { GetMyUserInfoHandler } from "./queries/handlers/get-my-user-info.handler";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -93,7 +96,7 @@ export class UsersController {
   @Post()
   async joinUser(@Body() signupUserDto: SignupLocalRequestDto) {
     const user = await this.usersService.signupLocal(signupUserDto);
-    return new MyUserInfoDto(user);
+    return MyUserInfoDto.fromModel(user);
   }
 
   @ApiOperation({
@@ -108,14 +111,24 @@ export class UsersController {
   })
   @ApiOkResponse({
     description: "유저 정보 조회 성공",
-    type: UserInfoDto,
+    schema: {
+      oneOf: refs(UserInfoDto, MyUserInfoDto),
+    },
   })
   @HttpCode(HttpStatus.OK)
   @Get(":nickname")
-  getUserInfo(@Param("nickname") nickname: string) {
-    return this.queryBus.execute(new GetUserInfoQuery(nickname)) as ReturnType<
-      GetUserInfoHandler["execute"]
-    >;
+  getUserInfo(
+    @Param("nickname") nickname: string,
+    @LoginUser() loginUser?: User,
+  ) {
+    if (loginUser?.nickname === nickname)
+      return this.queryBus.execute(
+        new GetMyUserInfoQuery(loginUser.nickname),
+      ) as ReturnType<GetMyUserInfoHandler["execute"]>;
+    else
+      return this.queryBus.execute(
+        new GetUserInfoQuery(nickname),
+      ) as ReturnType<GetUserInfoHandler["execute"]>;
   }
 
   @ApiOperation({
@@ -179,7 +192,7 @@ export class UsersController {
     const result = (await this.commandBus.execute(
       new ChangeProfileCommand(loginUser.nickname, nickname, body),
     )) as Awaited<ReturnType<ChangeProfileHandler["execute"]>>;
-    return new MyUserInfoDto(result);
+    return MyUserInfoDto.fromModel(result);
   }
 
   @ApiOperation({

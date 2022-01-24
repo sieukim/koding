@@ -2,7 +2,6 @@ import { PostMetadataInfoDto } from "./post-metadata-info.dto";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { PostWithWriterInfoDto } from "./post-with-writer-info.dto";
 import { Post } from "../../models/post.model";
-import { User } from "../../models/user.model";
 
 export class PostWithAroundInfoDto {
   @ApiProperty({
@@ -18,13 +17,13 @@ export class PostWithAroundInfoDto {
   })
   nextPostInfo?: PostMetadataInfoDto;
 
-  constructor(post: Post & { writer: User }, prevPost?: Post, nextPost?: Post) {
+  constructor(post: Post, prevPost?: Post, nextPost?: Post) {
     this.prevPostInfo = prevPost
-      ? new PostMetadataInfoDto(prevPost)
+      ? PostMetadataInfoDto.fromModel(prevPost)
       : undefined;
     this.nextPostInfo = nextPost
-      ? new PostMetadataInfoDto(nextPost)
+      ? PostMetadataInfoDto.fromModel(nextPost)
       : undefined;
-    this.post = new PostWithWriterInfoDto(post, post.writer);
+    this.post = PostWithWriterInfoDto.fromModel(post);
   }
 }

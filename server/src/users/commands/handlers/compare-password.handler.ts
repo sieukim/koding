@@ -13,7 +13,6 @@ export class ComparePasswordHandler
     const { password, email } = command;
     const user = await this.userRepository.findByEmail(email);
     if (!user) return null;
-    console.log("password: ", password, ", user:", user);
     if (await user.comparePassword(password)) return user;
     return null;
   }

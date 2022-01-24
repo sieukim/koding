@@ -20,8 +20,6 @@ import { plainToClass } from "class-transformer";
   },
 })
 export class NotificationDocument extends Document {
-  _id: Types.ObjectId;
-
   notificationId: string;
 
   @Prop({ type: String })
@@ -44,13 +42,10 @@ export class NotificationDocument extends Document {
 
   static toModel(document: NotificationDocument): Notification {
     const json = document.toJSON();
-    console.log("before id:", json.notificationId, document.notificationId);
-    const result = plainToClass(Notification, json, {
+    return plainToClass(Notification, json, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });
-    console.log("after id:", result.notificationId);
-    return result;
   }
 }
 
@@ -59,8 +54,7 @@ export const NotificationSchema =
 NotificationSchema.index({ receiverNickname: 1, createdAt: 1 });
 NotificationSchema.virtual("notificationId")
   .get(function () {
-    console.log("call getter");
-    return this._id;
+    return this._id.toString();
   })
   .set(function (value) {
     if (value instanceof Types.ObjectId) this._id = value;

@@ -78,7 +78,7 @@ export class PostsController {
     @Body() body: WritePostRequestDto,
   ) {
     const post = await this.postsService.writePost(boardType, user, body);
-    return new PostInfoDto(post);
+    return PostInfoDto.fromModel(post);
   }
 
   @ApiOperation({
@@ -170,7 +170,7 @@ export class PostsController {
       { boardType, postId },
       body,
     );
-    return new PostInfoDto(post);
+    return PostInfoDto.fromModel(post);
   }
 
   @ApiOperation({

@@ -123,7 +123,7 @@ export class CommentsController {
       { boardType, postId },
       body,
     );
-    return new CommentInfoDto(newComment);
+    return CommentInfoDto.fromModel(newComment);
   }
 
   @ApiOperation({
@@ -161,7 +161,7 @@ export class CommentsController {
       commentId,
       body,
     );
-    return new CommentInfoDto(comment);
+    return CommentInfoDto.fromModel(comment);
   }
 
   @ApiOperation({

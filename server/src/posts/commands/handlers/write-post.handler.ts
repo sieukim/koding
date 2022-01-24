@@ -1,7 +1,6 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { WritePostCommand } from "../write-post.command";
 import { Post } from "../../../models/post.model";
-import { PartialUser } from "../../../models/user.model";
 import { PostsRepository } from "../../posts.repository";
 import { TagChangedEvent } from "../../../tags/events/tag-changed.event";
 import { UploadRepository } from "../../../upload/upload.repository";
@@ -32,7 +31,7 @@ export class WritePostHandler implements ICommandHandler<WritePostCommand> {
     if (images.length !== imageUrls.length)
       throw new BadRequestException("만료되거나 잘못된 이미지 URL이 있습니다.");
     const post = new Post({
-      writer: new PartialUser({ nickname: writerNickname }),
+      writerNickname,
       boardType,
       tags,
       title,

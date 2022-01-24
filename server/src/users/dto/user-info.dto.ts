@@ -1,7 +1,8 @@
 import { PickType } from "@nestjs/swagger";
 import { User } from "../../models/user.model";
+import { Expose, plainToClass } from "class-transformer";
 
-const keys = [
+export class UserInfoDto extends PickType(User, [
   "email",
   "nickname",
   "emailSignupVerified",
@@ -15,20 +16,17 @@ const keys = [
   "githubSignupVerified",
   "followersCount",
   "followingsCount",
-] as const;
-
-export class UserInfoDto extends PickType(User, keys) {
+] as const) {
+  @Expose()
   followersCount: number;
+
+  @Expose()
   followingsCount: number;
 
-  constructor(user: User) {
-    super();
-    for (const key of keys) {
-      if (user[key] !== undefined) this[key as keyof User] = user[key];
-    }
-    // TODO: 유저 정보 조회 도메인 모델 따로 만들기
-    if (!user.isBlogUrlPublic) delete this.blogUrl;
-    if (!user.isGithubUrlPublic) delete this.githubUrl;
-    if (!user.isPortfolioUrlPublic) delete this.portfolioUrl;
+  static fromModel(model: User) {
+    return plainToClass(UserInfoDto, model, {
+      excludeExtraneousValues: true,
+      groups: ["user"],
+    });
   }
 }

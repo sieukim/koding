@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { UserDocument } from "../schemas/user.schema";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { User } from "../models/user.model";
 import { MongooseBaseRepository } from "../common/repository/mongoose-base.repository";
 
@@ -91,72 +91,18 @@ export class UsersRepository extends MongooseBaseRepository<
     fieldName: keyof UserDocument,
     upsert: boolean,
   ): Promise<User> {
-    const userDocument = UserDocument.fromModel(user, this.userModel);
-    const {
-      nickname,
-      email,
-      isEmailUser,
-      isGithubUser,
-      githubUserInfo,
-      githubUserIdentifier,
-      githubUrl,
-      followerNicknames,
-      followingNicknames,
-      createdAt,
-      passwordResetToken,
-      githubSignupVerified,
-      githubSignupVerifyToken,
-      password,
-      portfolioUrl,
-      blogUrl,
-      emailSignupVerified,
-      emailSignupVerifyToken,
-      isGithubUrlPublic,
-      isPortfolioUrlPublic,
-      isBlogUrlPublic,
-    } = userDocument.toJSON();
-    const set = {
-      nickname,
-      email,
-      isEmailUser,
-      isGithubUser,
-      githubUserInfo,
-      githubUserIdentifier,
-      githubUrl,
-      followerNicknames,
-      followingNicknames,
-      createdAt,
-      passwordResetToken,
-      githubSignupVerified,
-      githubSignupVerifyToken,
-      password,
-      portfolioUrl,
-      blogUrl,
-      emailSignupVerified,
-      emailSignupVerifyToken,
-      isGithubUrlPublic,
-      isPortfolioUrlPublic,
-      isBlogUrlPublic,
-    };
-    const unset = {};
-    if (set[fieldName]) delete set[fieldName];
-    if (upsert === false)
-      for (const key in set) {
-        if (set[key] === undefined) {
-          delete set[key];
-          unset[key] = "";
-        }
-      }
-
+    // TODO: 유저 모델과 스키마에 _id 를 추가하여 replace 를 위한 _id 조회를 없애기
+    const userDocument = this.fromModel(user, this.userModel);
+    const prevUserDocument = await this.userModel
+      .findOne({
+        [fieldName]: userDocument[fieldName],
+      })
+      .exec();
+    userDocument._id = prevUserDocument?.get("_id") ?? new Types.ObjectId();
     await this.userModel
-      .updateOne(
-        { [fieldName]: userDocument[fieldName] },
-        {
-          $set: set,
-          $unset: unset,
-        },
-        { upsert },
-      )
+      .replaceOne({ _id: userDocument._id }, userDocument, {
+        upsert,
+      })
       .exec();
     return user;
   }

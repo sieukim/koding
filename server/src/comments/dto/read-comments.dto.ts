@@ -35,6 +35,6 @@ export class ReadCommentsDto {
   ) {
     this.prevPageCursor = prevPageCursor;
     this.nextPageCursor = nextPageCursor;
-    this.comments = comments.map((comment) => new CommentInfoDto(comment));
+    this.comments = comments.map(CommentInfoDto.fromModel);
   }
 }

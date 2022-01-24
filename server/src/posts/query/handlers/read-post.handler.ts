@@ -4,7 +4,6 @@ import { PostWithAroundInfoDto } from "../../dto/post-with-around-info.dto";
 import { PostsRepository } from "../../posts.repository";
 import { NotFoundException } from "@nestjs/common";
 import { Post } from "../../../models/post.model";
-import { User } from "../../../models/user.model";
 import { SortType } from "../../../common/repository/sort-option";
 
 @QueryHandler(ReadPostQuery)
@@ -24,11 +23,10 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
         postId: { eq: postId },
       },
       ["writer"],
-    )) as Post & { writer: User };
+    )) as Post;
     if (!post) throw new NotFoundException("잘못된 게시글 아이디");
     post = this.publisher.mergeObjectContext(post);
     post.increaseReadCount();
-    post.commit();
     const prevPost: Post | null = await this.postRepository.findOne(
       {
         boardType: { eq: boardType },
@@ -43,6 +41,7 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
       },
       { postId: SortType.DESC },
     );
+    post.commit();
     return new PostWithAroundInfoDto(post, prevPost, nextPost);
   }
 }

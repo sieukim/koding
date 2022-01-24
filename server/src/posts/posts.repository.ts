@@ -42,60 +42,16 @@ export class PostsRepository extends MongooseBaseRepository<
 
   async persist(model: Post): Promise<Post> {
     const postDocument = PostDocument.fromModel(model, this.postModel);
-    const {
-      _id,
-      createdAt,
-      writerNickname,
-      boardType,
-      markdownContent,
-      title,
-      readCount,
-      tags,
-      imageUrls,
-    } = postDocument.toJSON();
-    await this.postModel.updateOne(
-      { _id },
-      {
-        createdAt,
-        writerNickname,
-        boardType,
-        markdownContent,
-        title,
-        readCount,
-        tags,
-        imageUrls,
-      },
-      { upsert: true },
-    );
+    await this.postModel.replaceOne({ _id: postDocument._id }, postDocument, {
+      upsert: true,
+    });
     return PostDocument.toModel(postDocument);
   }
 
   async update(model: Post): Promise<Post> {
     const postDocument = PostDocument.fromModel(model, this.postModel);
-    const {
-      _id,
-      createdAt,
-      writerNickname,
-      boardType,
-      markdownContent,
-      title,
-      readCount,
-      tags,
-      imageUrls,
-    } = postDocument.toJSON();
-    await this.postModel.updateOne(
-      { _id },
-      {
-        createdAt,
-        writerNickname,
-        boardType,
-        markdownContent,
-        title,
-        readCount,
-        tags,
-        imageUrls,
-      },
-    );
+    const { readCount, ...rest } = postDocument.toJSON(); // 조회수는 원자성 문제로 update시 포함시키지 않음.
+    await this.postModel.updateOne({ _id: postDocument._id }, rest); // 조회수를 빼고 업데이트 하므로, replaceOne 대신 updateOne 을 이용
     return PostDocument.toModel(postDocument);
   }
 

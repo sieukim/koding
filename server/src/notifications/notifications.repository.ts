@@ -23,7 +23,6 @@ export class NotificationsRepository extends MongooseBaseRepository<
 
   async persist(model: Notification): Promise<Notification> {
     const document = this.fromModel(model, this.notificationModel);
-    console.log("persist ", document);
     console.dir(document.data);
     await this.notificationModel.replaceOne({ _id: document._id }, document, {
       upsert: true,

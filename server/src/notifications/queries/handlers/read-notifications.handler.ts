@@ -47,7 +47,6 @@ export class ReadNotificationsHandler
         { notificationId: SortType.ASC },
         pageSize,
       );
-      console.log("prevNotifications", prevNotifications);
       if (prevNotifications.length > 0) {
         prevPageCursor =
           prevNotifications[prevNotifications.length - 1].notificationId;

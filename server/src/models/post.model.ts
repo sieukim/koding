@@ -2,12 +2,13 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsDate, IsIn, IsNumber, IsString, IsUrl, Min } from "class-validator";
 import { ForbiddenException } from "@nestjs/common";
 import { AggregateRoot } from "@nestjs/cqrs";
-import { PartialUser, User } from "./user.model";
+import { User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
 import { IncreasePostReadCountEvent } from "../posts/events/increase-post-read-count.event";
 import { Types } from "mongoose";
 import { TagChangedEvent } from "../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../upload/event/post-image-changed.event";
+import { Expose } from "class-transformer";
 
 export class PostImage {
   s3Bucket: string;
@@ -32,6 +33,7 @@ export const postBoardTypes = [
 export type PostBoardType = typeof postBoardTypes[number];
 
 export class Post extends AggregateRoot {
+  @Expose()
   @IsString()
   @ApiProperty({
     description: "게시글 고유 아이디",
@@ -39,12 +41,14 @@ export class Post extends AggregateRoot {
   })
   postId: string;
 
+  @Expose()
   @IsString()
   @ApiProperty({
     description: "게시글 제목",
   })
   title: string;
 
+  @Expose()
   @IsIn(postBoardTypes)
   @ApiProperty({
     description: "게시판 타입",
@@ -53,8 +57,17 @@ export class Post extends AggregateRoot {
   })
   boardType: PostBoardType;
 
-  writer: PartialUser | User;
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "게시글 작성자 닉네임. 탈퇴한 회원인 경우 값 없음",
+  })
+  writerNickname?: string;
 
+  @Expose()
+  writer?: User;
+
+  @Expose()
   @IsString({ each: true })
   @ApiProperty({
     description: "게시글 태그",
@@ -62,12 +75,14 @@ export class Post extends AggregateRoot {
   })
   tags: string[];
 
+  @Expose()
   @IsString()
   @ApiProperty({
     description: "마크다운 형식의 게시글 내용",
   })
   markdownContent: string;
 
+  @Expose()
   @IsNumber()
   @Min(0)
   @ApiProperty({
@@ -75,12 +90,14 @@ export class Post extends AggregateRoot {
   })
   readCount: number;
 
+  @Expose()
   @IsDate()
   @ApiProperty({
     description: "게시글 생성 시간",
   })
   createdAt: Date;
 
+  @Expose()
   @IsUrl(undefined, { each: true })
   @ApiProperty({
     description: "게시글에서 사용하는 이미지 url들",
@@ -88,48 +105,35 @@ export class Post extends AggregateRoot {
   })
   imageUrls: string[];
 
+  constructor();
   constructor(param: {
     title: string;
     boardType: PostBoardType;
-    writer: PartialUser | User;
+    writerNickname: string;
     tags: string[];
     markdownContent: string;
     imageUrls: string[];
   });
-
-  constructor(param: {
-    postId: string;
+  constructor(param?: {
     title: string;
     boardType: PostBoardType;
-    writer: PartialUser | User;
+    writerNickname: string;
     tags: string[];
     markdownContent: string;
-    readCount: number;
-    createdAt: Date;
-    imageUrls: string[];
-  });
-
-  constructor(param: {
-    postId?: string;
-    title: string;
-    boardType: PostBoardType;
-    writer: PartialUser | User;
-    tags: string[];
-    markdownContent: string;
-    readCount?: number;
-    createdAt?: Date;
     imageUrls: string[];
   }) {
     super();
-    this.postId = param.postId ?? new Types.ObjectId().toString();
-    this.title = param.title;
-    this.boardType = param.boardType;
-    this.writer = param.writer;
-    this.tags = param.tags ?? [];
-    this.markdownContent = param.markdownContent;
-    this.readCount = param.readCount ?? 0;
-    this.createdAt = param.createdAt ?? currentTime();
-    this.imageUrls = param.imageUrls ?? [];
+    if (param) {
+      this.postId = new Types.ObjectId().toString();
+      this.title = param.title;
+      this.boardType = param.boardType;
+      this.writerNickname = param.writerNickname;
+      this.tags = param.tags ?? [];
+      this.markdownContent = param.markdownContent;
+      this.imageUrls = param.imageUrls ?? [];
+      this.readCount = 0;
+      this.createdAt = currentTime();
+    }
   }
 
   modifyPost(

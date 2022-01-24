@@ -15,7 +15,7 @@ export class FollowerUsersInfoDto {
   count: number;
 
   constructor(followerUsers: User[]) {
-    this.followers = followerUsers.map((user) => new UserInfoDto(user));
+    this.followers = followerUsers.map(UserInfoDto.fromModel);
     this.count = this.followers.length;
   }
 }

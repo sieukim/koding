@@ -31,6 +31,6 @@ export class PostListDto {
   constructor(posts: Post[], prevPageCursor?: string, nextPageCursor?: string) {
     this.prevPageCursor = prevPageCursor;
     this.nextPageCursor = nextPageCursor;
-    this.posts = posts.map((post) => new PostMetadataInfoDto(post));
+    this.posts = posts.map(PostMetadataInfoDto.fromModel);
   }
 }

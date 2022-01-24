@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ofType, Saga } from "@nestjs/cqrs";
-import { map, mergeMap, Observable } from "rxjs";
+import { filter, map, mergeMap, Observable } from "rxjs";
 import { CommentAddedEvent } from "../../comments/events/comment-added.event";
 import { AddNotificationCommand } from "../commands/add-notification.command";
 import {
@@ -16,6 +16,11 @@ export class NotificationSaga {
   commentNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(CommentAddedEvent),
+      filter(
+        // 본인 게시글에 본인이 댓글을 단 경우는 알람에서 제외
+        ({ commentWriterNickname, postWriterNickname }) =>
+          commentWriterNickname !== postWriterNickname,
+      ),
       map(
         ({
           commentContent,

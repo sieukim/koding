@@ -20,10 +20,12 @@ import {
   Matches,
 } from "class-validator";
 import { ChangeProfileRequestDto } from "../users/dto/change-profile-request.dto";
+import { Expose, Transform, Type } from "class-transformer";
 
 export class User extends AggregateRoot {
   private static readonly round = 10;
 
+  @Expose()
   @IsEmail()
   @ApiProperty({
     example: "test@test.com",
@@ -32,6 +34,7 @@ export class User extends AggregateRoot {
   })
   email: string;
 
+  @Expose()
   @IsString()
   @Length(2, 10)
   @Matches("[A-Za-z0-9가-힣]*")
@@ -45,6 +48,7 @@ export class User extends AggregateRoot {
   })
   nickname: string;
 
+  @Expose()
   @Length(8, 16)
   @IsString()
   @ApiProperty({
@@ -56,6 +60,7 @@ export class User extends AggregateRoot {
   })
   password?: string;
 
+  @Expose()
   @IsBoolean()
   @ApiPropertyOptional({
     description: "유저 블로그 주소 공개여부",
@@ -64,6 +69,17 @@ export class User extends AggregateRoot {
   })
   isBlogUrlPublic: boolean;
 
+  @Transform(
+    ({ value, obj, options }) => {
+      if (options?.groups?.includes("myInfo")) return value;
+      else if ((obj as User).isBlogUrlPublic) return value;
+      return;
+    },
+    {
+      toClassOnly: true,
+    },
+  )
+  @Expose()
   @IsOptional()
   @IsUrl()
   @ApiPropertyOptional({
@@ -73,6 +89,7 @@ export class User extends AggregateRoot {
   })
   blogUrl?: string;
 
+  @Expose()
   @IsBoolean()
   @ApiPropertyOptional({
     description: "유저 깃허브 주소 공개여부",
@@ -81,6 +98,15 @@ export class User extends AggregateRoot {
   })
   isGithubUrlPublic: boolean;
 
+  @Transform(
+    ({ value, obj }: { value?: string; obj: User }) =>
+      obj.isGithubUrlPublic ? value : undefined,
+    {
+      toClassOnly: true,
+      groups: ["user"],
+    },
+  )
+  @Expose()
   @IsOptional()
   @IsUrl()
   @ApiPropertyOptional({
@@ -90,6 +116,7 @@ export class User extends AggregateRoot {
   })
   githubUrl?: string;
 
+  @Expose()
   @IsBoolean()
   @ApiPropertyOptional({
     description: "유저 포트폴리오 주소 공개여부",
@@ -98,6 +125,15 @@ export class User extends AggregateRoot {
   })
   isPortfolioUrlPublic: boolean;
 
+  @Transform(
+    ({ value, obj }: { value?: string; obj: User }) =>
+      obj.isPortfolioUrlPublic ? value : undefined,
+    {
+      toClassOnly: true,
+      groups: ["user"],
+    },
+  )
+  @Expose()
   @IsOptional()
   @IsUrl()
   @ApiPropertyOptional({
@@ -107,18 +143,21 @@ export class User extends AggregateRoot {
   })
   portfolioUrl?: string;
 
+  @Expose()
   @ApiProperty({
     description: "깃허브 연동 유저 여부",
     type: Boolean,
   })
   isGithubUser: boolean;
 
+  @Expose()
   @ApiProperty({
     description: "이메일 가입 유저 여부",
     type: Boolean,
   })
   isEmailUser: boolean;
 
+  @Expose()
   @ApiProperty({
     description: "깃허브 API에서 제공하는 깃허브 유저 고유 넘버",
     type: Number,
@@ -127,6 +166,8 @@ export class User extends AggregateRoot {
   @IsNumber()
   githubUserIdentifier?: number;
 
+  @Type(() => GithubUserInfo)
+  @Expose()
   @IsOptional()
   @ApiProperty({
     description: "깃허브 연동 정보",
@@ -134,36 +175,57 @@ export class User extends AggregateRoot {
   })
   githubUserInfo?: GithubUserInfo;
 
+  @Expose()
   @IsString()
   emailSignupVerifyToken?: string;
 
+  @Expose()
   @ApiProperty({
     description: "이메일 사용자인 경우, 이메일 인증 여부",
     type: Boolean,
   })
   emailSignupVerified: boolean;
 
+  @Expose()
   @IsString()
   githubSignupVerifyToken?: string;
 
+  @Expose()
   @ApiProperty({
     description: "깃허브 사용자인 경우, 닉네임 설정 여부",
     type: Boolean,
   })
   githubSignupVerified: boolean;
 
+  @Expose()
   @IsString()
   passwordResetToken?: string;
 
+  @Expose()
   @IsDate()
   @ApiProperty({
     description: "가입일",
     type: Date,
   })
   createdAt: Date;
-  followings: (PartialUser | User)[];
-  followers: (PartialUser | User)[];
 
+  @Type(() => String)
+  @Expose()
+  followingNicknames: string[];
+
+  @Type(() => User)
+  @Expose()
+  followings?: User[];
+
+  @Type(() => String)
+  @Expose()
+  followerNicknames: string[];
+
+  @Type(() => User)
+  @Expose()
+  followers?: User[];
+
+  constructor();
   constructor(param: {
     email: string;
     nickname: string;
@@ -181,95 +243,62 @@ export class User extends AggregateRoot {
     githubUserInfo?: GithubUserInfo;
   });
 
-  constructor(param: {
+  constructor(param?: {
     email: string;
-    nickname: string;
+    nickname?: string;
     password?: string;
-    isBlogUrlPublic: boolean;
     blogUrl?: string;
-    isGithubUrlPublic: boolean;
     githubUrl?: string;
-    isPortfolioUrlPublic: boolean;
     portfolioUrl?: string;
-    isGithubUser: boolean;
-    isEmailUser: boolean;
+    isEmailUser?: boolean;
+    isGithubUser?: boolean;
     githubUserIdentifier?: number;
     githubUserInfo?: GithubUserInfo;
-    emailSignupVerifyToken?: string;
-    emailSignupVerified: boolean;
-    githubSignupVerifyToken?: string;
-    githubSignupVerified: boolean;
-    passwordResetToken?: string;
-    createdAt: Date;
-    followings: (PartialUser | User)[];
-    followers: (PartialUser | User)[];
-  });
-
-  constructor(param: {
-    email: string;
-    nickname: string;
-    password?: string;
-    isBlogUrlPublic?: boolean;
-    blogUrl?: string;
-    isGithubUrlPublic?: boolean;
-    githubUrl?: string;
-    isPortfolioUrlPublic?: boolean;
-    portfolioUrl?: string;
-    isGithubUser: boolean;
-    isEmailUser: boolean;
-    githubUserIdentifier?: number;
-    githubUserInfo?: GithubUserInfo;
-    emailSignupVerifyToken?: string;
-    emailSignupVerified?: boolean;
-    githubSignupVerifyToken?: string;
-    githubSignupVerified?: boolean;
-    passwordResetToken?: string;
-    createdAt?: Date;
-    followings?: (PartialUser | User)[];
-    followers?: (PartialUser | User)[];
   }) {
     super();
-    this.email = param.email;
-    this.nickname = param.nickname;
-    this.password = param.password;
-    this.isBlogUrlPublic = param.isBlogUrlPublic ?? false;
-    this.blogUrl = param.blogUrl;
-    this.isGithubUrlPublic = param.isGithubUrlPublic ?? false;
-    this.githubUrl = param.githubUrl;
-    this.isPortfolioUrlPublic = param.isPortfolioUrlPublic ?? false;
-    this.portfolioUrl = param.portfolioUrl;
-    this.isGithubUser = param.isGithubUser;
-    this.isEmailUser = param.isEmailUser;
-    this.githubUserIdentifier = param.githubUserIdentifier;
-    this.githubUserInfo = param.githubUserInfo;
-    this.emailSignupVerifyToken = param.emailSignupVerifyToken;
-    this.emailSignupVerified = param.emailSignupVerified ?? false;
-    this.githubSignupVerifyToken = param.githubSignupVerifyToken;
-    this.githubSignupVerified = param.githubSignupVerified ?? false;
-    this.passwordResetToken = param.passwordResetToken;
-    this.createdAt = param.createdAt ?? currentTime();
-    this.followings = param.followings ?? [];
-    this.followers = param.followers ?? [];
+    if (param) {
+      this.email = param.email;
+      this.nickname = param.nickname;
+      this.password = param.password;
+      this.isBlogUrlPublic = false;
+      this.blogUrl = param.blogUrl;
+      this.isGithubUrlPublic = false;
+      this.githubUrl = param.githubUrl;
+      this.isPortfolioUrlPublic = false;
+      this.portfolioUrl = param.portfolioUrl;
+      this.isGithubUser = param.isGithubUser;
+      this.isEmailUser = param.isEmailUser;
+      this.githubUserIdentifier = param.githubUserIdentifier;
+      this.githubUserInfo = param.githubUserInfo;
+      this.emailSignupVerified = false;
+      this.githubSignupVerified = false;
+      this.followingNicknames = [];
+      this.followerNicknames = [];
+      this.createdAt = currentTime();
+    }
   }
 
+  @Expose()
   @ApiProperty({
     description: "팔로우 하는 사용자 수",
     type: Number,
     minimum: 0,
   })
   get followingsCount() {
-    return this.followings.length;
+    return this.followingNicknames.length;
   }
 
+  @Expose()
   @ApiProperty({
     description: "팔로워 수",
     type: Number,
     minimum: 0,
   })
   get followersCount() {
-    return this.followers.length;
+    return this.followerNicknames.length;
   }
 
+  @Expose({ toClassOnly: true })
   @ApiProperty({ description: "회원가입 인증 여부", type: Boolean })
   get isVerifiedUser(): boolean {
     // 이메일 유저 & 이메일 인증 완료

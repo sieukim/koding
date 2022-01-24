@@ -13,7 +13,7 @@ export class FollowUserResultDto {
   to: UserInfoDto;
 
   constructor(from: User, to: User) {
-    this.from = new UserInfoDto(from);
-    this.to = new UserInfoDto(to);
+    this.from = UserInfoDto.fromModel(from);
+    this.to = UserInfoDto.fromModel(to);
   }
 }

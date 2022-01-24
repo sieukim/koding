@@ -42,17 +42,9 @@ export class CommentsRepository extends MongooseBaseRepository<
 
   async persist(model: Comment): Promise<Comment> {
     const commentDocument = CommentDocument.fromModel(model, this.commentModel);
-    const {
-      _id,
-      content,
-      writerNickname,
-      postId,
-      createdAt,
-      mentionedUserNicknames,
-    } = commentDocument.toJSON();
     await this.commentModel.updateOne(
-      { _id },
-      { content, writerNickname, postId, createdAt, mentionedUserNicknames },
+      { _id: commentDocument._id },
+      commentDocument,
       { upsert: true },
     );
     return CommentDocument.toModel(commentDocument);
@@ -60,17 +52,10 @@ export class CommentsRepository extends MongooseBaseRepository<
 
   async update(model: Comment): Promise<Comment> {
     const commentDocument = CommentDocument.fromModel(model, this.commentModel);
-    const {
-      _id,
-      content,
-      writerNickname,
-      postId,
-      createdAt,
-      mentionedUserNicknames,
-    } = commentDocument.toJSON();
     await this.commentModel.updateOne(
-      { _id },
-      { content, writerNickname, postId, createdAt, mentionedUserNicknames },
+      { _id: commentDocument._id },
+      commentDocument,
+      { overwrite: true },
     );
     return CommentDocument.toModel(commentDocument);
   }

@@ -14,6 +14,6 @@ export class GetMyUserInfoHandler
     const { myNickname } = query;
     const me = await this.usersRepository.findByNickname(myNickname);
     if (!me) throw new NotFoundException("잘못된 사용자");
-    return new MyUserInfoDto(me);
+    return MyUserInfoDto.fromModel(me);
   }
 }

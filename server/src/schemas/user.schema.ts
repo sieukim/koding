@@ -3,7 +3,8 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNumber, IsUrl, Min } from "class-validator";
 import { currentTime } from "../common/utils/current-time.util";
-import { PartialUser, User } from "../models/user.model";
+import { User } from "../models/user.model";
+import { Expose, plainToClass, Transform, Type } from "class-transformer";
 
 export class GithubRepositoryInfo {
   @ApiProperty({
@@ -73,6 +74,7 @@ export class GithubUserInfo {
   repositories: GithubRepositoryInfo[];
 }
 
+@Expose({ toClassOnly: true })
 @Schema({
   id: false,
   _id: true,
@@ -81,8 +83,6 @@ export class GithubUserInfo {
   timestamps: { createdAt: true, updatedAt: false, currentTime: currentTime },
 })
 export class UserDocument extends Document {
-  private static readonly round = 10;
-
   _id: Types.ObjectId;
 
   @Prop({ required: false, index: { unique: true, sparse: true } })
@@ -154,6 +154,12 @@ export class UserDocument extends Document {
   })
   followingNicknames: string[];
 
+  @Type(() => UserDocument)
+  @Transform(
+    ({ value }) =>
+      value instanceof UserDocument ? UserDocument.toModel(value) : value,
+    { toClassOnly: true },
+  )
   followings?: UserDocument[];
 
   @Prop({
@@ -166,110 +172,23 @@ export class UserDocument extends Document {
   })
   followerNicknames: string[];
 
+  @Type(() => UserDocument)
+  @Transform(
+    ({ value }) =>
+      value instanceof UserDocument ? UserDocument.toModel(value) : value,
+    { toClassOnly: true },
+  )
   followers?: UserDocument[];
 
   static toModel(userDocument: UserDocument): User {
-    const {
-      followings,
-      followers,
-      followingNicknames,
-      followerNicknames,
-      password,
-      passwordResetToken,
-      isEmailUser,
-      email,
-      isGithubUser,
-      githubUserInfo,
-      githubUserIdentifier,
-      githubUrl,
-      nickname,
-      blogUrl,
-      emailSignupVerifyToken,
-      githubSignupVerifyToken,
-      emailSignupVerified,
-      githubSignupVerified,
-      portfolioUrl,
-      createdAt,
-      isBlogUrlPublic,
-      isGithubUrlPublic,
-      isPortfolioUrlPublic,
-    } = userDocument;
-    return new User({
-      password,
-      passwordResetToken,
-      isEmailUser,
-      email,
-      isGithubUser,
-      githubUserInfo,
-      githubUserIdentifier,
-      githubUrl,
-      nickname,
-      blogUrl,
-      emailSignupVerifyToken,
-      githubSignupVerifyToken,
-      emailSignupVerified,
-      githubSignupVerified,
-      portfolioUrl,
-      createdAt,
-      isBlogUrlPublic,
-      isGithubUrlPublic,
-      isPortfolioUrlPublic,
-      followings: followings
-        ? followings.map(UserDocument.toModel)
-        : followingNicknames.map((nickname) => new PartialUser({ nickname })),
-      followers: followers
-        ? followers.map(UserDocument.toModel)
-        : followerNicknames.map((nickname) => new PartialUser({ nickname })),
+    return plainToClass(User, userDocument, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
     });
   }
 
   static fromModel(user: User, model: Model<UserDocument>): UserDocument {
-    const {
-      followings,
-      followers,
-      emailSignupVerifyToken,
-      githubSignupVerifyToken,
-      emailSignupVerified,
-      githubSignupVerified,
-      isEmailUser,
-      email,
-      isGithubUser,
-      githubUserInfo,
-      githubUserIdentifier,
-      githubUrl,
-      nickname,
-      blogUrl,
-      createdAt,
-      portfolioUrl,
-      password,
-      passwordResetToken,
-      isBlogUrlPublic,
-      isGithubUrlPublic,
-      isPortfolioUrlPublic,
-    } = user;
-    return new model({
-      emailSignupVerifyToken,
-      githubSignupVerifyToken,
-      emailSignupVerified,
-      githubSignupVerified,
-      isEmailUser,
-      email,
-      isGithubUser,
-      githubUserInfo,
-      githubUserIdentifier,
-      githubUrl,
-      nickname,
-      blogUrl,
-      createdAt,
-      portfolioUrl,
-      password,
-      passwordResetToken,
-      isBlogUrlPublic,
-      isGithubUrlPublic,
-      isPortfolioUrlPublic,
-      followingNicknames: followings.map(({ nickname }) => nickname),
-      followerNicknames: followers.map(({ nickname }) => nickname),
-    });
+    return new model(user);
   }
 }
 

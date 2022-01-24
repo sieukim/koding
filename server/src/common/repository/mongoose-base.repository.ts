@@ -67,7 +67,6 @@ export abstract class MongooseBaseRepository<
     if (populate) query = query.populate(populate);
     if (sortOption) query = query.sort(sortQuery);
     const document: ModelDocument | null = await query.exec();
-    console.log("document: ", document);
     if (document) return this.toModel(document);
     return null;
   }
@@ -78,7 +77,6 @@ export abstract class MongooseBaseRepository<
     const findQuery: FilterQuery<ModelDocument> = {};
     Object.keys(findOption).forEach((key) => {
       let query;
-      console.log("findOption[key]: ", findOption[key]);
       let value;
       switch (Object.keys(findOption[key])[0]) {
         case "eq":

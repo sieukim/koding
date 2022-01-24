@@ -14,7 +14,6 @@ export class AddNotificationHandler
   async execute(command: AddNotificationCommand): Promise<Notification> {
     const { data, receiverNickname } = command;
     const notification = new Notification({ data, receiverNickname });
-    console.log("data: ", data);
     return await this.notificationsRepository.persist(notification);
   }
 }

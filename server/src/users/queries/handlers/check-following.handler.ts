@@ -14,9 +14,11 @@ export class CheckFollowingHandler
     // TODO: $in 조건을 이용한 성능 개선
     const user = await this.userRepository.findOne({
       nickname: { eq: fromNickname },
+      followingNicknames: { in: [toNickname] },
     });
     if (!user) throw new NotFoundException("잘못된 사용자");
-    if (user.followings.some(({ nickname }) => nickname === toNickname)) return;
+    if (user.followingNicknames.some((nickname) => nickname === toNickname))
+      return;
     else throw new NotFoundException("팔로우중이지 않습니다");
   }
 }
