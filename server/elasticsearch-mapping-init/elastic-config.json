@@ -1,0 +1,73 @@
+{
+  "settings": {
+    "refresh_interval": "1s",
+    "analysis": {
+      "analyzer": {
+        "post_content_analyzer": {
+          "type": "custom",
+          "char_filter": [
+            "html_strip"
+          ],
+          "tokenizer": "nori_mixed",
+          "filter": [
+            "lowercase",
+            "nori_part_of_speech",
+            "unique"
+          ]
+        }
+      },
+      "tokenizer": {
+        "nori_mixed": {
+          "type": "nori_tokenizer",
+          "decompound_mode": "mixed"
+        }
+      },
+      "char_filter": {
+        "programming_language_filtter": {
+          "type": "mapping",
+          "mappings": [
+            "+ => _plus_",
+            "# => _sharp_"
+          ]
+        }
+      },
+      "normalizer": {
+        "post_tag_normalizer": {
+          "type": "custom",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "post_content_analyzer"
+      },
+      "boardType": {
+        "type": "keyword"
+      },
+      "htmlContent": {
+        "type": "text",
+        "analyzer": "post_content_analyzer"
+      },
+      "tags": {
+        "type": "keyword",
+        "boost": 2,
+        "normalizer": "post_tag_normalizer"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "writerNickname": {
+        "type": "keyword"
+      },
+      "readCount": {
+        "type": "integer"
+      }
+    }
+  }
+}

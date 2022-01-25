@@ -1,0 +1,90 @@
+version: "3"
+
+services:
+  koding:
+    build: .
+    ports:
+      - "3001:3001"
+    depends_on:
+      - elasticsearch-mapping-init
+      - monstache
+    links:
+      - mongo
+      - elasticsearch
+
+
+  elasticsearch:
+    restart: always
+    build: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    #    volumes:
+    #      - ./elasticsearch/data:/home/psw/elasticsearch/data
+
+
+  elasticsearch-mapping-init:
+    build: elasticsearch-mapping-init
+    links:
+      - elasticsearch
+    depends_on:
+      - elasticsearch
+  
+  kibana:
+    restart: always
+    image: docker.elastic.co/kibana/kibana:6.8.14
+    expose:
+      - 5601
+    ports:
+      - 5601:5601
+    depends_on:
+      - elasticsearch-mapping-init
+    environment:
+      - SERVER_PORT=5601
+      - SERVER_NAME=kibana.example.org
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    links:
+      - elasticsearch
+
+  monstache:
+    restart: always
+    image: rwynn/monstache:rel5
+    command: -f /home/monstache.config.toml &
+    volumes:
+      - ./monstache/monstache.config.toml:/home/monstache.config.toml
+    depends_on:
+      - elasticsearch-mapping-init
+      - mongo-replica-init
+    links:
+      - elasticsearch
+      - mongo
+    ports:
+      - "8080:8080"
+
+  mongo:
+    image: mongo:5.0.5
+    ports:
+      - "27020:27017"
+    command: mongod --replSet koding-replication
+    volumes:
+      - ./mongo/db:/data/db
+
+  mongo-replica-init:
+    build: mongo-replica-init
+    depends_on:
+      - mongo
+    links:
+      - mongo
+
+#networks:
+#  monstache-network:
+#    driver: bridge
+#  koding-network:
+#    driver: bridge
