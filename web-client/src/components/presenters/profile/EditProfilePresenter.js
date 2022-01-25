@@ -165,7 +165,7 @@ const EditProfilePresenter = ({
               name="isBlogUrlPublic"
               value="isBlogUrlPublic"
               defaultChecked={getLoginUserData.isBlogUrlPublic}
-              onChange={onChangeInput}
+              onInput={onChangeInput}
             />
             공개
           </label>
@@ -187,7 +187,7 @@ const EditProfilePresenter = ({
               name="isGithubUrlPublic"
               value="isGithubUrlPublic"
               defaultChecked={getLoginUserData.isGithubUrlPublic}
-              onChange={onChangeInput}
+              onInput={onChangeInput}
             />
             공개
           </label>
@@ -209,7 +209,7 @@ const EditProfilePresenter = ({
               name="isPortfolioUrlPublic"
               value="isPortfolioUrlPublic"
               defaultChecked={getLoginUserData.isPortfolioUrlPublic}
-              onChange={onChangeInput}
+              onInput={onChangeInput}
             />
             공개
           </label>
