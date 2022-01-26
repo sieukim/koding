@@ -18,11 +18,11 @@ import { QueryBus } from "@nestjs/cqrs";
 import { UnifiedSearchPostQuery } from "./queries/unified-search-post.query";
 import { UnifiedSearchPostsResultDto } from "./dto/unified-search-posts-result.dto";
 import { ApiParamBoardType } from "../common/decorator/swagger/api-param.decorator";
-import { PostListDto } from "../posts/dto/post-list.dto";
 import { BoardTypeValidationPipe } from "../common/pipes/board-type-validation-pipe";
 import { PostBoardType } from "../models/post.model";
 import { SearchPostQuery } from "./queries/search-post.query";
 import { SearchPostQueryDto } from "./dto/query/search-post-query.dto";
+import { SearchPostResultWithCursorDto } from "./dto/search-post-result-with-cursor.dto";
 
 @ApiTags("SEARCH")
 @Controller("api/search")
@@ -69,7 +69,7 @@ export class SearchController {
   })
   @ApiOkResponse({
     description: "게시글 검색 성공",
-    type: PostListDto,
+    type: SearchPostResultWithCursorDto,
   })
   @Get(":boardType")
   async searchPosts(

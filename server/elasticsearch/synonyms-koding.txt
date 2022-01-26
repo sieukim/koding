@@ -6,7 +6,7 @@
 코틀린,kotlin
 html
 css
-고,go,golang
+go,golang
 매트랩,matlab
 그루비,groovy
 루비,ruby
