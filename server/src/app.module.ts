@@ -12,6 +12,7 @@ import { CommentsModule } from "./comments/comments.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { TagsModule } from "./tags/tags.module";
 import { NotificationsModule } from "./notifications/notifications.module";
+import { SearchModule } from "./search/search.module";
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
     CommentsModule,
     TagsModule,
     NotificationsModule,
+    SearchModule,
   ],
   controllers: [],
   providers: [],

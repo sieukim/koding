@@ -88,11 +88,12 @@ export class PostsController {
   @ApiQuery({
     name: "cursor",
     description:
-      "조회를 시작할 기준이 되는 게시글 아이디. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
+      "조회를 시작할 기준이 되는 커서. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
     type: String,
     required: false,
   })
   @ApiQuery({
+    required: false,
     name: "tags",
     description:
       "검색할 태그들. 여러개인 경우 , 로 구분하며, 각각은 OR로 묶임. 검색이 필요 없는 경우 값을 넣지 않음",

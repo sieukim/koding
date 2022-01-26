@@ -16,4 +16,10 @@ export class PostMetadataInfoDto extends PickType(Post, [
       excludeExtraneousValues: true,
     });
   }
+
+  static fromJson(json: Record<any, any>) {
+    return plainToClass(PostMetadataInfoDto, json, {
+      excludeExtraneousValues: true,
+    });
+  }
 }

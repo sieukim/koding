@@ -8,7 +8,6 @@ export class ReadPostFilter {
   cursor?: string;
 
   @IsArray()
-  @IsOptional()
   @Type(() => String)
   @Transform(({ value }) => (value as string).split(",").map((v) => v.trim()))
   tags?: string[];

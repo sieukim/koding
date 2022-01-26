@@ -28,9 +28,15 @@ export class PostListDto {
   })
   prevPageCursor?: string;
 
-  constructor(posts: Post[], prevPageCursor?: string, nextPageCursor?: string) {
+  constructor(
+    posts: Post[] | PostMetadataInfoDto[],
+    prevPageCursor?: string,
+    nextPageCursor?: string,
+  ) {
     this.prevPageCursor = prevPageCursor;
     this.nextPageCursor = nextPageCursor;
-    this.posts = posts.map(PostMetadataInfoDto.fromModel);
+    this.posts = posts.map((post) =>
+      post instanceof Post ? PostMetadataInfoDto.fromModel(post) : post,
+    );
   }
 }

@@ -1,5 +1,5 @@
 import { IsDate, IsIn, IsString } from "class-validator";
-import { PostBoardType, postBoardTypes } from "./post.model";
+import { PostBoardType, PostBoardTypes } from "./post.model";
 import {
   ApiExtraModels,
   ApiProperty,
@@ -29,10 +29,10 @@ export abstract class NotificationData {
 
 export class CommentNotificationData extends NotificationData {
   @Expose()
-  @IsIn(postBoardTypes)
+  @IsIn(PostBoardTypes)
   @ApiProperty({
     description: "댓글이 달린 게시글의 게시판",
-    enum: postBoardTypes,
+    enum: PostBoardTypes,
   })
   boardType: PostBoardType;
   @Expose()

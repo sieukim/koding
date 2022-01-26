@@ -10,14 +10,14 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
   constructor(private readonly postRepository: PostsRepository) {}
 
   async execute(query: GetPostListQuery) {
-    const { boardType, cursorPostId, searchQuery, pageSize } = query;
+    const { boardType, cursor, searchQuery, pageSize } = query;
     const searchOption = searchQuery?.tags
       ? { tags: { in: searchQuery.tags } }
       : {};
     let posts: Post[];
     let nextPageCursor: string | undefined;
     let prevPageCursor: string | undefined;
-    if (!cursorPostId) {
+    if (!cursor) {
       // 첫페이지인 경우
       posts = await this.postRepository.findAll(
         {
@@ -33,7 +33,7 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
       posts = await this.postRepository.findAll(
         {
           boardType: { eq: boardType },
-          postId: { lte: cursorPostId },
+          postId: { lte: cursor },
           ...searchOption,
         },
         {
@@ -44,7 +44,7 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
       const prevPosts = await this.postRepository.findAll(
         {
           boardType: { eq: boardType },
-          postId: { gt: cursorPostId },
+          postId: { gt: cursor },
           ...searchOption,
         },
         {

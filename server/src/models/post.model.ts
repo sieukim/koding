@@ -10,19 +10,7 @@ import { TagChangedEvent } from "../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../upload/event/post-image-changed.event";
 import { Expose } from "class-transformer";
 
-export class PostImage {
-  s3Bucket: string;
-  s3Key: string;
-  @IsUrl(undefined, { each: true })
-  @ApiProperty({
-    description:
-      "게시글에서 사용하는 이미지의 url들. 이미지 업로드 API의 반환값을 사용",
-    type: [String],
-  })
-  url: string;
-}
-
-export const postBoardTypes = [
+export const PostBoardTypes = [
   "common",
   "question",
   "career",
@@ -30,7 +18,7 @@ export const postBoardTypes = [
   "study-group",
   "column",
 ] as const;
-export type PostBoardType = typeof postBoardTypes[number];
+export type PostBoardType = typeof PostBoardTypes[number];
 
 export class Post extends AggregateRoot {
   @Expose()
@@ -49,11 +37,11 @@ export class Post extends AggregateRoot {
   title: string;
 
   @Expose()
-  @IsIn(postBoardTypes)
+  @IsIn(PostBoardTypes)
   @ApiProperty({
     description: "게시판 타입",
     example: "common",
-    enum: postBoardTypes,
+    enum: PostBoardTypes,
   })
   boardType: PostBoardType;
 
@@ -182,8 +170,8 @@ export class Post extends AggregateRoot {
 
   private isOwner(userOrNickname: User | string) {
     if (userOrNickname instanceof User)
-      return this.writer.nickname === userOrNickname.nickname;
-    else return this.writer.nickname === userOrNickname;
+      return this.writerNickname === userOrNickname.nickname;
+    else return this.writerNickname === userOrNickname;
   }
 }
 

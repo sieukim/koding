@@ -1,5 +1,5 @@
 import { ApiParam } from "@nestjs/swagger";
-import { postBoardTypes } from "../../../models/post.model";
+import { PostBoardTypes } from "../../../models/post.model";
 
 export const ApiParamBoardType = ({
   name = "boardType",
@@ -11,7 +11,7 @@ export const ApiParamBoardType = ({
   ApiParam({
     name,
     description,
-    enum: postBoardTypes,
+    enum: PostBoardTypes,
   });
 
 export const ApiParamPostId = ({
