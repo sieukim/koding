@@ -173,9 +173,21 @@ export const revokeUser = (nickname) => {
 // 알림 조회
 export const getNotifications = (nickname, cursor) => {
   const query = new URLSearchParams();
-  if (cursor) {
-    query.set('cursor', cursor);
-  }
+  if (cursor) query.set('cursor', cursor);
 
   return axios.get(`/api/notifications/${nickname}?${query.toString()}`);
+};
+
+// 게시글 검색(통합)
+export const integratedSearch = (query) => {
+  return axios.get(`/api/search/posts?query=${query}`);
+};
+
+// 게시글 검색(게시판)
+export const search = (boardType, cursor, query) => {
+  const queries = new URLSearchParams();
+  if (cursor) queries.set('cursor', cursor);
+  queries.set('query', query);
+
+  return axios.get(`/api/search/${boardType}?${queries.toString()}`);
 };

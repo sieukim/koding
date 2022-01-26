@@ -15,7 +15,7 @@ const CommentContainer = ({
 
   const [comments, setComments] = useState([]);
 
-  const [readCommentState] = useAsync(
+  const [readCommentState, readCommentFetch] = useAsync(
     () => {
       setCommentSuccess(false);
       return api.readComment(boardType, postId, cursor);
@@ -64,16 +64,25 @@ const CommentContainer = ({
   useEffect(() => {
     if (writeCommentState.success) {
       setComments((comments) => {
-        const newComments = [...comments];
-        newComments.push(writeCommentState.success.data);
-        return newComments;
+        if (comments.length < 10) {
+          const newComments = [...comments];
+          newComments.push(writeCommentState.success.data);
+          return newComments;
+        } else {
+          return comments;
+        }
       });
     }
   }, [writeCommentState.success]);
 
   const writeComment = useCallback(
-    async (comment) => await writeCommentFetch(comment),
-    [writeCommentFetch],
+    async (comment) => {
+      const response = await writeCommentFetch(comment);
+      await readCommentFetch();
+
+      return response;
+    },
+    [writeCommentFetch, readCommentFetch],
   );
 
   /* 댓글 수정 api */
@@ -100,13 +109,25 @@ const CommentContainer = ({
 
   const removeComment = useCallback(
     async (commentId) => {
-      await removeCommentFetch(commentId);
+      const response = await removeCommentFetch(commentId);
+      await readCommentFetch();
+
       setComments((comments) => {
         return comments.filter((comment) => comment.commentId !== commentId);
       });
+
+      return response;
     },
-    [removeCommentFetch],
+    [removeCommentFetch, removeCommentFetch],
   );
+
+  useEffect(() => {
+    if (comments.length === 0 && prevPageCursor) {
+      const query = new URLSearchParams();
+      query.set('cursor', prevPageCursor);
+      navigate(`/board/${boardType}/post/${postId}?${query}`);
+    }
+  }, [comments, prevPageCursor, navigate, boardType, postId]);
 
   return (
     <>

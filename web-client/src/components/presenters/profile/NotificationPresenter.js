@@ -15,6 +15,12 @@ const StyledNotification = styled.div`
   .post-title {
     color: red;
   }
+
+  .paging-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+  }
 `;
 
 const Notification = ({ notification }) => {
@@ -71,8 +77,13 @@ const Notification = ({ notification }) => {
   }
 };
 
-const NotificationPresenter = ({ notifications }) => {
-  console.log(notifications);
+const NotificationPresenter = ({
+  notifications,
+  prevCursor,
+  nextCursor,
+  onClickPrevCursor,
+  onClickNextCursor,
+}) => {
   return (
     <StyledNotification>
       {notifications.map((notification) => (
@@ -81,6 +92,14 @@ const NotificationPresenter = ({ notifications }) => {
           key={notification.notificationId}
         />
       ))}
+      <div className="paging-button">
+        <button onClick={onClickPrevCursor} disabled={!prevCursor}>
+          이전
+        </button>
+        <button onClick={onClickNextCursor} disabled={!nextCursor}>
+          다음
+        </button>
+      </div>
     </StyledNotification>
   );
 };
