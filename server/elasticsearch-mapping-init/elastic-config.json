@@ -20,14 +20,14 @@
       "filter": {
         "synonyms_koding": {
           "type": "synonym",
-          "synonyms_path": "analysis/synonyms.txt"
+          "synonyms_path": "synonyms-koding.txt"
         }
       },
       "tokenizer": {
         "nori_mixed": {
           "type": "nori_tokenizer",
           "decompound_mode": "mixed",
-          "user_dictionary": "analysis/user-dictionary.txt"
+          "user_dictionary": "user-dictionary.txt"
         }
       },
       "char_filter": {

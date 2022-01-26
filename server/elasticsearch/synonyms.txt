@@ -1,4 +1,0 @@
-자바,java
-자바스크립트,javascript,js
-파이썬,python
-
