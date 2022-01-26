@@ -1,15 +1,17 @@
 import styled from 'styled-components';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as api from '../modules/api';
 import { useCallback } from 'react';
 import { setLogout } from '../modules/auth';
 import { MyPageLink } from '../utils/MyComponents';
+import SearchBar from '../utils/SearchBar';
 
 const StyledHeader = styled.nav`
   display: flex;
   flex-direction: row;
   padding: 30px;
+  justify-content: space-between;
 
   .web-title {
     font-size: 30px;
@@ -19,7 +21,6 @@ const StyledHeader = styled.nav`
     list-style: none;
     display: flex;
     flex-direction: row;
-    margin-left: auto;
   }
 
   li {
@@ -45,11 +46,16 @@ const Header = () => {
     }
   }, []);
 
+  /* 검색 */
+
+  const match = useMatch('/search');
+
   return (
     <StyledHeader>
       <NavLink className="web-title" to="/">
         Koding
       </NavLink>
+      {!match && <SearchBar className="header" />}
       <ul>
         <li>
           <NavLink to="/board/common">일반</NavLink>
@@ -68,9 +74,6 @@ const Header = () => {
         </li>
         <li>
           <NavLink to="/board/column">칼럼</NavLink>
-        </li>
-        <li>
-          <a>검색</a>
         </li>
         {!user && (
           <>

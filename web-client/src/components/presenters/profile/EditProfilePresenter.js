@@ -140,8 +140,6 @@ const EditProfilePresenter = ({
     }
   }, [logout, navigate, revokeState.success]);
 
-  console.log(revokeState);
-
   return (
     <StyledEditProfile>
       <div>닉네임</div>
