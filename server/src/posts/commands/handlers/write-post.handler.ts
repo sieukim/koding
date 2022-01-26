@@ -19,7 +19,13 @@ export class WritePostHandler implements ICommandHandler<WritePostCommand> {
     const {
       boardType,
       writerNickname,
-      writePostRequest: { markdownContent, tags, title, imageUrls },
+      writePostRequest: {
+        markdownContent,
+        tags,
+        title,
+        imageUrls,
+        htmlContent,
+      },
     } = command;
     const images = await this.uploadRepository.getTemporaryImages(imageUrls);
     images.forEach(({ uploaderNickname }) => {
@@ -36,6 +42,7 @@ export class WritePostHandler implements ICommandHandler<WritePostCommand> {
       tags,
       title,
       markdownContent,
+      htmlContent,
       imageUrls,
     });
     const resultPost = await this.postRepository.persist(post);

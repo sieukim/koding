@@ -12,14 +12,22 @@
           "filter": [
             "lowercase",
             "nori_part_of_speech",
-            "unique"
+            "unique",
+            "synonyms_koding"
           ]
+        }
+      },
+      "filter": {
+        "synonyms_koding": {
+          "type": "synonym",
+          "synonyms_path": "analysis/synonyms.txt"
         }
       },
       "tokenizer": {
         "nori_mixed": {
           "type": "nori_tokenizer",
-          "decompound_mode": "mixed"
+          "decompound_mode": "mixed",
+          "user_dictionary": "analysis/user-dictionary.txt"
         }
       },
       "char_filter": {

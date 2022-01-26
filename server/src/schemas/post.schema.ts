@@ -50,6 +50,9 @@ export class PostDocument extends Document {
   @Prop()
   markdownContent: string;
 
+  @Prop()
+  htmlContent: string;
+
   @Prop({ type: Number, default: 0, min: 0 })
   readCount: number;
 
@@ -60,13 +63,9 @@ export class PostDocument extends Document {
   imageUrls: string[];
 
   static toModel(postDocument: PostDocument): Post {
-    console.log("before: ", postDocument);
-    // TODO: PostDocument를 plainToClass를 이용해 Post로 바꿀 때 postId가 String이 아닌 Types.ObjectId인 문제 해결
-    const result = plainToClass(Post, postDocument, {
+    return plainToClass(Post, postDocument, {
       excludeExtraneousValues: true,
     });
-    console.log("after: ", result);
-    return result;
   }
 
   static fromModel(post: Post, model: Model<PostDocument>): PostDocument {

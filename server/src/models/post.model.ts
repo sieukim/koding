@@ -71,6 +71,13 @@ export class Post extends AggregateRoot {
   markdownContent: string;
 
   @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "html 형식의 게시글 내용",
+  })
+  htmlContent: string;
+
+  @Expose()
   @IsNumber()
   @Min(0)
   @ApiProperty({
@@ -100,6 +107,7 @@ export class Post extends AggregateRoot {
     writerNickname: string;
     tags: string[];
     markdownContent: string;
+    htmlContent: string;
     imageUrls: string[];
   });
   constructor(param?: {
@@ -108,6 +116,7 @@ export class Post extends AggregateRoot {
     writerNickname: string;
     tags: string[];
     markdownContent: string;
+    htmlContent: string;
     imageUrls: string[];
   }) {
     super();
@@ -118,6 +127,7 @@ export class Post extends AggregateRoot {
       this.writerNickname = param.writerNickname;
       this.tags = param.tags ?? [];
       this.markdownContent = param.markdownContent;
+      this.htmlContent = param.htmlContent;
       this.imageUrls = param.imageUrls ?? [];
       this.readCount = 0;
       this.createdAt = currentTime();
@@ -130,11 +140,13 @@ export class Post extends AggregateRoot {
       title,
       tags,
       markdownContent,
+      htmlContent,
       imageUrls,
     }: {
       title?: string;
       tags?: string[];
       markdownContent?: string;
+      htmlContent?: string;
       imageUrls?: string[];
     },
   ) {
@@ -146,6 +158,7 @@ export class Post extends AggregateRoot {
     this.title = title ?? this.title;
     this.tags = tags ?? this.tags;
     this.markdownContent = markdownContent ?? this.markdownContent;
+    this.htmlContent = htmlContent ?? this.htmlContent;
     this.imageUrls = imageUrls ?? this.imageUrls;
   }
 

@@ -7,6 +7,7 @@ export class ReadPostFilter {
   @IsNotEmpty()
   cursor?: string;
 
+  @IsOptional()
   @IsArray()
   @Type(() => String)
   @Transform(({ value }) => (value as string).split(",").map((v) => v.trim()))

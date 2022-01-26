@@ -25,7 +25,7 @@ import { SearchPostQuery } from "./queries/search-post.query";
 import { SearchPostQueryDto } from "./dto/query/search-post-query.dto";
 
 @ApiTags("SEARCH")
-@Controller("search")
+@Controller("api/search")
 export class SearchController {
   constructor(private readonly queryBus: QueryBus) {}
 
