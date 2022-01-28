@@ -76,14 +76,9 @@ const Header = () => {
           <NavLink to="/board/column">칼럼</NavLink>
         </li>
         {!user && (
-          <>
-            <li>
-              <NavLink to="/login">로그인</NavLink>
-            </li>
-            <li>
-              <NavLink to="/signup">회원가입</NavLink>
-            </li>
-          </>
+          <li>
+            <NavLink to="/login">로그인</NavLink>
+          </li>
         )}
         {user && (
           <>

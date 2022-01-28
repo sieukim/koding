@@ -1,120 +1,109 @@
-import styled from 'styled-components';
 import { useCallback } from 'react';
-import useInputs from '../../../hooks/useInput';
+import { Button, Form, Input } from 'antd';
+import {
+  ContactsOutlined,
+  GithubOutlined,
+  LockOutlined,
+  SearchOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import styled from 'styled-components';
 
-const StyledLogin = styled.form`
-  display: flex;
-  flex-direction: column;
-  width: 50%;
-
-  .findPassword {
-    width: 85%;
-    text-align: right;
-    margin: 10px 0;
+const StyledForm = styled.div`
+  .title-text {
+    text-align: center;
+    font-weight: bold;
+    font-size: 32px;
+    margin: 24px 0;
   }
 
-  & > div {
+  .login-form {
+    max-width: 300px;
+  }
+
+  .login-form-navLink {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 10px 0;
+    justify-content: center;
+  }
+
+  .login-form-button {
     width: 100%;
-
-    input {
-      width: 85%;
-      height: 30px;
-    }
-
-    button {
-      width: 10%;
-      height: 30px;
-    }
-
-    .submit-button {
-      width: 85%;
-      height: 30px;
-    }
-
-    a {
-      width: 100%;
-    }
-
-    a .github-button {
-      width: 85%;
-      height: 30px;
-    }
   }
 `;
 
 const LoginPresenter = ({ login, loginState, url }) => {
-  /* 유저 정보 */
-  // input 이벤트 핸들러
-  const [form, onChangeInputs] = useInputs({ email: '', password: '' });
-
-  /* 로그인 */
-
-  // 로그인 버튼 이벤트 핸들러
-  const onSubmitButton = useCallback(
-    (e) => {
-      e.preventDefault();
-      const user = {
-        ...form,
-      };
-      login(user);
+  // 로그인 Form onFinish(onSubmit) 핸들러
+  const onFinish = useCallback(
+    (values) => {
+      login({ ...values });
     },
-    [form, login],
+    [login],
   );
 
-  // 로그인 진행중인지에 대한 정보
-  const disableButton = loginState.loading;
-
   return (
-    <StyledLogin onSubmit={onSubmitButton}>
-      <p>이메일</p>
-      <div>
-        <input
+    <StyledForm>
+      <div className="title-text">로그인</div>
+      <Form name="login-form" className="login-form" onFinish={onFinish}>
+        <Form.Item
           name="email"
-          type="email"
-          placeholder="이메일"
-          required
-          onChange={onChangeInputs}
-          autoComplete="email"
-        />
-      </div>
+          rules={[{ required: true, message: '이메일을 입력하세요.' }]}
+        >
+          <Input
+            prefix={<UserOutlined className="site-form-item-icon" />}
+            placeholder="이메일"
+            allowClear={true}
+          />
+        </Form.Item>
 
-      <p>비밀번호</p>
-      <div>
-        <input
+        <Form.Item
           name="password"
-          type="password"
-          placeholder="비밀번호"
-          minLength="8"
-          maxLength="16"
-          required
-          onChange={onChangeInputs}
-          autoComplete="current-password"
-        />
-      </div>
+          rules={[{ required: true, message: '비밀번호를 입력하세요.' }]}
+        >
+          <Input.Password
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            placeholder="비밀번호"
+            allowClear={true}
+          />
+        </Form.Item>
 
-      <a className="findPassword" href="/reset-password">
-        비밀번호 초기화
-      </a>
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="login-form-button"
+            loading={loginState.loading}
+          >
+            로그인
+          </Button>
+        </Form.Item>
 
-      <div>
-        <button className="submit-button" disabled={disableButton}>
-          로그인
-        </button>
-      </div>
-      {loginState.error && <p>일치하지 않는 회원정보입니다.</p>}
-
-      <div>
-        <a href={url}>
-          <button className="github-button" type="button">
+        <Form.Item>
+          <Button
+            type="primary"
+            href={url}
+            icon={<GithubOutlined />}
+            className="login-form-button"
+          >
             깃허브 로그인
-          </button>
-        </a>
-      </div>
-    </StyledLogin>
+          </Button>
+        </Form.Item>
+
+        <Form.Item>
+          <div className="login-form-navLink">
+            <Button type="link" href="/signup" icon={<ContactsOutlined />}>
+              회원가입
+            </Button>
+            <Button
+              type="link"
+              href="/reset-password"
+              icon={<SearchOutlined />}
+            >
+              비밀번호 찾기
+            </Button>
+          </div>
+        </Form.Item>
+      </Form>
+    </StyledForm>
   );
 };
 

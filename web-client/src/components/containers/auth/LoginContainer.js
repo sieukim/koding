@@ -35,7 +35,7 @@ const LoginContainer = () => {
     }
   }, [onSetLogin, loginState.success]);
 
-  /* github callback */
+  /* github 로그인 */
 
   const url = useMemo(() => {
     const CLIENT_ID = '855268489b238ce4aa0e';
