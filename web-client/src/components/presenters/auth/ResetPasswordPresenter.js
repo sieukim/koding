@@ -1,42 +1,23 @@
 import styled from 'styled-components';
-import { useCallback } from 'react';
-import useInputs from '../../../hooks/useInput';
-import { PrintState } from '../../../utils/MyComponents';
+import { useCallback, useEffect, useState } from 'react';
+import { Button, Col, Form, Input, Row } from 'antd';
+import { KeyOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
 
-const StyledResetPassword = styled.form`
-  display: flex;
-  flex-direction: column;
-  width: 50%;
-
-  & > div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 10px 0;
-    width: 100%;
-
-    input {
-      width: 75%;
-      height: 30px;
-    }
-
-    button {
-      width: 20%;
-      height: 30px;
-    }
-
-    .no-button-input {
-      width: 100%;
-    }
-
-    .submit-button {
-      width: 100%;
-      height: 30px;
-    }
+const StyledResetPassword = styled.div`
+  .title-text {
+    text-align: center;
+    font-weight: bold;
+    font-size: 32px;
+    margin: 24px 0;
   }
 
-  p {
-    margin: 3px 0;
+  .reset-password-form {
+    max-width: 500px;
+    min-width: 350px;
+  }
+
+  .reset-password-form-button {
+    width: 100%;
   }
 `;
 
@@ -49,149 +30,213 @@ const ResetPasswordPresenter = ({
   resetState,
   initializeState,
 }) => {
-  /* 유저 정보 */
+  const [form] = Form.useForm();
 
-  // input 이벤트 핸들러
-  const [form, onChange] = useInputs({
-    email: '',
-    verifiedToken: '',
-    password: '',
-    'password-check': '',
-  });
+  // 비밀번호 초기화 Form onFinish(onSubmit) 핸들러
+  const onFinish = useCallback(
+    (values) => {
+      resetPassword({ ...values });
+    },
+    [resetPassword],
+  );
 
-  const onChangeInputs = useCallback(
-    (e) => {
-      // 현재 정보에서 입력중인 값을 추가
-      onChange(e);
+  const [sent, setSent] = useState(false);
 
-      // email 값이 변경되면 상태 초기화
-      if (e.target.name === 'email' || e.target.name === 'verifiedToken') {
-        initializeState();
+  // 인증 코드 발송 버튼 onClick 이벤트 핸들러
+  const onClickSend = useCallback(() => {
+    const email = form.getFieldValue('email');
+    sendToken({ email: email });
+    setSent(true);
+  }, [sendToken, form]);
+
+  // 인증 코드 발송 상태 초기화 이벤트 핸들러
+  const onChangeMail = useCallback(() => {
+    initializeState();
+    setSent(false);
+  }, [initializeState]);
+
+  // 이메일 유효성 검증
+  const validateEmail = useCallback(() => {
+    if (sendState.error) {
+      return Promise.reject(new Error('유효한 이메일이 아닙니다.'));
+    }
+
+    if (!sent && !sendState.success) {
+      return Promise.reject(new Error('인증 코드 발송이 필요합니다.'));
+    }
+
+    return Promise.resolve();
+  }, [sent, sendState]);
+
+  const [checked, setChecked] = useState(false);
+
+  // 인증 코드 확인 버튼 onClick 이벤트 핸들러
+  const onClickVerify = useCallback(() => {
+    const { email, verifyToken: token } = form.getFieldsValue([
+      'email',
+      'verifyToken',
+    ]);
+    verifyToken({ email: email, verifyToken: token });
+    setChecked(true);
+  }, [verifyToken, form]);
+
+  // 인증 코드 유효성 검증
+  const validateToken = useCallback(
+    (_, value) => {
+      if (!value || value.length !== 6) return Promise.reject();
+
+      if (verifyState.error) {
+        return Promise.reject(new Error('인증번호가 일치하지 않습니다.'));
       }
+
+      if (!checked && !verifyState.success) {
+        return Promise.reject(new Error('인증 코드 확인이 필요합니다.'));
+      }
+
+      return Promise.resolve();
     },
-    [onChange, initializeState],
+    [checked, verifyState],
   );
 
-  /* 인증 코드 발송 */
+  useEffect(() => {
+    if (sent) {
+      form.validateFields(['email']);
+    }
+    if (checked) {
+      form.validateFields(['verifyToken']);
+    }
+  }, [sent, checked, form, sendState.error, verifyState.error]);
 
-  const onSendToken = useCallback(
-    (e) => {
-      e.preventDefault();
-      const user = { email: form['email'] };
-      sendToken(user);
-    },
-    [form, sendToken],
-  );
+  // 비밀번호 유효성 검증
+  const validatePassword = useCallback((_, value) => {
+    if (!value) return Promise.reject();
 
-  /* 인증 코드 확인 */
+    if (value.length < 8 || value.length > 16) {
+      return Promise.reject(
+        new Error('8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.'),
+      );
+    }
 
-  const onVerifyToken = useCallback(
-    (e) => {
-      e.preventDefault();
-      const user = { email: form['email'], verifyToken: form['verifyToken'] };
-      verifyToken(user);
-    },
-    [form, verifyToken],
-  );
+    return Promise.resolve();
+  }, []);
 
-  /* 비밀번호 변경 */
+  // 비밀번호 동일성 검증
+  const validatePasswordCheck = useCallback((_, value) => {
+    if (!value) return Promise.reject();
 
-  const onResetPassword = useCallback(
-    (e) => {
-      e.preventDefault();
-      const user = { ...form };
-      delete user['password-check'];
-      resetPassword(user);
-    },
-    [form, resetPassword],
-  );
+    if (value.length < 8 || value.length > 16) {
+      return Promise.reject();
+    }
 
-  // 비밀번호 변경 진행중인지, 유효한 토큰인지, 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
-  const disableButton =
-    resetState.loading ||
-    !sendState.success ||
-    !verifyState.success ||
-    !form['password'] ||
-    !form['password-check'] ||
-    form['password'] !== form['password-check'];
+    if (form.getFieldValue('password') !== value) {
+      return Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
+    }
+
+    return Promise.resolve();
+  }, []);
 
   return (
-    <StyledResetPassword onSubmit={onResetPassword}>
-      <p>이메일</p>
-      <div>
-        <input
-          name="email"
-          onChange={onChangeInputs}
-          placeholder="가입한 이메일을 입력하세요."
-        />
-        <button
-          type="button"
-          onClick={onSendToken}
-          disabled={sendState.success}
-        >
-          인증 코드 발송
-        </button>
-      </div>
-      {sendState.success && <p>인증 코드를 입력해주세요.</p>}
-      {sendState.error && <p>일치하지 않는 회원 정보입니다.</p>}
+    <StyledResetPassword>
+      <div className="title-text">비밀번호 변경</div>
 
-      <p>인증 코드</p>
-      <div>
-        <input
-          name="verifyToken"
-          onChange={onChangeInputs}
-          placeholder="인증 코드를 입력하세요."
-          disabled={sendState.success && verifyState.success}
-        />
-        <button
-          type="button"
-          onClick={onVerifyToken}
-          disabled={sendState.success && verifyState.success}
-        >
-          인증 코드 확인
-        </button>
-      </div>
-      {verifyState.success && <p>비밀 번호 변경을 진행해주세요.</p>}
-      {verifyState.failure && <p>다시 입력해주세요.</p>}
+      <Form
+        name="reset-password-form"
+        form={form}
+        className="reset-password-form"
+        onFinish={onFinish}
+      >
+        <Row gutter={8}>
+          <Col flex={3}>
+            <Form.Item
+              name="email"
+              rules={[
+                { required: true, message: '이메일을 입력하세요.' },
+                { type: 'email', message: '이메일을 입력하세요.' },
+                { validator: validateEmail },
+              ]}
+              hasFeedback
+              validateFirst={true}
+            >
+              <Input
+                prefix={<MailOutlined className="site-form-item-icon" />}
+                placeholder="이메일"
+                onChange={onChangeMail}
+                allowClear={true}
+              />
+            </Form.Item>
+          </Col>
+          <Col flex={1}>
+            <Button onClick={onClickSend} loading={sendState.loading}>
+              인증 코드 발송
+            </Button>
+          </Col>
+        </Row>
 
-      <p>비밀번호</p>
-      <div>
-        <input
+        <Row gutter={8}>
+          <Col flex={3}>
+            <Form.Item
+              name="verifyToken"
+              rules={[
+                { required: true, message: '인증 코드를 입력하세요.' },
+                { validator: validateToken },
+              ]}
+              hasFeedback
+            >
+              <Input
+                prefix={<KeyOutlined className="site-form-item-icon" />}
+                placeholder="인증 코드"
+                allowClear={true}
+              />
+            </Form.Item>
+          </Col>
+          <Col flex={1}>
+            <Button onClick={onClickVerify} loading={verifyState.loading}>
+              인증 코드 확인
+            </Button>
+          </Col>
+        </Row>
+
+        <Form.Item
           name="password"
-          type="password"
-          placeholder="8 ~ 16자 영문 대소문자, 숫자, 특수문자를 사용하세요. "
-          minLength="8"
-          maxLength="16"
-          required
-          onChange={onChangeInputs}
-          className="no-button-input"
-        />
-      </div>
-
-      <p>비밀번호 확인</p>
-      <div>
-        <input
-          name="password-check"
-          type="password"
-          minLength="8"
-          maxLength="16"
-          required
-          onChange={onChangeInputs}
-          className="no-button-input"
-        />
-      </div>
-
-      <div>
-        <button
-          type="submit"
-          className="submit-button"
-          disabled={disableButton}
+          hasFeedback
+          rules={[
+            { required: true, message: '비밀번호를 입력하세요.' },
+            { validator: validatePassword },
+          ]}
         >
-          비밀번호 변경
-        </button>
-      </div>
-      {resetState.success && <p>비밀번호가 변경되었습니다.</p>}
-      <PrintState state={resetState} />
+          <Input.Password
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            placeholder="비밀번호"
+            allowClear={true}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="password-check"
+          hasFeedback
+          rules={[
+            { required: true, message: '필수 정보입니다.' },
+            { validator: validatePasswordCheck },
+          ]}
+        >
+          <Input.Password
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            placeholder="비밀번호 재확인"
+            allowClear={true}
+          />
+        </Form.Item>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="reset-password-form-button"
+            loading={resetState.loading}
+          >
+            비밀번호 변경
+          </Button>
+        </Form.Item>
+      </Form>
     </StyledResetPassword>
   );
 };
