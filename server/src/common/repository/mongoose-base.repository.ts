@@ -63,9 +63,9 @@ export abstract class MongooseBaseRepository<
     const findQuery: FilterQuery<ModelDocument> =
       this.parseFindOption(findOption);
     const sortQuery = this.parseSortOption(sortOption);
-    let query = this.mongooseModel.findOne(findQuery);
-    if (populate) query = query.populate(populate);
-    if (sortOption) query = query.sort(sortQuery);
+    const query = this.mongooseModel.findOne(findQuery);
+    if (populate) query.populate(populate);
+    if (sortOption) query.sort(sortQuery);
     const document: ModelDocument | null = await query.exec();
     if (document) return this.toModel(document);
     return null;

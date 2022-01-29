@@ -1,5 +1,6 @@
 import {
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -7,9 +8,10 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { QueryBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import {
   ApiForbiddenResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -23,6 +25,7 @@ import { ReadNotificationsQuery } from "./queries/read-notifications.query";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../models/user.model";
+import { DeleteNotificationCommand } from "./commands/delete-notification.command";
 
 @ApiTags("NOTIFICATION")
 @ApiForbiddenResponse({
@@ -30,7 +33,10 @@ import { User } from "../models/user.model";
 })
 @Controller("api/notifications")
 export class NotificationsController {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @ApiOperation({
     summary: "알림 조회",
@@ -66,5 +72,35 @@ export class NotificationsController {
     return this.queryBus.execute(
       new ReadNotificationsQuery(nickname, pageSize, cursor),
     ) as ReturnType<ReadNotificationsHandler["execute"]>;
+  }
+
+  @ApiOperation({
+    summary: "알림 삭제",
+  })
+  @ApiParam({
+    name: "nickname",
+    description: "삭제할 알림을 받은 사용자 닉네임",
+    type: String,
+  })
+  @ApiParam({
+    name: "notificationId",
+    description: "삭제할 알림의 아이디",
+    type: String,
+  })
+  @ApiNoContentResponse({
+    description: "알림 삭제 성공",
+  })
+  @UseGuards(VerifiedUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":nickname/:notificationId")
+  deleteNotification(
+    @LoginUser() user: User,
+    @Param("nickname") nickname: string,
+    @Param("notificationId") notificationId: string,
+  ) {
+    user.verifySameUser(nickname);
+    return this.commandBus.execute(
+      new DeleteNotificationCommand(user.nickname, notificationId),
+    );
   }
 }
