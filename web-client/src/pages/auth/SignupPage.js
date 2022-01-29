@@ -1,18 +1,18 @@
 import styled from 'styled-components';
 import SignupContainer from '../../components/containers/auth/SignupContainer';
 
-const StyledSignup = styled.div`
+const StyledPage = styled.div`
   display: flex;
   justify-content: center;
   margin: 0 auto;
-  width: 60%;
+  width: 100%;
 `;
 
 const SignupPage = () => {
   return (
-    <StyledSignup>
+    <StyledPage>
       <SignupContainer />
-    </StyledSignup>
+    </StyledPage>
   );
 };
 

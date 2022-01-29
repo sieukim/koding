@@ -1,34 +1,28 @@
 import styled from 'styled-components';
-import { useCallback, useRef } from 'react';
-import useInputs from '../../../hooks/useInput';
-import { PrintState } from '../../../utils/MyComponents';
+import { useCallback, useEffect, useState } from 'react';
+import { Button, Form, Input } from 'antd';
+import {
+  LinkOutlined,
+  LockOutlined,
+  MailOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 
-const StyledSignup = styled.form`
-  display: flex;
-  flex-direction: column;
-  width: 50%;
+const StyledSignup = styled.div`
+  .title-text {
+    text-align: center;
+    font-weight: bold;
+    font-size: 32px;
+    margin: 24px 0;
+  }
 
-  & > div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 10px 0;
+  .signup-form {
+    max-width: 500px;
+    min-width: 350px;
+  }
+
+  .signup-form-button {
     width: 100%;
-
-    input {
-      width: 85%;
-      height: 30px;
-    }
-
-    button {
-      width: 10%;
-      height: 30px;
-    }
-
-    .submit-button {
-      width: 85%;
-      height: 30px;
-    }
   }
 `;
 
@@ -38,202 +32,265 @@ const SignupPresenter = ({
   duplicated,
   checked,
   duplicateCheck,
-  resetCheck,
 }) => {
-  /* 유저 정보 */
+  const [form] = Form.useForm();
+  const [validated, setValidated] = useState({ email: false, nickname: false });
 
-  // input 이벤트 핸들러
-  const [form, onChange] = useInputs({
-    email: '',
-    password: '',
-    'password-check': '',
-    nickname: '',
-    blog: '',
-    github: '',
-    portfolio: '',
-  });
+  // 회원가입 Form onFinish(onSubmit) 핸들러
+  const onFinish = useCallback(
+    (values) => {
+      signup({ ...values });
+    },
+    [signup],
+  );
 
-  const onChangeInput = useCallback(
+  // 이메일 onChange 리스너
+  const onChangeEmail = useCallback(
     (e) => {
-      onChange(e);
+      duplicateCheck('email', e.target.value);
+    },
+    [duplicateCheck],
+  );
 
-      // 만약 추가중인 정보가 id 또는 email, nickname이면 resetCheck 함수를 호출하여 중복 검사 초기화
-      if (e.target.name === 'email' || e.target.name === 'nickname') {
-        resetCheck(e.target.name);
+  // 이메일 유효성 검증
+  const email = form.getFieldValue('email');
+
+  useEffect(() => {
+    if (checked.email && duplicated.email) {
+      setValidated((validated) => ({ ...validated, email: false }));
+    } else {
+      setValidated((validated) => ({ ...validated, email: true }));
+    }
+  }, [checked.nickname, duplicated.nickname, email]);
+
+  useEffect(() => {
+    if (checked.email) {
+      form.validateFields(['email']);
+    }
+  }, [checked.email, validated, form]);
+
+  const validateEmail = useCallback(() => {
+    if (validated.email) return Promise.resolve();
+
+    if (!validated.email) {
+      return Promise.reject(new Error('사용중인 이메일입니다.'));
+    }
+  }, [validated.email]);
+
+  // 비밀번호 유효성 검증
+  const validatePassword = useCallback((_, value) => {
+    if (!value) return Promise.reject();
+
+    if (value.length < 8 || value.length > 16) {
+      return Promise.reject(
+        new Error('8~16자 영문 대 소문자, 숫자, 특수문자를 사용하세요.'),
+      );
+    }
+
+    return Promise.resolve();
+  }, []);
+
+  // 비밀번호 동일성 검증
+  const validatePasswordCheck = useCallback((_, value) => {
+    if (!value) return Promise.reject();
+
+    if (value.length < 8 || value.length > 16) {
+      return Promise.reject();
+    }
+
+    if (form.getFieldValue('password') !== value) {
+      return Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
+    }
+
+    return Promise.resolve();
+  }, []);
+
+  // 닉네임 onChange 리스너
+  const onChangeNickname = useCallback(
+    (e) => {
+      duplicateCheck('nickname', e.target.value);
+    },
+    [duplicateCheck],
+  );
+
+  // 닉네임 유효성 검증
+  const nickname = form.getFieldValue('nickname');
+
+  useEffect(() => {
+    if (checked.nickname && duplicated.nickname) {
+      setValidated((validated) => ({ ...validated, nickname: false }));
+    } else {
+      setValidated((validated) => ({ ...validated, nickname: true }));
+    }
+  }, [checked.nickname, duplicated.nickname, nickname]);
+
+  useEffect(() => {
+    if (checked.nickname) {
+      form.validateFields(['nickname']);
+    }
+  }, [checked.nickname, validated, form]);
+
+  // 닉네임 유효성 검증
+  const validateNickname = useCallback(
+    (_, value) => {
+      if (!value) return Promise.reject();
+
+      if (
+        value.length < 2 ||
+        value.length > 10 ||
+        /^[A-Za-z0-9가-힣]{2, 10}/.test(value)
+      ) {
+        return Promise.reject(
+          new Error('2~10자 영문 대 소문자, 숫자, 한글을 사용하세요.'),
+        );
       }
-    },
-    [resetCheck, onChange],
-  );
 
-  /* 중복 검사*/
+      if (validated.nickname) return Promise.resolve();
 
-  // email, nickname에 대한 DOM을 선택하기 위해 ref를 사용(useRef)
-  const emailInput = useRef();
-  const nicknameInput = useRef();
-
-  // 중복 검사 버튼 이벤트 핸들러
-  const onClickDuplicateCheckButton = useCallback(
-    (e) => {
-      const inputs = {
-        email: emailInput,
-        nickname: nicknameInput,
-      };
-      const key = e.target.dataset.name;
-      const value = form[key];
-      const input = inputs[key];
-
-      // 현재 입력중인 값이 input 조건을 만족하면 중복 검사를 진행
-      if (input.current.reportValidity()) {
-        duplicateCheck(key, value);
+      if (!validated.nickname) {
+        return Promise.reject(new Error('사용중인 닉네임입니다.'));
       }
+
+      return Promise.resolve();
     },
-    [form, duplicateCheck],
+    [validated.nickname],
   );
-
-  /* 회원가입 */
-
-  // 회원가입 버튼 이벤트 핸들러
-  const onSubmitButton = useCallback(
-    (e) => {
-      e.preventDefault();
-      const user = {
-        ...form,
-      };
-      delete user[`password-check`];
-      signup(user);
-    },
-    [form, signup],
-  );
-
-  // email, nickname의 값이 유효한지에 대한 정보
-  const validatedEmail = checked.email && !duplicated.email;
-  const validatedNickname = checked.nickname && !duplicated.nickname;
-
-  // 회원가입 진행중인지 email, nickname의 값은 유효한지 비밀번호와 비밀번호 확인란이 입력되어있으며 값이 동일한지에 대한 정보
-  const disableButton =
-    signupState.loading ||
-    !validatedEmail ||
-    !validatedNickname ||
-    !form[`password`] ||
-    !form[`password-check`] ||
-    form[`password`] !== form[`password-check`];
 
   return (
-    <StyledSignup onSubmit={onSubmitButton}>
-      <p>이메일</p>
-      <div>
-        <input
-          ref={emailInput}
+    <StyledSignup>
+      <div className="title-text">회원가입</div>
+
+      <Form
+        name="signup-form"
+        form={form}
+        className="signup-form"
+        onFinish={onFinish}
+      >
+        <Form.Item
           name="email"
-          type="email"
-          placeholder="이메일을 입력하세요."
-          required
-          onChange={onChangeInput}
-          autoComplete="email"
-        />
-        <button
-          data-name="email"
-          onClick={onClickDuplicateCheckButton}
-          disabled={validatedEmail}
-          type="button"
+          hasFeedback
+          rules={[
+            { required: true, message: '이메일을 입력하세요.' },
+            { type: 'email', message: '이메일을 입력하세요.' },
+            { validator: validateEmail },
+          ]}
         >
-          중복 확인
-        </button>
-      </div>
-      {validatedEmail && <p>가능한 이메일입니다.</p>}
-      {checked.email && duplicated.email && <p>중복된 이메일입니다.</p>}
+          <Input
+            prefix={<MailOutlined className="site-form-item-icon" />}
+            placeholder="이메일"
+            onChange={onChangeEmail}
+            allowClear={true}
+          />
+        </Form.Item>
 
-      <p>비밀번호</p>
-      <div>
-        <input
+        <Form.Item
           name="password"
-          type="password"
-          placeholder="8 ~ 16자 영문 대소문자, 숫자, 특수문자를 사용하세요. "
-          minLength="8"
-          maxLength="16"
-          required
-          onChange={onChangeInput}
-          autoComplete="new-password"
-        />
-      </div>
+          hasFeedback
+          rules={[
+            { required: true, message: '비밀번호를 입력하세요.' },
+            { validator: validatePassword },
+          ]}
+        >
+          <Input.Password
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            placeholder="비밀번호"
+            allowClear={true}
+          />
+        </Form.Item>
 
-      <p>비밀번호 확인</p>
-      <div>
-        <input
+        <Form.Item
           name="password-check"
-          type="password"
-          minLength="8"
-          maxLength="16"
-          required
-          onChange={onChangeInput}
-        />
-      </div>
+          hasFeedback
+          rules={[
+            { required: true, message: '필수 정보입니다.' },
+            { validator: validatePasswordCheck },
+          ]}
+        >
+          <Input.Password
+            prefix={<LockOutlined className="site-form-item-icon" />}
+            placeholder="비밀번호 재확인"
+            allowClear={true}
+          />
+        </Form.Item>
 
-      <p>닉네임</p>
-      <div>
-        <input
-          ref={nicknameInput}
+        <Form.Item
           name="nickname"
-          type="text"
-          placeholder="영문 대소문자, 한글, 숫자를 사용하세요. (단, 띄어쓰기는 불가)"
-          minLength="2"
-          maxLength="10"
-          pattern="[A-Za-z0-9가-힣]*"
-          required
-          onChange={onChangeInput}
-        />
-        <button
-          data-name="nickname"
-          onClick={onClickDuplicateCheckButton}
-          disabled={validatedNickname}
-          type="button"
+          hasFeedback
+          rules={[
+            { required: true, message: '닉네임을 입력하세요.' },
+            { validator: validateNickname },
+          ]}
         >
-          중복 확인
-        </button>
-      </div>
-      {validatedNickname && <p>가능한 별명입니다.</p>}
-      {checked.nickname && duplicated.nickname && <p>중복된 별명입니다.</p>}
+          <Input
+            prefix={<UserOutlined className="site-form-item-icon" />}
+            placeholder="닉네임"
+            onChange={onChangeNickname}
+            allowClear={true}
+          />
+        </Form.Item>
 
-      <p>블로그(선택)</p>
-      <div>
-        <input
+        <Form.Item
           name="blog"
-          type="url"
-          placeholder="블로그 주소를 입력하세요."
-          onChange={onChangeInput}
-        />
-      </div>
-
-      <p>깃허브(선택)</p>
-      <div>
-        <input
-          name="github"
-          type="url"
-          placeholder="깃허브 주소를 입력하세요."
-          onChange={onChangeInput}
-        />
-      </div>
-
-      <p>포트폴리오(선택)</p>
-      <div>
-        <input
-          name="portfolio"
-          type="url"
-          placeholder="포트폴리오 주소를 입력하세요."
-          onChange={onChangeInput}
-        />
-      </div>
-
-      <div>
-        <button
-          type="submit"
-          className="submit-button"
-          disabled={disableButton}
+          rules={[
+            { required: false },
+            {
+              type: 'url',
+              message: '올바른 주소 형식이 아닙니다. ex) https://blog.com',
+            },
+          ]}
         >
-          회원가입
-        </button>
-      </div>
-      <PrintState state={signupState} />
+          <Input
+            prefix={<LinkOutlined className="site-form-item-icon" />}
+            placeholder="블로그 주소(선택)"
+            allowClear={true}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="github"
+          rules={[
+            { required: false },
+            {
+              type: 'url',
+              message: '올바른 주소 형식이 아닙니다. ex) https://github.com',
+            },
+          ]}
+        >
+          <Input
+            prefix={<LinkOutlined className="site-form-item-icon" />}
+            placeholder="깃허브 주소(선택)"
+            allowClear={true}
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="portfolio"
+          rules={[
+            { required: false },
+            {
+              type: 'url',
+              message: '올바른 주소 형식이 아닙니다. ex) https://portfolio.com',
+            },
+          ]}
+        >
+          <Input
+            prefix={<LinkOutlined className="site-form-item-icon" />}
+            placeholder="포트폴리오 주소(선택)"
+            allowClear={true}
+          />
+        </Form.Item>
+
+        <Form.Item>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="signup-form-button"
+            loading={signupState.loading}
+          >
+            회원가입
+          </Button>
+        </Form.Item>
+      </Form>
     </StyledSignup>
   );
 };

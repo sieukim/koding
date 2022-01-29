@@ -41,18 +41,6 @@ const SignupContainer = () => {
     }
   }, []);
 
-  // 중복 검사 후 입력값이 변하는 경우 checked와 duplicated 값을 초기화 => 중복검사 재활성화
-  const resetCheck = useCallback((key) => {
-    setDuplicated((duplicated) => ({
-      ...duplicated,
-      [key]: true,
-    }));
-    setChecked((checked) => ({
-      ...checked,
-      [key]: false,
-    }));
-  }, []);
-
   /* 회원가입 */
 
   // signup state
@@ -100,7 +88,6 @@ const SignupContainer = () => {
         duplicated={duplicated}
         checked={checked}
         duplicateCheck={duplicateCheck}
-        resetCheck={resetCheck}
       />
     </>
   );
