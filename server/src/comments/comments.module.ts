@@ -31,5 +31,6 @@ import { CommentsSaga } from "./sagas/comments.saga";
     ...CommentCommandHandlers,
     ...CommentQueryHandlers,
   ],
+  exports: [CommentsRepository],
 })
 export class CommentsModule {}

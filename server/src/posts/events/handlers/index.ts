@@ -1,3 +1,3 @@
-import { IncreasePostReadCountHandler } from "./increase-post-read-count.handler";
+import { PostReadCountIncreasedHandler } from "./post-read-count-increased.handler";
 
-export const PostEventHandlers = [IncreasePostReadCountHandler];
+export const PostEventHandlers = [PostReadCountIncreasedHandler];

@@ -7,7 +7,7 @@ import {
   GithubRepositoryInfo,
   GithubUserInfo,
 } from "../../../schemas/user.schema";
-import { Logger } from "@nestjs/common";
+import { ForbiddenException, Logger } from "@nestjs/common";
 
 @CommandHandler(SignupGithubCommand)
 export class SignupGithubHandler
@@ -49,6 +49,8 @@ export class SignupGithubHandler
     } as GithubUserInfo;
 
     user = await this.userRepository.findByEmail(email);
+    if (user.accountDeletedSince)
+      throw new ForbiddenException("계정이 삭제되었으므로 가입할 수 없습니다");
     this.logger.log(user);
     if (user) {
       user.linkAccountWithGithub(githubUserIdentifier, githubUserInfo);

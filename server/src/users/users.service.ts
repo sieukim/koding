@@ -16,6 +16,7 @@ import { FollowUserCommand } from "./commands/follow-user.command";
 import { FollowUserHandler } from "./commands/handlers/follow-user.handler";
 import { UnfollowUserCommand } from "./commands/unfollow-user.command";
 import { UnfollowUserHandler } from "./commands/handlers/unfollow-user.handler";
+import { SignupGithubHandler } from "./commands/handlers/signup-github.handler";
 
 @Injectable()
 export class UsersService {
@@ -54,9 +55,9 @@ export class UsersService {
     });
     console.log(signupGithubRequest);
     await validateOrReject(signupGithubRequest);
-    return await this.commandBus.execute(
+    return (await this.commandBus.execute(
       new SignupGithubCommand(signupGithubRequest),
-    );
+    )) as Awaited<ReturnType<SignupGithubHandler["execute"]>>;
   }
 
   async verifyEmailSignup(nickname: string, verifyToken: string) {

@@ -2,7 +2,7 @@ import { User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
 import { IsDate, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { Post } from "./post.model";
+import { Post, PostBoardType } from "./post.model";
 import { Types } from "mongoose";
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { ModifyCommentRequestDto } from "../comments/dto/modify-comment-request.dto";
@@ -24,6 +24,13 @@ export class Comment {
     type: String,
   })
   postId: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "댓글의 부모 게시글 게시판",
+  })
+  boardType: PostBoardType;
 
   @Expose()
   post?: Post;
@@ -62,12 +69,14 @@ export class Comment {
   constructor();
   constructor(param: {
     postId: string;
+    boardType: PostBoardType;
     writerNickname: string;
     content: string;
     mentionedNicknames: string[];
   });
   constructor(param?: {
     postId: string;
+    boardType: PostBoardType;
     writerNickname: string;
     content: string;
     mentionedNicknames: string[];
@@ -75,6 +84,7 @@ export class Comment {
     if (param) {
       this.commentId = new Types.ObjectId().toString();
       this.postId = param.postId;
+      this.boardType = param.boardType;
       this.writerNickname = param.writerNickname;
       this.content = param.content;
       this.mentionedNicknames = param.mentionedNicknames ?? [];

@@ -30,6 +30,7 @@ export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
     });
     const comment = new Comment({
       postId: post.postId,
+      boardType: post.boardType,
       writerNickname: writer.nickname,
       content,
       mentionedNicknames: mentionedUsers.map((user) => user.nickname),

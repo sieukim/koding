@@ -1,5 +1,5 @@
 import { AggregateRoot } from "@nestjs/cqrs";
-import { ApiProperty, ApiPropertyOptional, PickType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { currentTime } from "../common/utils/current-time.util";
 import { compare, hash } from "bcrypt";
 import { v1 } from "uuid";
@@ -21,9 +21,10 @@ import {
 } from "class-validator";
 import { ChangeProfileRequestDto } from "../users/dto/change-profile-request.dto";
 import { Expose, Transform, Type } from "class-transformer";
+import { Role } from "./role.enum";
 
 export class User extends AggregateRoot {
-  private static readonly round = 10;
+  private static readonly ROUND = 10;
 
   @Expose()
   @IsEmail()
@@ -225,6 +226,26 @@ export class User extends AggregateRoot {
   @Expose()
   followers?: User[];
 
+  @Expose()
+  @ApiProperty({
+    description: "사용자의 권한",
+    enum: Object.values(Role),
+    isArray: true,
+  })
+  roles: Role[];
+
+  @Expose()
+  @ApiProperty({
+    description: "계정 정지 기간",
+  })
+  accountSuspendedUntil: Date;
+
+  @Expose()
+  @ApiProperty({
+    description: "계정이 삭제된 시간",
+  })
+  accountDeletedSince: Date;
+
   constructor();
   constructor(param: {
     email: string;
@@ -275,6 +296,7 @@ export class User extends AggregateRoot {
       this.followingNicknames = [];
       this.followerNicknames = [];
       this.createdAt = currentTime();
+      this.roles = [Role.User];
     }
   }
 
@@ -309,7 +331,7 @@ export class User extends AggregateRoot {
   }
 
   async hashPassword() {
-    if (this.password) this.password = await hash(this.password, User.round);
+    if (this.password) this.password = await hash(this.password, User.ROUND);
     return this;
   }
 
@@ -369,6 +391,8 @@ export class User extends AggregateRoot {
   }
 
   verifyPasswordResetToken(verifyToken: string) {
+    if (!this.isEmailUser)
+      throw new ForbiddenException("이메일로 가입한 사용자가 아닙니다");
     if (this.passwordResetToken !== verifyToken)
       throw new BadRequestException("유효하지 않은 토큰");
   }
@@ -380,6 +404,8 @@ export class User extends AggregateRoot {
     verifyToken: string;
     newPassword: string;
   }) {
+    if (!this.isEmailUser)
+      throw new ForbiddenException("이메일로 가입한 사용자가 아닙니다");
     this.verifyPasswordResetToken(verifyToken);
     this.password = newPassword;
     this.passwordResetToken = undefined;
@@ -398,6 +424,8 @@ export class User extends AggregateRoot {
   }
 
   sendPasswordResetEmail() {
+    if (!this.isEmailUser)
+      throw new ForbiddenException("이메일로 가입한 사용자가 아닙니다");
     this.setNewPasswordResetToken();
     this.apply(
       new ResetPasswordRequestedEvent(
@@ -452,12 +480,5 @@ export class User extends AggregateRoot {
       throw new BadRequestException("잘못된 확인 비밀번호");
     this.password = newPassword;
     await this.hashPassword();
-  }
-}
-
-export class PartialUser extends PickType(User, ["nickname"] as const) {
-  constructor(param: { nickname: string }) {
-    super();
-    this.nickname = param.nickname;
   }
 }

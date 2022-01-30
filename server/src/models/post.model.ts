@@ -4,7 +4,7 @@ import { ForbiddenException } from "@nestjs/common";
 import { AggregateRoot } from "@nestjs/cqrs";
 import { User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
-import { IncreasePostReadCountEvent } from "../posts/events/increase-post-read-count.event";
+import { PostReadCountIncreasedEvent } from "../posts/events/post-read-count-increased.event";
 import { Types } from "mongoose";
 import { TagChangedEvent } from "../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../upload/event/post-image-changed.event";
@@ -169,7 +169,7 @@ export class Post extends AggregateRoot {
 
   increaseReadCount() {
     this.apply(
-      new IncreasePostReadCountEvent({
+      new PostReadCountIncreasedEvent({
         postId: this.postId,
         boardType: this.boardType,
       }),

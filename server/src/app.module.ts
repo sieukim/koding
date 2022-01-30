@@ -13,6 +13,9 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { TagsModule } from "./tags/tags.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { SearchModule } from "./search/search.module";
+import { APP_GUARD } from "@nestjs/core";
+import { RolesGuard } from "./auth/guard/roles.guard";
+import { AdminModule } from "./admin/admin.module";
 
 @Module({
   imports: [
@@ -44,9 +47,15 @@ import { SearchModule } from "./search/search.module";
     TagsModule,
     NotificationsModule,
     SearchModule,
+    AdminModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): any {

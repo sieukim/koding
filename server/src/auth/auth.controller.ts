@@ -17,6 +17,7 @@ import {
   ApiBadRequestResponse,
   ApiBody,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -41,6 +42,7 @@ import { QueryBus } from "@nestjs/cqrs";
 import { GetMyUserInfoQuery } from "../users/queries/get-my-user-info.query";
 import { MyUserInfoDto } from "../users/dto/my-user-info.dto";
 import { GetMyUserInfoHandler } from "../users/queries/handlers/get-my-user-info.handler";
+import { GithubUserGuard } from "./guard/authorization/github-user.guard";
 
 @ApiTags("AUTH")
 @Controller("api/auth")
@@ -122,6 +124,7 @@ export class AuthController {
   @ApiNotFoundResponse({
     description: "가입하지 않은 이메일",
   })
+  @UseGuards(GithubUserGuard)
   @HttpCode(HttpStatus.OK)
   @Post("/github/verify")
   async verifyGithubSignup(@Body() body: SignupGithubVerifyRequestDto) {
@@ -173,6 +176,9 @@ export class AuthController {
   @ApiAcceptedResponse({
     description: "비밀번호 초기화 메일 전송 완료",
   })
+  @ApiForbiddenResponse({
+    description: "이메일로 가입한 사용자가 아님",
+  })
   @ApiNotFoundResponse({
     description: "가입한 적 없는 이메일",
   })
@@ -191,6 +197,9 @@ export class AuthController {
   })
   @ApiBadRequestResponse({
     description: "유효하지 않은 토큰",
+  })
+  @ApiForbiddenResponse({
+    description: "이메일로 가입한 사용자가 아님",
   })
   @ApiNotFoundResponse({
     description: "가입한 적 없는 이메일",
@@ -216,6 +225,9 @@ export class AuthController {
   })
   @ApiBadRequestResponse({
     description: "유효하지 않은 토큰",
+  })
+  @ApiForbiddenResponse({
+    description: "이메일로 가입한 사용자가 아님",
   })
   @ApiNotFoundResponse({
     description: "가입한 적 없는 이메일",
