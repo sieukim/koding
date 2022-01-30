@@ -29,20 +29,16 @@ import {
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { ModifyPostRequestDto } from "./dto/modify-post-request.dto";
-import { BoardTypeValidationPipe } from "../common/pipes/board-type-validation-pipe";
-import {
-  ApiParamBoardType,
-  ApiParamPostId,
-} from "../common/decorator/swagger/api-param.decorator";
 
 import { PostListDto } from "./dto/post-list.dto";
 import { PostWithAroundInfoDto } from "./dto/post-with-around-info.dto";
 import { ReadPostFilter } from "./dto/read-post.filter";
 import { User } from "../models/user.model";
-import { PostBoardType } from "../models/post.model";
 import { QueryBus } from "@nestjs/cqrs";
 import { GetPostListQuery } from "./query/get-post-list.query";
 import { ReadPostQuery } from "./query/read-post.query";
+import { BoardTypeParamDto } from "./dto/param/board-type-param.dto";
+import { PostIdentifierParamDto } from "./dto/param/post-identifier-param.dto";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -61,7 +57,6 @@ export class PostsController {
   @ApiOperation({
     summary: "게시글 쓰기",
   })
-  @ApiParamBoardType()
   @ApiBody({
     type: WritePostRequestDto,
   })
@@ -74,7 +69,7 @@ export class PostsController {
   @Post(":boardType")
   async writePost(
     @LoginUser() user: User,
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
+    @Param() { boardType }: BoardTypeParamDto,
     @Body() body: WritePostRequestDto,
   ) {
     const post = await this.postsService.writePost(boardType, user, body);
@@ -84,7 +79,6 @@ export class PostsController {
   @ApiOperation({
     summary: "게시글 목록 조회",
   })
-  @ApiParamBoardType()
   @ApiQuery({
     name: "cursor",
     description:
@@ -112,7 +106,7 @@ export class PostsController {
   })
   @Get(":boardType")
   async readPosts(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
+    @Param() { boardType }: BoardTypeParamDto,
     @Query() { cursor, tags }: ReadPostFilter,
   ) {
     const pageSize = 10;
@@ -124,8 +118,6 @@ export class PostsController {
   @ApiOperation({
     summary: "게시글 읽기",
   })
-  @ApiParamBoardType()
-  @ApiParamPostId()
   @ApiNotFoundResponse({
     description: "잘못된 게시글 아이디",
   })
@@ -135,10 +127,7 @@ export class PostsController {
   })
   @HttpCode(HttpStatus.OK)
   @Get(":boardType/:postId")
-  async readPost(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
-    @Param("postId") postId: string,
-  ) {
+  async readPost(@Param() { postId, boardType }: PostIdentifierParamDto) {
     return this.queryBus.execute(new ReadPostQuery({ boardType, postId }));
   }
 
@@ -148,8 +137,6 @@ export class PostsController {
   @ApiBody({
     type: ModifyPostRequestDto,
   })
-  @ApiParamBoardType()
-  @ApiParamPostId()
   @ApiNotFoundResponse({
     description: "잘못된 게시글 아이디",
   })
@@ -161,8 +148,7 @@ export class PostsController {
   @HttpCode(HttpStatus.OK)
   @Patch(":boardType/:postId")
   async modifyPost(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
-    @Param("postId") postId: string,
+    @Param() { postId, boardType }: PostIdentifierParamDto,
     @Body() body: ModifyPostRequestDto,
     @LoginUser() user: User,
   ) {
@@ -177,8 +163,6 @@ export class PostsController {
   @ApiOperation({
     summary: "게시글 삭제",
   })
-  @ApiParamBoardType()
-  @ApiParamPostId()
   @ApiNotFoundResponse({
     description: "잘못된 게시글 아이디",
   })
@@ -189,8 +173,7 @@ export class PostsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":boardType/:postId")
   async deletePost(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
-    @Param("postId") postId: string,
+    @Param() { postId, boardType }: PostIdentifierParamDto,
     @LoginUser() user: User,
   ) {
     await this.postsService.deletePost(user, { boardType, postId });

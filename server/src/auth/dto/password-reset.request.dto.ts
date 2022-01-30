@@ -2,13 +2,10 @@ import { ApiProperty, PickType } from "@nestjs/swagger";
 import { IsNumberString, Length } from "class-validator";
 import { User } from "../../models/user.model";
 
-export class PasswordResetRequestDto extends PickType(User, [
-  "email",
-  "password",
-]) {
+export class PasswordResetRequestDto extends PickType(User, ["email", "password"]) {
   @ApiProperty({
     description: "비밀번호를 초기화할 사용자 이메일",
-    example: "test@test.com",
+    example: "vvsos1@hotmail.co.kr",
   })
   email: string;
 

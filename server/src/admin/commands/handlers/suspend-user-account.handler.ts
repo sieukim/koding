@@ -10,7 +10,11 @@ export class SuspendUserAccountHandler
   constructor(private readonly userSuspendService: UserSuspendService) {}
 
   async execute(command: SuspendUserAccountCommand): Promise<User> {
-    const { nickname } = command;
-    return this.userSuspendService.suspendUserAccount(nickname);
+    const { nickname, suspendDay, forever } = command;
+    return this.userSuspendService.suspendUserAccount(
+      nickname,
+      forever,
+      suspendDay,
+    );
   }
 }

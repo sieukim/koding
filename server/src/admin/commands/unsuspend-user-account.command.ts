@@ -1,5 +1,5 @@
 import { ICommand } from "@nestjs/cqrs";
 
-export class ForceDeleteUserAccountCommand implements ICommand {
+export class UnsuspendUserAccountCommand implements ICommand {
   constructor(public readonly nickname: string) {}
 }

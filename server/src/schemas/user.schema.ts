@@ -155,12 +155,6 @@ export class UserDocument extends Document {
   })
   accountSuspendedUntil: Date;
 
-  @Prop({
-    type: Date,
-    required: false,
-  })
-  accountDeletedSince: Date;
-
   createdAt: Date;
 
   @Prop({

@@ -237,13 +237,7 @@ export class UsersController {
     name: "key",
     required: true,
     description: "중복 확인하고 싶은 속성 키",
-    example: "email",
-    schema: {
-      oneOf: [
-        { type: "string", example: "email" },
-        { type: "string", example: "nickname" },
-      ],
-    },
+    enum: ["email", "nickname"],
   })
   @ApiQuery({
     name: "value",

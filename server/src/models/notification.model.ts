@@ -1,5 +1,5 @@
-import { IsDate, IsIn, IsString } from "class-validator";
-import { PostBoardType, PostBoardTypes } from "./post.model";
+import { IsDate, IsEnum, IsIn, IsString } from "class-validator";
+import { PostBoardType } from "./post.model";
 import {
   ApiExtraModels,
   ApiProperty,
@@ -35,10 +35,10 @@ export abstract class NotificationData {
 
 export class CommentNotificationData extends NotificationData {
   @Expose()
-  @IsIn(PostBoardTypes)
+  @IsEnum(PostBoardType)
   @ApiProperty({
     description: "댓글이 달린 게시글의 게시판",
-    enum: PostBoardTypes,
+    enum: PostBoardType,
   })
   boardType: PostBoardType;
   @Expose()
@@ -122,10 +122,10 @@ export class MentionNotificationData extends CommentNotificationData {
 
 export class PostDeletedNotificationData extends NotificationData {
   @Expose()
-  @IsIn(PostBoardTypes)
+  @IsEnum(PostBoardType)
   @ApiProperty({
     description: "삭제된 게시글의 게시판",
-    enum: PostBoardTypes,
+    enum: PostBoardType,
   })
   boardType: PostBoardType;
   @Expose()
@@ -145,10 +145,10 @@ export class PostDeletedNotificationData extends NotificationData {
 
 export class CommentDeletedNotificationData extends NotificationData {
   @Expose()
-  @IsIn(PostBoardTypes)
+  @IsEnum(PostBoardType)
   @ApiProperty({
     description: "삭제된 댓글의 게시글의 게시판",
-    enum: PostBoardTypes,
+    enum: PostBoardType,
   })
   boardType: PostBoardType;
   @Expose()

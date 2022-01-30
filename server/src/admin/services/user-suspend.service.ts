@@ -4,18 +4,25 @@ import { currentTime } from "../../common/utils/current-time.util";
 
 @Injectable()
 export class UserSuspendService {
-  private static readonly DEFAULT_SUSPEND_DAYS = 1;
-
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  async suspendUserAccount(nickname: string) {
+  async suspendUserAccount(
+    nickname: string,
+    forever: boolean,
+    suspendDay?: number,
+  ) {
+    if (forever) suspendDay = 365 * 1000;
     const user = await this.usersRepository.findByNickname(nickname);
     if (!user) throw new NotFoundException("없는 유저입니다");
     const suspendDueDate = currentTime();
-    suspendDueDate.setDate(
-      suspendDueDate.getDate() + UserSuspendService.DEFAULT_SUSPEND_DAYS,
-    );
+    suspendDueDate.setDate(suspendDueDate.getDate() + suspendDay);
     user.accountSuspendedUntil = suspendDueDate;
+    return this.usersRepository.update(user);
+  }
+
+  async unsuspendUserAccount(nickname: string) {
+    const user = await this.usersRepository.findByNickname(nickname);
+    user.accountSuspendedUntil = undefined;
     return this.usersRepository.update(user);
   }
 }

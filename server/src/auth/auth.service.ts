@@ -73,11 +73,6 @@ export class AuthService {
   }
 
   checkAccountNotSuspended(user: User) {
-    if (user.accountDeletedSince) {
-      throw new ForbiddenException({
-        message: "계정이 삭제되었습니다",
-      });
-    }
     if (
       user.accountSuspendedUntil &&
       user.accountSuspendedUntil.getTime() > currentTime().getTime()

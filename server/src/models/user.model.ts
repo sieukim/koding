@@ -240,12 +240,6 @@ export class User extends AggregateRoot {
   })
   accountSuspendedUntil: Date;
 
-  @Expose()
-  @ApiProperty({
-    description: "계정이 삭제된 시간",
-  })
-  accountDeletedSince: Date;
-
   constructor();
   constructor(param: {
     email: string;

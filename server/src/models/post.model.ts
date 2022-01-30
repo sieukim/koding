@@ -1,5 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsIn, IsNumber, IsString, IsUrl, Min } from "class-validator";
+import {
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsString,
+  IsUrl,
+  Min,
+} from "class-validator";
 import { ForbiddenException } from "@nestjs/common";
 import { AggregateRoot } from "@nestjs/cqrs";
 import { User } from "./user.model";
@@ -10,22 +17,22 @@ import { TagChangedEvent } from "../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../upload/event/post-image-changed.event";
 import { Expose } from "class-transformer";
 
-export const PostBoardTypes = [
-  "common",
-  "question",
-  "career",
-  "recruit",
-  "study-group",
-  "column",
-] as const;
-export type PostBoardType = typeof PostBoardTypes[number];
+export enum PostBoardType {
+  Common = "common",
+  Question = "question",
+  Career = "career",
+  Recruit = "recruit",
+  StudyGroup = "study-group",
+  Column = "column",
+}
+
+export const PostBoardTypes = Object.values(PostBoardType);
 
 export class Post extends AggregateRoot {
   @Expose()
   @IsString()
   @ApiProperty({
     description: "게시글 고유 아이디",
-    type: String,
   })
   postId: string;
 
@@ -37,11 +44,11 @@ export class Post extends AggregateRoot {
   title: string;
 
   @Expose()
-  @IsIn(PostBoardTypes)
+  @IsEnum(PostBoardType)
   @ApiProperty({
     description: "게시판 타입",
     example: "common",
-    enum: PostBoardTypes,
+    enum: PostBoardType,
   })
   boardType: PostBoardType;
 
