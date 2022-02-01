@@ -1,64 +1,45 @@
 import styled from 'styled-components';
-import { useCallback, useEffect, useState } from 'react';
-import { PrintState } from '../../../utils/MyComponents';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogout } from '../../../modules/auth';
+import { Button, Checkbox, Form, Input, message } from 'antd';
+import { LinkOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 
 const StyledEditProfile = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 50%;
-  background: antiquewhite;
-  padding: 10px;
-
-  & > div {
-    margin: 5px;
-    padding: 5px;
+  .title-text {
+    text-align: center;
+    font-weight: bold;
+    font-size: 32px;
+    margin: 24px 0;
   }
 
-  form {
-    display: flex;
-    flex-direction: column;
-    margin: 5px;
-    padding: 0 5px;
+  .nothing,
+  .edit-profile-form,
+  .edit-password-form {
+    max-width: 500px;
+    min-width: 350px;
+  }
 
-    div {
-      margin: 5px 0;
-      padding: 5px 0;
-    }
+  .edit-profile-button,
+  .edit-password-button,
+  .revoke-button {
+    width: 100%;
+    margin-bottom: 24px;
   }
 
   .url-container {
     display: flex;
     justify-content: space-between;
-
-    .url {
-      width: 80%;
-      padding: 2px;
-    }
-
-    label {
-      width: 15%;
-      margin: auto 0;
-      text-align: end;
-
-      input {
-        margin-right: 5px;
-      }
-    }
   }
 
-  button {
-    width: 100%;
-    margin: 6px auto;
+  .url {
+    width: 80%;
   }
 
-  .password-container {
-    input {
-      padding: 2px;
-      margin: 5px 0;
-    }
+  .text {
+    text-align: center;
+    font-weight: bold;
   }
 `;
 
@@ -66,69 +47,39 @@ const EditProfilePresenter = ({
   getLoginUserData = {},
   changeUserInfoState,
   changeUserInfoFetch,
-  changePasswordState,
-  changePasswordFetch,
   revokeState,
   revokeFetch,
 }) => {
-  /* 유저 정보 변경 */
-  const [userInfo, setUserInfo] = useState({});
+  // profile 변경 form
+  const [profileForm] = Form.useForm();
 
-  // Input 관리
-  const onChangeInput = useCallback((e) => {
-    // 공개 여부 관리
-    if (e.target.name.includes('Public')) {
-      setUserInfo((userInfo) => ({
-        ...userInfo,
-        [e.target.name]: e.target.checked,
-      }));
-    }
-    // url 정보 관리
-    else {
-      setUserInfo((userInfo) => ({
-        ...userInfo,
-        [e.target.name]: e.target.value,
-      }));
-    }
-  }, []);
+  useEffect(() => {
+    profileForm.setFieldsValue({
+      blogUrl: getLoginUserData.blogUrl,
+      githubUrl: getLoginUserData.githubUrl,
+      portfolioUrl: getLoginUserData.portfolioUrl,
+      isBlogUrlPublic: getLoginUserData.isBlogUrlPublic,
+      isGithubUrlPublic: getLoginUserData.isGithubUrlPublic,
+      isPortfolioUrlPublic: getLoginUserData.isPortfolioUrlPublic,
+    });
+  }, [getLoginUserData, profileForm]);
 
-  // 정보 변경
-  const onSubmitUserInfo = useCallback(
-    (e) => {
-      e.preventDefault();
-      changeUserInfoFetch(userInfo);
+  // 프로필 편집 버튼 onFinish(onSubmit) 핸들러
+  const onFinishEditProfile = useCallback(
+    (values) => {
+      changeUserInfoFetch({ ...values });
     },
-    [changeUserInfoFetch, userInfo],
+    [changeUserInfoFetch],
   );
 
-  /* 비밀번호 변경 */
-
-  const onSubmitPassword = useCallback(
-    (e) => {
-      e.preventDefault();
-      if (userInfo['newPassword'] === userInfo['newPassword-check']) {
-        changePasswordFetch(userInfo);
-      }
-      setUserInfo((userInfo) => ({
-        ...userInfo,
-        currentPassword: '',
-        newPassword: '',
-        'newPassword-check': '',
-      }));
-    },
-    [changePasswordFetch, userInfo],
-  );
-
-  /* 유저 탈퇴 */
-
+  // 탈퇴
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // 로그 아웃 api 호출하는 함수
-  const logout = useCallback(() => {
-    dispatch(setLogout());
-  }, [setLogout]);
+  // 로그아웃
+  const logout = useCallback(() => dispatch(setLogout()), [setLogout]);
 
+  // 탈퇴 버튼 onClick 핸들러
   const onClickRevoke = useCallback(() => {
     revokeFetch(getLoginUserData.nickname);
   }, [revokeFetch, getLoginUserData]);
@@ -140,126 +91,147 @@ const EditProfilePresenter = ({
     }
   }, [logout, navigate, revokeState.success]);
 
+  // message
+  useEffect(() => {
+    if (changeUserInfoState.success) {
+      message.success('프로필이 변경되었습니다.');
+    }
+    if (changeUserInfoState.error || revokeState.error) {
+      message.error('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  });
+
   return (
     <StyledEditProfile>
-      <div>닉네임</div>
-      <div>{getLoginUserData.nickname}</div>
-      <div>이메일</div>
-      <div>{getLoginUserData.email}</div>
-      <form onSubmit={onSubmitUserInfo}>
-        <div>블로그</div>
+      <div className="title-text">프로필</div>
+      <Form
+        className="nothing"
+        initialValues={{
+          blogUrl: getLoginUserData.blogUrl,
+          githubUrl: getLoginUserData.githubUrl,
+          portfolioUrl: getLoginUserData.portfolioUrl,
+          isBlogUrlPublic: getLoginUserData.isBlogUrlPublic,
+          isGithubUrlPublic: getLoginUserData.isGithubUrlPublic,
+          isPortfolioUrlPublic: getLoginUserData.isPortfolioUrlPublic,
+        }}
+      >
+        <Form.Item>
+          <span className="ant-input-affix-wrapper">
+            <UserOutlined className="site-form-item-icon ant-input-prefix" />
+            {getLoginUserData.nickname}
+          </span>
+        </Form.Item>
+
+        <Form.Item>
+          <span className="ant-input-affix-wrapper">
+            <MailOutlined className="site-form-item-icon ant-input-prefix" />
+            {getLoginUserData.email}
+          </span>
+        </Form.Item>
+      </Form>
+      <Form
+        name="edit-profile-form"
+        form={profileForm}
+        className="edit-profile-form"
+        onFinish={onFinishEditProfile}
+      >
         <div className="url-container">
-          <input
-            type="url"
+          <Form.Item
             name="blogUrl"
-            defaultValue={getLoginUserData.blogUrl}
-            onChange={onChangeInput}
+            rules={[
+              { required: false },
+              {
+                type: 'url',
+                message: '올바른 주소 형식이 아닙니다. ex) https://blog.com',
+              },
+            ]}
             className="url"
-            placeholder="블로그 주소를 입력하세요."
-          />
-          <label>
-            <input
-              type="checkbox"
-              name="isBlogUrlPublic"
-              value="isBlogUrlPublic"
-              defaultChecked={getLoginUserData.isBlogUrlPublic}
-              onInput={onChangeInput}
+          >
+            <Input
+              prefix={<LinkOutlined className="site-form-item-icon" />}
+              placeholder="블로그 주소(선택)"
+              allowClear={true}
             />
-            공개
-          </label>
+          </Form.Item>
+
+          <Form.Item name="isBlogUrlPublic" valuePropName="checked">
+            <Checkbox>공개</Checkbox>
+          </Form.Item>
         </div>
 
-        <div>깃허브</div>
         <div className="url-container">
-          <input
-            type="url"
+          <Form.Item
             name="githubUrl"
-            defaultValue={getLoginUserData.githubUrl}
-            onChange={onChangeInput}
+            rules={[
+              { required: false },
+              {
+                type: 'url',
+                message: '올바른 주소 형식이 아닙니다. ex) https://github.com',
+              },
+            ]}
             className="url"
-            placeholder="깃허브 주소를 입력하세요."
-          />
-          <label>
-            <input
-              type="checkbox"
-              name="isGithubUrlPublic"
-              value="isGithubUrlPublic"
-              defaultChecked={getLoginUserData.isGithubUrlPublic}
-              onInput={onChangeInput}
+          >
+            <Input
+              prefix={<LinkOutlined className="site-form-item-icon" />}
+              placeholder="깃허브 주소(선택)"
+              allowClear={true}
             />
-            공개
-          </label>
+          </Form.Item>
+
+          <Form.Item name="isGithubUrlPublic" valuePropName="checked">
+            <Checkbox>공개</Checkbox>
+          </Form.Item>
         </div>
 
-        <div>포트폴리오</div>
         <div className="url-container">
-          <input
-            type="url"
+          <Form.Item
             name="portfolioUrl"
-            defaultValue={getLoginUserData.portfolioUrl}
-            onChange={onChangeInput}
+            rules={[
+              { required: false },
+              {
+                type: 'url',
+                message:
+                  '올바른 주소 형식이 아닙니다. ex) https://portfolio.com',
+              },
+            ]}
             className="url"
-            placeholder="포트폴리오 주소를 입력하세요."
-          />
-          <label>
-            <input
-              type="checkbox"
-              name="isPortfolioUrlPublic"
-              value="isPortfolioUrlPublic"
-              defaultChecked={getLoginUserData.isPortfolioUrlPublic}
-              onInput={onChangeInput}
+          >
+            <Input
+              prefix={<LinkOutlined className="site-form-item-icon" />}
+              placeholder="포트폴리오 주소(선택)"
+              allowClear={true}
             />
-            공개
-          </label>
+          </Form.Item>
+
+          <Form.Item name="isPortfolioUrlPublic" valuePropName="checked">
+            <Checkbox>공개</Checkbox>
+          </Form.Item>
         </div>
-        <button>변경</button>
-        <PrintState state={changeUserInfoState} />
-        {changeUserInfoState.success && <div>변경되었습니다.</div>}
-      </form>
+
+        <Button
+          type="primary"
+          htmlType="submit"
+          className="edit-profile-button"
+          loading={changeUserInfoState.loading}
+        >
+          편집
+        </Button>
+      </Form>
 
       {getLoginUserData.isEmailUser && (
-        <>
-          <form className="password-container" onSubmit={onSubmitPassword}>
-            <div>현재 비밀번호</div>
-            <input
-              type="password"
-              name="currentPassword"
-              value={userInfo['currentPassword'] ?? ''}
-              placeholder="현재 비밀번호를 입력하세요."
-              minLength="8"
-              maxLength="16"
-              autoComplete="current-password"
-              onChange={onChangeInput}
-            />
-            <div>변경 비밀번호</div>
-            <input
-              type="password"
-              name="newPassword"
-              value={userInfo['newPassword'] ?? ''}
-              placeholder="8 ~ 16자 영문 대소문자, 숫자, 특수문자를 사용하세요. "
-              minLength="8"
-              maxLength="16"
-              autoComplete="new-password"
-              onChange={onChangeInput}
-            />
-            <div>변경 비밀번호 확인</div>
-            <input
-              type="password"
-              name="newPassword-check"
-              value={userInfo['newPassword-check'] ?? ''}
-              placeholder="변경 비밀번호를 다시 입력하세요. "
-              minLength="8"
-              maxLength="16"
-              onChange={onChangeInput}
-            />
-            <button>변경</button>
-          </form>
-          <PrintState state={changePasswordState} />
-          {changePasswordState.success && <div>변경되었습니다.</div>}
-        </>
+        <Button type="primary" className="edit-password-button">
+          <NavLink to="/reset-password">비밀번호 변경</NavLink>
+        </Button>
       )}
-      <button onClick={onClickRevoke}>계정 삭제</button>
-      <PrintState state={revokeState} />
+
+      <Button
+        type="primary"
+        className="revoke-button"
+        onClick={onClickRevoke}
+        loading={revokeState.loading}
+      >
+        탈퇴
+      </Button>
     </StyledEditProfile>
   );
 };

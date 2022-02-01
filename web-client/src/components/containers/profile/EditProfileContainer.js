@@ -17,13 +17,6 @@ const EditProfileContainer = ({ profileNickname }) => {
     true,
   );
 
-  // 비밀번호 변경
-  const [changePasswordState, changePasswordFetch] = useAsync(
-    (password) => api.changePassword(profileNickname, password),
-    [profileNickname],
-    true,
-  );
-
   // 유저 탈퇴
   const [revokeState, revokeFetch] = useAsync(
     (nickname) => api.revokeUser(nickname),
@@ -37,8 +30,6 @@ const EditProfileContainer = ({ profileNickname }) => {
       getLoginUserData={getLoginUserState.success?.data}
       changeUserInfoState={changeUserInfoState}
       changeUserInfoFetch={changeUserInfoFetch}
-      changePasswordState={changePasswordState}
-      changePasswordFetch={changePasswordFetch}
       revokeState={revokeState}
       revokeFetch={revokeFetch}
     />
