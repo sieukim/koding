@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Col, Form, Input, Row } from 'antd';
 import { KeyOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { useMessage } from '../../../hooks/useMessage';
 
 const StyledResetPassword = styled.div`
   .title-text {
@@ -134,6 +135,14 @@ const ResetPasswordPresenter = ({
 
     return Promise.resolve();
   }, []);
+
+  // message
+  useMessage(sendState, '인증코드가 발송되었어요! 확인해주세요 🔑');
+  useMessage(
+    verifyState,
+    '인증번호가 확인되었어요! 비밀번호 변경을 진행해주세요 🔑',
+  );
+  useMessage(resetState, '비밀번호를 변경했어요! 까먹지 않도록 해요 🤙');
 
   return (
     <StyledResetPassword>

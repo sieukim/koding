@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 import { setLogout } from '../modules/auth';
 import { MyPageLink } from '../utils/MyComponents';
 import SearchBar from '../utils/SearchBar';
+import { message } from 'antd';
 
 const StyledHeader = styled.nav`
   display: flex;
@@ -31,18 +32,17 @@ const StyledHeader = styled.nav`
 const Header = () => {
   const user = useSelector((state) => state.auth.user);
 
-  /* 로그 아웃 */
-
+  // 로그아웃
   const dispatch = useDispatch();
 
-  // 로그 아웃 api 호출하는 함수
   const logout = useCallback(async () => {
     try {
       const onSetLogout = () => dispatch(setLogout());
       await api.logout();
       onSetLogout();
+      message.success('또 만나요! 👋');
     } catch (e) {
-      alert('로그아웃에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      message.error('오류가 발생했어요 😭 잠시 후 다시 시도해주세요!');
     }
   }, []);
 

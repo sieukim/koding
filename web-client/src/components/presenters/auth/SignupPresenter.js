@@ -7,6 +7,7 @@ import {
   MailOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import { useMessage } from '../../../hooks/useMessage';
 
 const StyledSignup = styled.div`
   .title-text {
@@ -61,7 +62,7 @@ const SignupPresenter = ({
     } else {
       setValidated((validated) => ({ ...validated, email: true }));
     }
-  }, [checked.nickname, duplicated.nickname, email]);
+  }, [checked, duplicated, email]);
 
   useEffect(() => {
     if (checked.email) {
@@ -75,7 +76,7 @@ const SignupPresenter = ({
     if (!validated.email) {
       return Promise.reject(new Error('사용중인 이메일입니다.'));
     }
-  }, [validated.email]);
+  }, [validated]);
 
   // 비밀번호 유효성 검증
   const validatePassword = useCallback((_, value) => {
@@ -122,13 +123,13 @@ const SignupPresenter = ({
     } else {
       setValidated((validated) => ({ ...validated, nickname: true }));
     }
-  }, [checked.nickname, duplicated.nickname, nickname]);
+  }, [checked, duplicated, nickname]);
 
   useEffect(() => {
     if (checked.nickname) {
       form.validateFields(['nickname']);
     }
-  }, [checked.nickname, validated, form]);
+  }, [checked, validated, form]);
 
   // 닉네임 유효성 검증
   const validateNickname = useCallback(
@@ -153,8 +154,11 @@ const SignupPresenter = ({
 
       return Promise.resolve();
     },
-    [validated.nickname],
+    [validated],
   );
+
+  // message
+  useMessage(signupState, 'Hello World! 👻');
 
   return (
     <StyledSignup>

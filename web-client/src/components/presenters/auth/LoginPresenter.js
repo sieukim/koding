@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Button, Form, Input } from 'antd';
+import { useCallback, useEffect } from 'react';
+import { Button, Form, Input, message } from 'antd';
 import {
   ContactsOutlined,
   GithubOutlined,
@@ -39,6 +39,16 @@ const LoginPresenter = ({ login, loginState, url }) => {
     },
     [login],
   );
+
+  // message
+  useEffect(() => {
+    if (loginState.success) {
+      message.success('오늘도 멋진 하루 보내세요 ✨');
+    }
+    if (loginState.error) {
+      message.error('오류가 발생했어요 😭 잠시 후 다시 시도해주세요!');
+    }
+  }, [loginState]);
 
   return (
     <StyledForm>

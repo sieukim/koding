@@ -3,8 +3,9 @@ import { useCallback, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogout } from '../../../modules/auth';
-import { Button, Checkbox, Form, Input, message } from 'antd';
+import { Button, Checkbox, Form, Input } from 'antd';
 import { LinkOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
+import { useMessage } from '../../../hooks/useMessage';
 
 const StyledEditProfile = styled.div`
   .title-text {
@@ -92,14 +93,8 @@ const EditProfilePresenter = ({
   }, [logout, navigate, revokeState.success]);
 
   // message
-  useEffect(() => {
-    if (changeUserInfoState.success) {
-      message.success('프로필이 변경되었습니다.');
-    }
-    if (changeUserInfoState.error || revokeState.error) {
-      message.error('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
-    }
-  });
+  useMessage(changeUserInfoState, '멋진 프로필이네요! 🤩');
+  useMessage(revokeState, '다음에 또 만나요 🥺');
 
   return (
     <StyledEditProfile>
