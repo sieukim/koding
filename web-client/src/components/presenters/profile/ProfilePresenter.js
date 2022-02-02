@@ -1,7 +1,8 @@
 import styled from 'styled-components';
 import { useCallback } from 'react';
-import { FollowListLink, PrintState } from '../../../utils/MyComponents';
+import { PrintState } from '../../../utils/MyComponents';
 import { useNavigate } from 'react-router-dom';
+import { FollowListLink } from '../../../utils/FollowListLink';
 
 const StyledProfile = styled.div`
   display: flex;
@@ -136,7 +137,7 @@ const ProfilePresenter = ({
                 className="profile-info-item-number"
                 nickname={profileUserNickname}
                 number={followers}
-                type="follower"
+                tab="follower"
               />
             </div>
             <div className="profile-info-item">
@@ -145,7 +146,7 @@ const ProfilePresenter = ({
                 className="profile-info-item-number"
                 nickname={profileUserNickname}
                 number={followings}
-                type="following"
+                tab="following"
               />
             </div>
           </div>

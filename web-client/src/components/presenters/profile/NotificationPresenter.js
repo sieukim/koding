@@ -1,5 +1,6 @@
 import styled from 'styled-components';
-import { MyPageLink, PostLink } from '../../../utils/MyComponents';
+import { PostLink } from '../../../utils/MyComponents';
+import { ProfileLink } from '../../../utils/ProfileLink';
 
 const StyledNotification = styled.div`
   display: flex;
@@ -38,7 +39,7 @@ const Notification = ({ notification }) => {
     case 'comment':
       return (
         <div>
-          <MyPageLink nickname={commentWriterNickname} />
+          <ProfileLink nickname={commentWriterNickname} />
           님이 &nbsp;
           <PostLink
             boardType={boardType}
@@ -53,7 +54,7 @@ const Notification = ({ notification }) => {
     case 'mention':
       return (
         <div>
-          <MyPageLink nickname={commentWriterNickname} />
+          <ProfileLink nickname={commentWriterNickname} />
           님이 &nbsp;
           <PostLink
             boardType={boardType}
@@ -68,7 +69,7 @@ const Notification = ({ notification }) => {
     case 'follow':
       return (
         <div>
-          <MyPageLink nickname={followerNickname} />
+          <ProfileLink nickname={followerNickname} />
           님이 회원님을 팔로우했습니다.
         </div>
       );

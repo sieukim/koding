@@ -1,8 +1,9 @@
 import styled from 'styled-components';
-import { MyPageLink, PostLink } from './MyComponents';
+import { PostLink } from './MyComponents';
 import { Chip } from '@material-ui/core';
 import React from 'react';
 import { boardMap } from './boardMap';
+import { ProfileLink } from './ProfileLink';
 
 const StyledSearchResult = styled.div`
   hr {
@@ -82,7 +83,7 @@ const SearchResult = ({ query, boardType, searchResults }) => {
                 ))}
               </div>
             </div>
-            <MyPageLink
+            <ProfileLink
               className="search-result-writer"
               nickname={searchResult.writerNickname}
             />

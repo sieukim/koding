@@ -3,10 +3,10 @@ import { NavLink, useMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as api from '../modules/api';
 import { useCallback } from 'react';
-import { setLogout } from '../modules/auth';
-import { MyPageLink } from '../utils/MyComponents';
+import { ProfileLink } from '../utils/ProfileLink';
 import SearchBar from '../utils/SearchBar';
 import { message } from 'antd';
+import { setLogout } from '../modules/auth';
 
 const StyledHeader = styled.nav`
   display: flex;
@@ -86,7 +86,7 @@ const Header = () => {
               <NavLink to={`/user/${user.nickname}/notification`}>알림</NavLink>
             </li>
             <li>
-              <MyPageLink nickname={user.nickname} str={'마이페이지'} />
+              <ProfileLink nickname={user.nickname} str={'마이페이지'} />
             </li>
             <li>
               <button onClick={logout}>로그아웃</button>

@@ -11,12 +11,12 @@ const StyledFollowList = styled.div`
 
 const FollowListPage = () => {
   const params = useParams();
-  const profileNickname = params.nickname;
-  const type = params.type;
+  const profileUser = params.nickname;
+  const tab = params.tab;
 
   return (
     <StyledFollowList>
-      <FollowListContainer profileNickname={profileNickname} type={type} />
+      <FollowListContainer profileUser={profileUser} tab={tab} />
     </StyledFollowList>
   );
 };

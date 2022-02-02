@@ -3,11 +3,11 @@ import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import {
   GetDate,
-  MyPageLink,
   PostLink,
   PrintState,
   Viewer,
 } from '../../../utils/MyComponents';
+import { ProfileLink } from '../../../utils/ProfileLink';
 import { Chip } from '@material-ui/core';
 
 const StyledReadPost = styled.div`
@@ -114,7 +114,7 @@ const PostPresenter = ({
       <div className="post-header">
         <div className="post-info">
           <div className="post-title">{title}</div>
-          <MyPageLink nickname={writerNickname} str={writerNickname} />
+          <ProfileLink nickname={writerNickname} str={writerNickname} />
         </div>
         <GetDate date={createdAt} className="post-createdAt" />
       </div>

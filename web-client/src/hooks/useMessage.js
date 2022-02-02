@@ -8,7 +8,11 @@ export const useMessage = (
 ) => {
   useEffect(() => {
     if (state.success) {
-      message.success(successMessage);
+      if (successMessage instanceof Function) {
+        message.success(successMessage(state));
+      } else {
+        message.success(successMessage);
+      }
     }
     if (state.error) {
       message.error(failureMessage);

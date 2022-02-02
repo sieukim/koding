@@ -22,32 +22,12 @@ import tableMergedCell from '@toast-ui/editor-plugin-table-merged-cell';
 // chart
 import chart from '@toast-ui/editor-plugin-chart';
 
-// 마이페이지로 가는 NavLink
-export const MyPageLink = (props) => {
-  const { nickname, str, rest } = props;
-  return (
-    <NavLink to={`/user/${nickname}/profile`} {...rest}>
-      {str ?? nickname}
-    </NavLink>
-  );
-};
-
 // 게시글로 가는 NavLink
 export const PostLink = (props) => {
   const { boardType, postId, postTitle, ...rest } = props;
   return (
     <NavLink to={`/board/${boardType}/post/${postId}`} {...rest}>
       {postTitle}
-    </NavLink>
-  );
-};
-
-// 팔로우 리스트로 가는 NavLink
-export const FollowListLink = (props) => {
-  const { nickname, number, type, ...rest } = props;
-  return (
-    <NavLink to={`/user/${nickname}/profile/${type}`} {...rest}>
-      {number}
     </NavLink>
   );
 };

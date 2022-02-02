@@ -1,65 +1,146 @@
 import styled from 'styled-components';
-import { MyPageLink } from '../../../utils/MyComponents';
+import { ProfileLink } from '../../../utils/ProfileLink';
+import { Button, List, Tabs } from 'antd';
+import { UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
+import { useCallback, useEffect, useState } from 'react';
+import { useMessage } from '../../../hooks/useMessage';
+import { useNavigate } from 'react-router-dom';
+
+const { TabPane } = Tabs;
 
 const StyledFollowList = styled.div`
-  display: flex;
-  width: 100%;
-
-  .list-container {
-    width: 100%;
-    background: aliceblue;
-    padding: 10px;
-
-    div {
-      margin: 5px 0;
-      padding: 5px 0;
-    }
-  }
-
-  .list-item {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  .ant-tabs-nav {
+    margin-bottom: 0;
   }
 `;
 
-const FollowListPresenter = ({
-  followersList = [],
-  followingsList = [],
-  type,
+const ListPresenter = ({
+  list,
+  loginUser,
+  loginUserFollowingState,
+  setLoginUserFollowingState,
+  followState,
+  followFetch,
+  unfollowState,
+  unfollowFetch,
 }) => {
+  // 팔로우 버튼 onClick 핸들러
+  const onClickFollow = useCallback(
+    async (e) => {
+      const targetNickname = e.currentTarget.dataset.nickname;
+      await followFetch(targetNickname);
+      setLoginUserFollowingState((state) => [...state, targetNickname]);
+    },
+    [followFetch],
+  );
+
+  // 언팔로우 버튼 onClick 핸들러
+  const onClickUnfollow = useCallback(
+    async (e) => {
+      const targetNickname = e.currentTarget.dataset.nickname;
+      await unfollowFetch(targetNickname);
+      setLoginUserFollowingState((state) =>
+        state.filter((nickname) => nickname !== targetNickname),
+      );
+    },
+    [unfollowFetch],
+  );
+
+  return (
+    <List
+      dataSource={list}
+      renderItem={(user) => (
+        <List.Item>
+          <ProfileLink nickname={user} />
+          {loginUser &&
+            loginUser !== user &&
+            (loginUserFollowingState.includes(user) ? (
+              <Button
+                icon={<UserDeleteOutlined />}
+                data-nickname={user}
+                onClick={onClickUnfollow}
+              >
+                언팔로우
+              </Button>
+            ) : (
+              <Button
+                icon={<UserAddOutlined />}
+                data-nickname={user}
+                onClick={onClickFollow}
+              >
+                팔로우
+              </Button>
+            ))}
+        </List.Item>
+      )}
+    />
+  );
+};
+
+const FollowListPresenter = ({
+  tab,
+  profileUser,
+  profileUserFollowers,
+  profileUserFollowings,
+  loginUser,
+  loginUserFollowings,
+  followState,
+  followFetch,
+  unfollowState,
+  unfollowFetch,
+}) => {
+  const navigate = useNavigate();
+
+  // tab onClick 핸들러
+  const onTabClick = useCallback(
+    (tab) => {
+      navigate(`/user/${profileUser}/profile/${tab}`);
+    },
+    [profileUser],
+  );
+
+  // 로그인 유저가 팔로우하는 유저 리스트
+  const [loginUserFollowingState, setLoginUserFollowingState] = useState([]);
+
+  useEffect(() => {
+    setLoginUserFollowingState(loginUserFollowings);
+  }, [loginUserFollowings]);
+
+  useMessage(followState, (state) => `${state.success}님을 팔로우했습니다.`);
+
+  useMessage(
+    unfollowState,
+    (state) => `${state.success}님을 언팔로우했습니다.`,
+  );
+
   return (
     <StyledFollowList>
-      {type === 'follower' && (
-        <div className="list-container">
-          <div>팔로워</div>
-          {followersList.map((follower) => {
-            return (
-              <div className="list-item" key={follower.nickname}>
-                <div>{follower.nickname}</div>
-                <button>
-                  <MyPageLink str="프로필 방문" nickname={follower.nickname} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {type === 'following' && (
-        <div className="list-container">
-          <div>팔로잉</div>
-          {followingsList.map((following) => {
-            return (
-              <div className="list-item" key={following.nickname}>
-                <div>{following.nickname}</div>
-                <button>
-                  <MyPageLink str="프로필 방문" nickname={following.nickname} />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <Tabs activeKey={tab} centered size="large" onTabClick={onTabClick}>
+        <TabPane tab="팔로워" key="follower">
+          <ListPresenter
+            list={profileUserFollowers}
+            loginUser={loginUser}
+            loginUserFollowingState={loginUserFollowingState}
+            setLoginUserFollowingState={setLoginUserFollowingState}
+            followState={followState}
+            followFetch={followFetch}
+            unfollowState={unfollowState}
+            unfollowFetch={unfollowFetch}
+          />
+        </TabPane>
+        <TabPane tab="팔로잉" key="following">
+          <ListPresenter
+            list={profileUserFollowings}
+            loginUser={loginUser}
+            loginUserFollowingState={loginUserFollowingState}
+            setLoginUserFollowingState={setLoginUserFollowingState}
+            followState={followState}
+            followFetch={followFetch}
+            unfollowState={unfollowState}
+            unfollowFetch={unfollowFetch}
+          />
+        </TabPane>
+      </Tabs>
     </StyledFollowList>
   );
 };
