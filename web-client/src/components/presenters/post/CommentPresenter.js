@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useCallback, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getMentionedList } from '../../../utils/getMentionedList';
-import { GetDate, PrintState } from '../../../utils/MyComponents';
+import { GetDate } from '../../../utils/GetDate';
 import { ProfileLink } from '../../../utils/ProfileLink';
 
 const StyledComment = styled.div`
@@ -168,7 +168,6 @@ const CommentPresenter = ({
         />
         <button>등록</button>
       </form>
-      <PrintState state={writeCommentState} />
       {comments.map((comment) => (
         <div key={comment.commentId} className="comment">
           <div className="comment-header">
@@ -202,8 +201,6 @@ const CommentPresenter = ({
                 </button>
               </div>
             )}
-            <PrintState state={editCommentState} />
-            <PrintState state={removeCommentState} />
           </div>
           <div
             ref={comment.commentId === editCommentId ? innerRef : undefined}

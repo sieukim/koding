@@ -1,14 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import {
-  GetDate,
-  PostLink,
-  PrintState,
-  Viewer,
-} from '../../../utils/MyComponents';
+import { GetDate } from '../../../utils/GetDate';
 import { ProfileLink } from '../../../utils/ProfileLink';
 import { Chip } from '@material-ui/core';
+import { Viewer } from '../../../utils/Viewer';
+import { PostLink } from '../../../utils/PostLink';
 
 const StyledReadPost = styled.div`
   display: flex;
@@ -110,7 +107,6 @@ const PostPresenter = ({
 
   return (
     <StyledReadPost>
-      <PrintState state={readPostState} />
       <div className="post-header">
         <div className="post-info">
           <div className="post-title">{title}</div>
@@ -141,7 +137,6 @@ const PostPresenter = ({
         <div className="buttons">
           <button onClick={onClickEdit}>수정</button>
           <button onClick={onClickRemove}>삭제</button>
-          <PrintState state={removePostState} />
         </div>
       )}
       <div className="nav-buttons">

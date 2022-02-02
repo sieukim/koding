@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import { PostLink } from '../../../utils/MyComponents';
 import { ProfileLink } from '../../../utils/ProfileLink';
+import { PostLink } from '../../../utils/PostLink';
 
 const StyledNotification = styled.div`
   display: flex;

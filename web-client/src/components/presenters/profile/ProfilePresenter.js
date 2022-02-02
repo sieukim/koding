@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import { useCallback } from 'react';
-import { PrintState } from '../../../utils/MyComponents';
 import { useNavigate } from 'react-router-dom';
 import { FollowListLink } from '../../../utils/FollowListLink';
 
@@ -126,8 +125,6 @@ const ProfilePresenter = ({
                 isFollowingState.success && (
                   <button onClick={onClickUnfollow}>언팔로우</button>
                 )}
-              <PrintState state={followState} />
-              <PrintState state={unfollowState} />
             </div>
           </div>
           <div className="profile-info-row">

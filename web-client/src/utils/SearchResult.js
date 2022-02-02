@@ -1,9 +1,9 @@
 import styled from 'styled-components';
-import { PostLink } from './MyComponents';
 import { Chip } from '@material-ui/core';
 import React from 'react';
 import { boardMap } from './boardMap';
 import { ProfileLink } from './ProfileLink';
+import { PostLink } from './PostLink';
 
 const StyledSearchResult = styled.div`
   hr {

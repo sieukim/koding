@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { useCallback, useRef, useState } from 'react';
-import { Editor, PrintState } from '../../../utils/MyComponents';
 import TagPresenter from './TagPresenter';
 import * as api from '../../../modules/api';
+import { Editor } from '../../../utils/Editor';
 
 const StyledWritePost = styled.form`
   display: flex;
@@ -79,7 +79,6 @@ const WritePostPresenter = ({ writePost, writePostState, tagList = [] }) => {
         }}
       />
       <button>등록</button>
-      <PrintState state={writePostState} />
     </StyledWritePost>
   );
 };

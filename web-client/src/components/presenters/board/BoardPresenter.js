@@ -1,8 +1,9 @@
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { GetDate, PostLink, PrintState } from '../../../utils/MyComponents';
+import { GetDate } from '../../../utils/GetDate';
 import TagPresenter from '../post/TagPresenter';
 import { ProfileLink } from '../../../utils/ProfileLink';
+import { PostLink } from '../../../utils/PostLink';
 
 const StyledBoard = styled.div`
   display: flex;
@@ -69,7 +70,6 @@ const BoardPresenter = ({
 
   return (
     <StyledBoard>
-      <PrintState state={readBoardState} />
       <TagPresenter tags={tagList} onChangeTag={onChangeTag} />
       <div className="board">
         {posts.map((post) => (

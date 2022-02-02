@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Editor, PrintState } from '../../../utils/MyComponents';
 import TagPresenter from './TagPresenter';
 import * as api from '../../../modules/api';
+import { Editor } from '../../../utils/Editor';
 
 const StyledEdit = styled.form`
   display: flex;
@@ -94,7 +94,6 @@ const EditPostPresenter = ({
     <>
       {readPostState.success && (
         <StyledEdit onSubmit={onSubmitButton}>
-          <PrintState state={readPostState} />
           <input
             name="title"
             placeholder="제목을 입력하세요."
@@ -114,7 +113,6 @@ const EditPostPresenter = ({
             }}
           />
           <button>수정</button>
-          <PrintState state={editPostState} />
         </StyledEdit>
       )}
     </>
