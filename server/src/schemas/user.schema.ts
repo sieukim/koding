@@ -53,7 +53,7 @@ export class GithubUserInfo {
   avatarUrl: string;
 
   @ApiProperty({
-    description: "유저 이름",
+    description: "사용자 이름",
     example: "홍길동",
   })
   @Prop()

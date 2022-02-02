@@ -5,6 +5,8 @@ import { CheckPasswordTokenValidityHandler } from "./check-password-token-validi
 import { GetUserInfoHandler } from "./get-user-info.handler";
 import { CheckFollowingHandler } from "./check-following.handler";
 import { GetMyUserInfoHandler } from "./get-my-user-info.handler";
+import { GetWritingPostsHandler } from "./get-writing-posts.handler";
+import { GetWritingCommentsHandler } from "./get-writing-comments.handler";
 
 export const UserQueryHandlers = [
   GetFollowerUsersHandler,
@@ -14,4 +16,6 @@ export const UserQueryHandlers = [
   GetUserInfoHandler,
   CheckFollowingHandler,
   GetMyUserInfoHandler,
+  GetWritingPostsHandler,
+  GetWritingCommentsHandler,
 ];

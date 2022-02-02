@@ -5,11 +5,11 @@ import { User } from "../../models/user.model";
 
 export class UnfollowUserResultDto extends FollowUserResultDto {
   @ApiProperty({
-    description: "언팔로우를 요청한 유저",
+    description: "언팔로우를 요청한 사용자",
   })
   from: UserInfoDto;
   @ApiProperty({
-    description: "언팔로우한 유저",
+    description: "언팔로우한 사용자",
   })
   to: UserInfoDto;
 

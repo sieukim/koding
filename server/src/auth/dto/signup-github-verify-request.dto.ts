@@ -7,7 +7,7 @@ export class SignupGithubVerifyRequestDto extends PickType(User, [
   "nickname",
 ]) {
   @ApiProperty({
-    description: "인증할 유저 이메일",
+    description: "인증할 사용자 이메일",
     example: "test@test.com",
   })
   email: string;

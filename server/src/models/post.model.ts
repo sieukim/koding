@@ -104,6 +104,8 @@ export class Post extends AggregateRoot {
   @ApiProperty({
     description: "게시글에서 사용하는 이미지 url들",
     type: [String],
+    format: "url",
+    example: ["https://sample-image.com/1", "https://sample-image.com/2"],
   })
   imageUrls: string[];
 

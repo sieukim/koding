@@ -20,7 +20,7 @@ export class FollowUserHandler implements ICommandHandler<FollowUserCommand> {
       nickname: { in: [fromNickname, toNickname] },
     });
     if (users.length !== 2)
-      throw new NotFoundException("잘못된 유저 정보입니다");
+      throw new NotFoundException("잘못된 사용자 정보입니다");
     const fromUser = users.find((user) => user.nickname === fromNickname);
     const toUser = users.find((user) => user.nickname === toNickname);
     const alreadyFollowed = fromUser.followingNicknames.some(

@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { MongooseModule } from "@nestjs/mongoose";
 import { CommentDocument, CommentSchema } from "../schemas/comment.schema";
@@ -20,7 +20,7 @@ import { CommentsSaga } from "./sagas/comments.saga";
         schema: CommentSchema,
       },
     ]),
-    UsersModule,
+    forwardRef(() => UsersModule),
     PostsModule,
   ],
   controllers: [CommentsController],

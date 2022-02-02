@@ -53,7 +53,7 @@ export class NotificationsController {
     required: false,
   })
   @ApiNotFoundResponse({
-    description: "잘못된 유저 아이디",
+    description: "잘못된 사용자 닉네임",
   })
   @ApiOkResponse({
     description: "알림 조회 성공",

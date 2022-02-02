@@ -32,7 +32,7 @@ import { ModifyPostRequestDto } from "./dto/modify-post-request.dto";
 
 import { PostListDto } from "./dto/post-list.dto";
 import { PostWithAroundInfoDto } from "./dto/post-with-around-info.dto";
-import { ReadPostFilter } from "./dto/read-post.filter";
+import { ReadPostQueryDto } from "./dto/query/read-post-query.dto";
 import { User } from "../models/user.model";
 import { QueryBus } from "@nestjs/cqrs";
 import { GetPostListQuery } from "./query/get-post-list.query";
@@ -99,6 +99,13 @@ export class PostsController {
         value: "nestjs",
       },
     },
+    type: String,
+  })
+  @ApiQuery({
+    required: false,
+    name: "writer",
+    description: "검색할 작성자. 검색이 필요 없는 경우 값을 넣지 않음",
+    example: "testNickname",
   })
   @ApiOkResponse({
     description: "게시글 목록 조회 성공",
@@ -107,11 +114,11 @@ export class PostsController {
   @Get(":boardType")
   async readPosts(
     @Param() { boardType }: BoardTypeParamDto,
-    @Query() { cursor, tags }: ReadPostFilter,
+    @Query() { cursor, tags, writer }: ReadPostQueryDto,
   ) {
     const pageSize = 10;
     return this.queryBus.execute(
-      new GetPostListQuery(boardType, pageSize, cursor, { tags }),
+      new GetPostListQuery(boardType, pageSize, cursor, { tags, writer }),
     );
   }
 

@@ -6,6 +6,7 @@ export class CommentInfoDto extends PickType(Comment, [
   "commentId",
   "content",
   "postId",
+  "boardType",
   "writerNickname",
   "createdAt",
   "mentionedNicknames",

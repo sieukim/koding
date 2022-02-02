@@ -11,9 +11,15 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
 
   async execute(query: GetPostListQuery) {
     const { boardType, cursor, searchQuery, pageSize } = query;
-    const searchOption = searchQuery?.tags
-      ? { tags: { in: searchQuery.tags } }
-      : {};
+    let searchOption = {};
+    if (searchQuery?.tags)
+      searchOption = { ...searchOption, tags: { in: searchQuery.tags } };
+    if (searchQuery?.writer)
+      searchOption = {
+        ...searchOption,
+        writerNickname: { eq: searchQuery.writer },
+      };
+
     let posts: Post[];
     let nextPageCursor: string | undefined;
     let prevPageCursor: string | undefined;

@@ -91,7 +91,7 @@ export class UsersRepository extends MongooseBaseRepository<
     fieldName: keyof UserDocument,
     upsert: boolean,
   ): Promise<User> {
-    // TODO: 유저 모델과 스키마에 _id 를 추가하여 replace 를 위한 _id 조회를 없애기
+    // TODO: 사용자 모델과 스키마에 _id 를 추가하여 replace 를 위한 _id 조회를 없애기
     const userDocument = this.fromModel(user, this.userModel);
     const prevUserDocument = await this.userModel
       .findOne({

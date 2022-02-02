@@ -1,6 +1,6 @@
 import { User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
-import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Post, PostBoardType } from "./post.model";
 import { Types } from "mongoose";
@@ -26,9 +26,10 @@ export class Comment {
   postId: string;
 
   @Expose()
-  @IsString()
+  @IsEnum(PostBoardType)
   @ApiProperty({
-    description: "댓글의 부모 게시글 게시판",
+    description: "댓글의 부모 게시글의 게시판",
+    enum: PostBoardType,
   })
   boardType: PostBoardType;
 

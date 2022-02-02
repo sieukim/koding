@@ -25,15 +25,16 @@ export class MyUserInfoDto extends PickType(User, [
   followingsCount: number;
 
   @ApiPropertyOptional({
-    description: "유저 깃허브 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
+    description: "사용자 깃허브 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
   })
   githubUrl?: string;
   @ApiPropertyOptional({
-    description: "유저 블로그 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
+    description: "사용자 블로그 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
   })
   blogUrl?: string;
   @ApiPropertyOptional({
-    description: "유저 포트폴리오 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
+    description:
+      "사용자 포트폴리오 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
   })
   portfolioUrl?: string;
 

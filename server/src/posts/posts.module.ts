@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { PostsController } from "./posts.controller";
 import { PostsService } from "./posts.service";
 import { MongooseModule } from "@nestjs/mongoose";
@@ -18,7 +18,7 @@ import { PostsSaga } from "./sagas/posts.saga";
       { name: PostDocument.name, schema: PostSchema },
     ]),
     CqrsModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
     UploadModule,
   ],
   controllers: [PostsController],

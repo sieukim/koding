@@ -97,11 +97,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     if (user.githubSignupVerified) {
-      // 기존 유저
+      // 기존 사용자
       res.status(HttpStatus.OK);
       return MyUserInfoDto.fromModel(user);
     } else {
-      // 신규 유저
+      // 신규 사용자
       res.status(HttpStatus.CREATED);
       return SignupGithubResult.fromModel(user);
     }
@@ -138,10 +138,10 @@ export class AuthController {
   }
 
   @ApiOperation({
-    summary: "로그인 유저 정보 확인",
+    summary: "로그인 사용자 정보 확인",
   })
   @ApiOkResponse({
-    description: "유저 정보 확인 성공",
+    description: "사용자 정보 확인 성공",
     type: MyUserInfoDto,
   })
   @HttpCode(HttpStatus.OK)

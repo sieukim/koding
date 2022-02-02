@@ -66,6 +66,11 @@ import { ConfigService } from "@nestjs/config";
 import { Request, Response } from "express";
 import { GetMyUserInfoQuery } from "./queries/get-my-user-info.query";
 import { GetMyUserInfoHandler } from "./queries/handlers/get-my-user-info.handler";
+import { NicknameParamDto } from "./dto/param/nickname-param.dto";
+import { GetWritingPostsQuery } from "./queries/get-writing-posts.query";
+import { WritingPostsInfoDto } from "./dto/writing-posts-info.dto";
+import { CommentInfoDto } from "../comments/dto/comment-info.dto";
+import { GetWritingCommentsQuery } from "./queries/get-writing-comments.query";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -100,17 +105,13 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 정보 조회",
-  })
-  @ApiParam({
-    name: "nickname",
-    description: "유저 닉네임",
+    summary: "사용자 정보 조회",
   })
   @ApiNotFoundResponse({
-    description: "없는 유저",
+    description: "없는 사용자",
   })
   @ApiOkResponse({
-    description: "유저 정보 조회 성공",
+    description: "사용자 정보 조회 성공",
     schema: {
       oneOf: refs(UserInfoDto, MyUserInfoDto),
     },
@@ -118,7 +119,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Get(":nickname")
   getUserInfo(
-    @Param("nickname") nickname: string,
+    @Param() { nickname }: NicknameParamDto,
     @LoginUser() loginUser?: User,
   ) {
     if (loginUser?.nickname === nickname)
@@ -132,23 +133,19 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 탈퇴 & 로그아웃",
-  })
-  @ApiParam({
-    name: "nickname",
-    description: "유저 닉네임",
+    summary: "사용자 탈퇴 & 로그아웃",
   })
   @ApiNotFoundResponse({
-    description: "없는 유저",
+    description: "없는 사용자",
   })
   @ApiNoContentResponse({
-    description: "유저 삭제 성공 & 로그아웃 완료",
+    description: "사용자 삭제 성공 & 로그아웃 완료",
   })
   @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":nickname")
   async deleteAccount(
-    @Param("nickname") nickname: string,
+    @Param() { nickname }: NicknameParamDto,
     @LoginUser() loginUser: User,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
@@ -162,30 +159,26 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 프로필 정보 변경",
-  })
-  @ApiParam({
-    name: "nickname",
-    description: "유저 닉네임",
+    summary: "사용자 프로필 정보 변경",
   })
   @ApiBody({
     type: ChangeProfileRequestDto,
   })
   @ApiNotFoundResponse({
-    description: "없는 유저",
+    description: "없는 사용자",
   })
   @ApiBadRequestResponse({
     description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
   })
   @ApiNoContentResponse({
-    description: "유저 프로필 정보 변경 성공",
+    description: "사용자 프로필 정보 변경 성공",
     type: MyUserInfoDto,
   })
   @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.OK)
   @Patch(":nickname")
   async changeProfile(
-    @Param("nickname") nickname: string,
+    @Param() { nickname }: NicknameParamDto,
     @Body() body: ChangeProfileRequestDto,
     @LoginUser() loginUser: User,
   ) {
@@ -196,29 +189,25 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 비밀번호 변경",
-  })
-  @ApiParam({
-    name: "nickname",
-    description: "유저 닉네임",
+    summary: "사용자 비밀번호 변경",
   })
   @ApiBody({
     type: ChangePasswordRequestDto,
   })
   @ApiNotFoundResponse({
-    description: "없는 유저",
+    description: "없는 사용자",
   })
   @ApiBadRequestResponse({
     description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
   })
   @ApiNoContentResponse({
-    description: "유저 비밀번호 변경 성공",
+    description: "사용자 비밀번호 변경 성공",
   })
   @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch(":nickname/password")
   changePassword(
-    @Param("nickname") nickname: string,
+    @Param() { nickname }: NicknameParamDto,
     @Body() body: ChangePasswordRequestDto,
     @LoginUser() loginUser: User,
   ) {
@@ -285,7 +274,7 @@ export class UsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Get(":nickname/verify")
   async verifySignup(
-    @Param("nickname") nickname: string,
+    @Param() { nickname }: NicknameParamDto,
     @Query("verifyToken") verifyToken: string,
   ) {
     this.logger.log(`nickname: ${nickname}, verifyToken: ${verifyToken}`);
@@ -293,11 +282,11 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 팔로우",
+    summary: "사용자 팔로우",
   })
   @ApiParam({
     name: "nickname",
-    description: "팔로우를 요청한 유저 닉네임",
+    description: "팔로우를 요청한 사용자 닉네임",
   })
   @ApiBody({
     type: FollowUserDto,
@@ -313,7 +302,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Post(":nickname/followings")
   async followUser(
-    @Param("nickname") nickname: string,
+    @Param() { nickname }: NicknameParamDto,
     @Body() body: FollowUserDto,
     @LoginUser() loginUser: User,
   ) {
@@ -327,15 +316,15 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 언팔로우",
+    summary: "사용자 언팔로우",
   })
   @ApiParam({
     name: "nickname",
-    description: "언팔로우를 요청한 유저 닉네임",
+    description: "언팔로우를 요청한 사용자 닉네임",
   })
   @ApiParam({
     name: "followNickname",
-    description: "언팔로우 할 유저 닉네임",
+    description: "언팔로우 할 사용자 닉네임",
   })
   @ApiNotFoundResponse({
     description: "잘못된 닉네임",
@@ -362,15 +351,15 @@ export class UsersController {
   }
 
   @ApiOperation({
-    summary: "유저 팔로우 여부 조회",
+    summary: "사용자 팔로우 여부 조회",
   })
   @ApiParam({
     name: "nickname",
-    description: "팔로우를 하는지 확인할 유저 닉네임",
+    description: "팔로우를 하는지 확인할 사용자 닉네임",
   })
   @ApiParam({
     name: "followNickname",
-    description: "팔로우를 당하는지 확인할 유저 닉네임",
+    description: "팔로우를 당하는지 확인할 사용자 닉네임",
   })
   @ApiNotFoundResponse({
     description: "팔로우하지 않고 있거나 잘못된 닉네임",
@@ -392,12 +381,8 @@ export class UsersController {
   @ApiOperation({
     summary: "유저가 팔로잉하는 유저들 정보",
   })
-  @ApiParam({
-    name: "nickname",
-    description: "유저 닉네임",
-  })
   @ApiNotFoundResponse({
-    description: "없는 유저 닉네임",
+    description: "없는 사용자 닉네임",
   })
   @ApiOkResponse({
     description: "팔로잉하는 유저들 정보 조회 완료",
@@ -405,7 +390,7 @@ export class UsersController {
   })
   @HttpCode(HttpStatus.OK)
   @Get(":nickname/followings")
-  getFollowings(@Param("nickname") nickname: string) {
+  getFollowings(@Param() { nickname }: NicknameParamDto) {
     return this.queryBus.execute(
       new GetFollowingUsersQuery(nickname),
     ) as ReturnType<GetFollowingUsersHandler["execute"]>;
@@ -414,12 +399,8 @@ export class UsersController {
   @ApiOperation({
     summary: "유저를 팔로우하는 유저들 정보",
   })
-  @ApiParam({
-    name: "nickname",
-    description: "유저 닉네임",
-  })
   @ApiNotFoundResponse({
-    description: "없는 유저 닉네임",
+    description: "없는 사용자 닉네임",
   })
   @ApiOkResponse({
     description: "팔로우하는 유저들 정보 조회 완료",
@@ -427,9 +408,35 @@ export class UsersController {
   })
   @HttpCode(HttpStatus.OK)
   @Get(":nickname/followers")
-  getFollowers(@Param("nickname") nickname: string) {
+  getFollowers(@Param() { nickname }: NicknameParamDto) {
     return this.queryBus.execute(
       new GetFollowerUsersQuery(nickname),
     ) as ReturnType<GetFollowerUsersHandler["execute"]>;
+  }
+
+  /*
+   * 사용자가 작성한 게시글 조회
+   */
+  @ApiOkResponse({
+    description: "조회 성공",
+    type: WritingPostsInfoDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get(":nickname/posts")
+  getAllPosts(@Param() { nickname }: NicknameParamDto) {
+    return this.queryBus.execute(new GetWritingPostsQuery(nickname));
+  }
+
+  /*
+   * 사용자가 작성한 댓글 조회
+   */
+  @ApiOkResponse({
+    description: "조회 성공",
+    type: [CommentInfoDto],
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get(":nickname/comments")
+  getAllComments(@Param() { nickname }: NicknameParamDto) {
+    return this.queryBus.execute(new GetWritingCommentsQuery(nickname));
   }
 }
