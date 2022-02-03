@@ -2,7 +2,7 @@ import { Document, Model, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "./user.schema";
 import { currentTime } from "../common/utils/current-time.util";
-import { Post, PostBoardType } from "../models/post.model";
+import { Post, PostBoardType, PostBoardTypes } from "../models/post.model";
 import { Expose, plainToClass, Transform, Type } from "class-transformer";
 
 @Expose({ toClassOnly: true })
@@ -26,7 +26,7 @@ export class PostDocument extends Document {
   @Prop()
   title: string;
 
-  @Prop({ type: String, default: "common" })
+  @Prop({ type: String, default: "common", enum: PostBoardTypes })
   boardType: PostBoardType;
 
   @Prop({
@@ -61,6 +61,9 @@ export class PostDocument extends Document {
   @Type(() => String)
   @Prop({ type: [String] })
   imageUrls: string[];
+
+  @Prop({ type: Number, default: 0, min: 0 })
+  likeCount: number;
 
   static toModel(postDocument: PostDocument): Post {
     return plainToClass(Post, postDocument, {

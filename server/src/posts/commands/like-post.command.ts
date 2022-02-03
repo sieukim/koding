@@ -1,9 +1,9 @@
-import { IQuery } from "@nestjs/cqrs";
+import { ICommand } from "@nestjs/cqrs";
 import { PostIdentifier } from "../../models/post.model";
 
-export class ReadPostQuery implements IQuery {
+export class LikePostCommand implements ICommand {
   constructor(
     public readonly postIdentifier: PostIdentifier,
-    public readonly readerNickname?: string,
+    public readonly nickname: string,
   ) {}
 }

@@ -10,6 +10,7 @@ export class PostMetadataInfoDto extends PickType(Post, [
   "createdAt",
   "boardType",
   "writerNickname",
+  "likeCount",
 ] as const) {
   static fromModel(model: Post) {
     return plainToClass(PostMetadataInfoDto, model, {

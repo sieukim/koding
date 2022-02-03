@@ -10,6 +10,7 @@ export class CommentInfoDto extends PickType(Comment, [
   "writerNickname",
   "createdAt",
   "mentionedNicknames",
+  "postTitle",
 ] as const) {
   static fromModel(model: Comment) {
     return plainToClass(CommentInfoDto, model, {

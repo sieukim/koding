@@ -16,6 +16,7 @@ import { Types } from "mongoose";
 import { TagChangedEvent } from "../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../upload/event/post-image-changed.event";
 import { Expose } from "class-transformer";
+import { PostModifiedEvent } from "../posts/events/post-modified.event";
 
 export enum PostBoardType {
   Common = "common",
@@ -105,9 +106,17 @@ export class Post extends AggregateRoot {
     description: "게시글에서 사용하는 이미지 url들",
     type: [String],
     format: "url",
-    example: ["https://sample-image.com/1", "https://sample-image.com/2"],
   })
   imageUrls: string[];
+
+  @Expose()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: "게시글의 좋아요 수",
+    type: Number,
+  })
+  likeCount: number;
 
   constructor();
   constructor(param: {
@@ -139,6 +148,7 @@ export class Post extends AggregateRoot {
       this.htmlContent = param.htmlContent;
       this.imageUrls = param.imageUrls ?? [];
       this.readCount = 0;
+      this.likeCount = 0;
       this.createdAt = currentTime();
     }
   }
@@ -162,6 +172,9 @@ export class Post extends AggregateRoot {
     this.apply(new TagChangedEvent(this.boardType, this.tags, tags));
     this.apply(
       new PostImageChangedEvent(this.postId, this.imageUrls, imageUrls),
+    );
+    this.apply(
+      new PostModifiedEvent({ postId: this.postId, boardType: this.boardType }),
     );
     this.verifyOwner(requestUser);
     this.title = title ?? this.title;

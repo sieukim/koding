@@ -5,6 +5,8 @@ import { UserDeletedEvent } from "../../users/events/user-deleted.event";
 import { RenameCommentWriterToNullCommand } from "../commands/rename-comment-writer-to-null.command";
 import { PostDeletedEvent } from "../../posts/events/post-deleted.event";
 import { DeleteOrphanCommentsCommand } from "../commands/delete-orphan-comments.command";
+import { PostModifiedEvent } from "../../posts/events/post-modified.event";
+import { SyncPostTitleOfCommentCommand } from "../commands/sync-post-title-of-comment.command";
 
 @Injectable()
 export class CommentsSaga {
@@ -21,6 +23,16 @@ export class CommentsSaga {
       ofType(PostDeletedEvent),
       map(
         ({ postIdentifier }) => new DeleteOrphanCommentsCommand(postIdentifier),
+      ),
+    );
+
+  @Saga()
+  syncPostTitle = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostModifiedEvent),
+      map(
+        ({ postIdentifier }) =>
+          new SyncPostTitleOfCommentCommand(postIdentifier),
       ),
     );
 }

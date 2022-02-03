@@ -34,6 +34,13 @@ export class Comment {
   boardType: PostBoardType;
 
   @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "댓글의 부모 게시글의 제목",
+  })
+  postTitle: string;
+
+  @Expose()
   post?: Post;
 
   @Expose()
@@ -69,23 +76,22 @@ export class Comment {
 
   constructor();
   constructor(param: {
-    postId: string;
-    boardType: PostBoardType;
+    post: Post;
     writerNickname: string;
     content: string;
     mentionedNicknames: string[];
   });
   constructor(param?: {
-    postId: string;
-    boardType: PostBoardType;
+    post: Post;
     writerNickname: string;
     content: string;
     mentionedNicknames: string[];
   }) {
     if (param) {
       this.commentId = new Types.ObjectId().toString();
-      this.postId = param.postId;
-      this.boardType = param.boardType;
+      this.postId = param.post.postId;
+      this.boardType = param.post.boardType;
+      this.postTitle = param.post.title;
       this.writerNickname = param.writerNickname;
       this.content = param.content;
       this.mentionedNicknames = param.mentionedNicknames ?? [];

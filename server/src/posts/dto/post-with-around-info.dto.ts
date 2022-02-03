@@ -17,7 +17,7 @@ export class PostWithAroundInfoDto {
   })
   nextPostInfo?: PostMetadataInfoDto;
 
-  constructor(post: Post, prevPost?: Post, nextPost?: Post) {
+  constructor(post: Post, liked: boolean, prevPost?: Post, nextPost?: Post) {
     this.prevPostInfo = prevPost
       ? PostMetadataInfoDto.fromModel(prevPost)
       : undefined;
@@ -25,5 +25,6 @@ export class PostWithAroundInfoDto {
       ? PostMetadataInfoDto.fromModel(nextPost)
       : undefined;
     this.post = PostWithWriterInfoDto.fromModel(post);
+    this.post.liked = liked;
   }
 }

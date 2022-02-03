@@ -1,6 +1,6 @@
 import { PickType } from "@nestjs/swagger";
 import { Post } from "../../models/post.model";
-import { plainToClass } from "class-transformer";
+import { Expose, plainToClass } from "class-transformer";
 
 export class PostInfoDto extends PickType(Post, [
   "postId",
@@ -12,7 +12,14 @@ export class PostInfoDto extends PickType(Post, [
   "createdAt",
   "imageUrls",
   "writerNickname",
+  "likeCount",
 ] as const) {
+  /*
+   * 게시글에 대한 사용자의 좋아요 여부.
+   */
+  @Expose()
+  liked?: boolean;
+
   static fromModel(model: Post) {
     return plainToClass(PostInfoDto, model, { excludeExtraneousValues: true });
   }
