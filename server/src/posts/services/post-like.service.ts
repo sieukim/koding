@@ -106,4 +106,10 @@ export class PostLikeService {
       { likeCount },
     );
   }
+
+  removeOrphanPostLikes({ postId, boardType }: PostIdentifier) {
+    return this.postLikeModel
+      .deleteMany({ _id: new Types.ObjectId(postId), boardType })
+      .exec();
+  }
 }

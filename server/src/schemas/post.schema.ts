@@ -65,6 +65,9 @@ export class PostDocument extends Document {
   @Prop({ type: Number, default: 0, min: 0 })
   likeCount: number;
 
+  @Prop({ type: Number, default: 0, min: 0 })
+  commentCount: number;
+
   static toModel(postDocument: PostDocument): Post {
     return plainToClass(Post, postDocument, {
       excludeExtraneousValues: true,

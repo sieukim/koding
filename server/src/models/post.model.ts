@@ -118,6 +118,15 @@ export class Post extends AggregateRoot {
   })
   likeCount: number;
 
+  @Expose()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: "게시글의 댓글 수",
+    type: Number,
+  })
+  commentCount: number;
+
   constructor();
   constructor(param: {
     title: string;
@@ -149,6 +158,7 @@ export class Post extends AggregateRoot {
       this.imageUrls = param.imageUrls ?? [];
       this.readCount = 0;
       this.likeCount = 0;
+      this.commentCount = 0;
       this.createdAt = currentTime();
     }
   }

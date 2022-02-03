@@ -7,6 +7,7 @@ import { PostDeletedEvent } from "../../posts/events/post-deleted.event";
 import { DeleteOrphanCommentsCommand } from "../commands/delete-orphan-comments.command";
 import { PostModifiedEvent } from "../../posts/events/post-modified.event";
 import { SyncPostTitleOfCommentCommand } from "../commands/sync-post-title-of-comment.command";
+import { DeleteOrphanPostLikesCommand } from "../../posts/commands/delete-orphan-post-likes.command";
 
 @Injectable()
 export class CommentsSaga {
@@ -18,11 +19,21 @@ export class CommentsSaga {
     );
 
   @Saga()
-  removeCommentsForDeletedPost = ($events: Observable<any>) =>
+  deleteOrphanComments = ($events: Observable<any>) =>
     $events.pipe(
       ofType(PostDeletedEvent),
       map(
         ({ postIdentifier }) => new DeleteOrphanCommentsCommand(postIdentifier),
+      ),
+    );
+
+  @Saga()
+  deleteOrphanPostLikes = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostDeletedEvent),
+      map(
+        ({ postIdentifier }) =>
+          new DeleteOrphanPostLikesCommand(postIdentifier),
       ),
     );
 

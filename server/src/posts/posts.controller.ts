@@ -51,7 +51,7 @@ import { LikePostHandler } from "./commands/handlers/like-post.handler";
 import { UnlikePostCommand } from "./commands/unlike-post.command";
 import { UnlikePostHandler } from "./commands/handlers/unlike-post.handler";
 import { UserLikePostInfoDto } from "./dto/user-like-post-info.dto";
-import { IsUserLikePostQuery } from "./query/is-user-like-post.query";
+import { CheckUserLikePostQuery } from "./query/check-user-like-post.query";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -262,7 +262,7 @@ export class PostsController {
     { postId, boardType, nickname }: PostIdentifierWithNicknameParamDto,
   ) {
     return this.queryBus.execute(
-      new IsUserLikePostQuery({ postId, boardType }, nickname),
+      new CheckUserLikePostQuery({ postId, boardType }, nickname),
     );
   }
 }

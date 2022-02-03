@@ -39,7 +39,6 @@ export class ModifyPostHandler implements ICommandHandler<ModifyPostCommand> {
       throw new BadRequestException("만료되거나 잘못된 이미지 URL이 있습니다.");
     post = this.publisher.mergeObjectContext(post);
     post.modifyPost(requestUser, modifyPostRequest);
-    post.commit();
     const result = await this.postRepository.update(post);
     post.commit();
     return result;

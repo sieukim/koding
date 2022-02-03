@@ -5,6 +5,7 @@ import { UsersRepository } from "../../../users/users.repository";
 import { TagChangedEvent } from "../../../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../../../upload/event/post-image-changed.event";
 import { PostDeletedEvent } from "../../events/post-deleted.event";
+import { NotFoundException } from "@nestjs/common";
 
 @CommandHandler(DeletePostCommand)
 export class DeletePostHandler implements ICommandHandler<DeletePostCommand> {
@@ -20,6 +21,7 @@ export class DeletePostHandler implements ICommandHandler<DeletePostCommand> {
       requestUserNickname,
     );
     const post = await this.postRepository.findByPostId(postIdentifier);
+    if (!post) throw new NotFoundException("잘못된 게시글");
     post.verifyOwner(requestUser);
     await this.postRepository.remove(post);
 

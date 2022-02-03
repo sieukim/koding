@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PostDocument } from "../schemas/post.schema";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { Post, PostIdentifier } from "../models/post.model";
 import { MongooseBaseRepository } from "../common/repository/mongoose-base.repository";
 
@@ -69,7 +69,7 @@ export class PostsRepository extends MongooseBaseRepository<
     await this.postModel
       .updateOne(
         {
-          postId,
+          _id: new Types.ObjectId(postId),
           boardType,
         },
         { $inc: { readCount: 1 } },
