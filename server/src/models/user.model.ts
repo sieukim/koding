@@ -1,5 +1,5 @@
 import { AggregateRoot } from "@nestjs/cqrs";
-import { ApiProperty, ApiPropertyOptional, PickType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { currentTime } from "../common/utils/current-time.util";
 import { compare, hash } from "bcrypt";
 import { v1 } from "uuid";
@@ -21,15 +21,16 @@ import {
 } from "class-validator";
 import { ChangeProfileRequestDto } from "../users/dto/change-profile-request.dto";
 import { Expose, Transform, Type } from "class-transformer";
+import { Role } from "./role.enum";
 
 export class User extends AggregateRoot {
-  private static readonly round = 10;
+  private static readonly ROUND = 10;
 
   @Expose()
   @IsEmail()
   @ApiProperty({
     example: "test@test.com",
-    description: "유저 이메일, 중복 불가",
+    description: "사용자 이메일, 중복 불가",
     type: String,
   })
   email: string;
@@ -40,7 +41,7 @@ export class User extends AggregateRoot {
   @Matches("[A-Za-z0-9가-힣]*")
   @ApiProperty({
     example: "testNick",
-    description: "유저 닉네임, 중복 불가",
+    description: "사용자 닉네임, 중복 불가",
     pattern: "[A-Za-z0-9가-힣]*",
     minLength: 2,
     maxLength: 10,
@@ -53,7 +54,7 @@ export class User extends AggregateRoot {
   @IsString()
   @ApiProperty({
     example: "abcd1234",
-    description: "유저 비밀번호",
+    description: "사용자 비밀번호",
     minLength: 8,
     maxLength: 16,
     type: String,
@@ -63,7 +64,7 @@ export class User extends AggregateRoot {
   @Expose()
   @IsBoolean()
   @ApiPropertyOptional({
-    description: "유저 블로그 주소 공개여부",
+    description: "사용자 블로그 주소 공개여부",
     type: Boolean,
     default: false,
   })
@@ -84,7 +85,7 @@ export class User extends AggregateRoot {
   @IsUrl()
   @ApiPropertyOptional({
     example: "https://blog.naver.com/test",
-    description: "유저 블로그 주소. 공개 여부에 따라 값이 없을 수 있음",
+    description: "사용자 블로그 주소. 공개 여부에 따라 값이 없을 수 있음",
     type: String,
   })
   blogUrl?: string;
@@ -92,7 +93,7 @@ export class User extends AggregateRoot {
   @Expose()
   @IsBoolean()
   @ApiPropertyOptional({
-    description: "유저 깃허브 주소 공개여부",
+    description: "사용자 깃허브 주소 공개여부",
     type: Boolean,
     default: false,
   })
@@ -111,7 +112,7 @@ export class User extends AggregateRoot {
   @IsUrl()
   @ApiPropertyOptional({
     example: "https://test.github.com",
-    description: "유저 깃허브 주소. 공개 여부에 따라 값이 없을 수 있음",
+    description: "사용자 깃허브 주소. 공개 여부에 따라 값이 없을 수 있음",
     type: String,
   })
   githubUrl?: string;
@@ -119,7 +120,7 @@ export class User extends AggregateRoot {
   @Expose()
   @IsBoolean()
   @ApiPropertyOptional({
-    description: "유저 포트폴리오 주소 공개여부",
+    description: "사용자 포트폴리오 주소 공개여부",
     type: Boolean,
     default: false,
   })
@@ -138,28 +139,28 @@ export class User extends AggregateRoot {
   @IsUrl()
   @ApiPropertyOptional({
     example: "https://linktr.ee/test",
-    description: "유저 포트폴리오 주소. 공개 여부에 따라 값이 없을 수 있음",
+    description: "사용자 포트폴리오 주소. 공개 여부에 따라 값이 없을 수 있음",
     type: String,
   })
   portfolioUrl?: string;
 
   @Expose()
   @ApiProperty({
-    description: "깃허브 연동 유저 여부",
+    description: "깃허브 연동 사용자 여부",
     type: Boolean,
   })
   isGithubUser: boolean;
 
   @Expose()
   @ApiProperty({
-    description: "이메일 가입 유저 여부",
+    description: "이메일 가입 사용자 여부",
     type: Boolean,
   })
   isEmailUser: boolean;
 
   @Expose()
   @ApiProperty({
-    description: "깃허브 API에서 제공하는 깃허브 유저 고유 넘버",
+    description: "깃허브 API에서 제공하는 깃허브 사용자 고유 넘버",
     type: Number,
   })
   @IsOptional()
@@ -225,6 +226,20 @@ export class User extends AggregateRoot {
   @Expose()
   followers?: User[];
 
+  @Expose()
+  @ApiProperty({
+    description: "사용자의 권한",
+    enum: Object.values(Role),
+    isArray: true,
+  })
+  roles: Role[];
+
+  @Expose()
+  @ApiProperty({
+    description: "계정 정지 기간",
+  })
+  accountSuspendedUntil: Date;
+
   constructor();
   constructor(param: {
     email: string;
@@ -275,6 +290,7 @@ export class User extends AggregateRoot {
       this.followingNicknames = [];
       this.followerNicknames = [];
       this.createdAt = currentTime();
+      this.roles = [Role.User];
     }
   }
 
@@ -301,15 +317,15 @@ export class User extends AggregateRoot {
   @Expose({ toClassOnly: true })
   @ApiProperty({ description: "회원가입 인증 여부", type: Boolean })
   get isVerifiedUser(): boolean {
-    // 이메일 유저 & 이메일 인증 완료
+    // 이메일 사용자 & 이메일 인증 완료
     if (this.isEmailUser && this.emailSignupVerified) return true;
-    // 깃허브 유저 & 깃허브 인증 완료
+    // 깃허브 사용자 & 깃허브 인증 완료
     if (this.isGithubUser && this.githubSignupVerified) return true;
     return false;
   }
 
   async hashPassword() {
-    if (this.password) this.password = await hash(this.password, User.round);
+    if (this.password) this.password = await hash(this.password, User.ROUND);
     return this;
   }
 
@@ -369,6 +385,8 @@ export class User extends AggregateRoot {
   }
 
   verifyPasswordResetToken(verifyToken: string) {
+    if (!this.isEmailUser)
+      throw new ForbiddenException("이메일로 가입한 사용자가 아닙니다");
     if (this.passwordResetToken !== verifyToken)
       throw new BadRequestException("유효하지 않은 토큰");
   }
@@ -380,6 +398,8 @@ export class User extends AggregateRoot {
     verifyToken: string;
     newPassword: string;
   }) {
+    if (!this.isEmailUser)
+      throw new ForbiddenException("이메일로 가입한 사용자가 아닙니다");
     this.verifyPasswordResetToken(verifyToken);
     this.password = newPassword;
     this.passwordResetToken = undefined;
@@ -398,6 +418,8 @@ export class User extends AggregateRoot {
   }
 
   sendPasswordResetEmail() {
+    if (!this.isEmailUser)
+      throw new ForbiddenException("이메일로 가입한 사용자가 아닙니다");
     this.setNewPasswordResetToken();
     this.apply(
       new ResetPasswordRequestedEvent(
@@ -420,7 +442,7 @@ export class User extends AggregateRoot {
 
   verifyEmailSignup(verifyToken: string) {
     if (!this.isEmailUser)
-      throw new BadRequestException("이메일 가입 유저가 아닙니다");
+      throw new BadRequestException("이메일 가입 사용자가 아닙니다");
     console.log(
       "this:",
       this.emailSignupVerifyToken,
@@ -452,12 +474,5 @@ export class User extends AggregateRoot {
       throw new BadRequestException("잘못된 확인 비밀번호");
     this.password = newPassword;
     await this.hashPassword();
-  }
-}
-
-export class PartialUser extends PickType(User, ["nickname"] as const) {
-  constructor(param: { nickname: string }) {
-    super();
-    this.nickname = param.nickname;
   }
 }

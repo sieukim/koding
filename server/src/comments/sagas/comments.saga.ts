@@ -3,6 +3,11 @@ import { ofType, Saga } from "@nestjs/cqrs";
 import { map, Observable } from "rxjs";
 import { UserDeletedEvent } from "../../users/events/user-deleted.event";
 import { RenameCommentWriterToNullCommand } from "../commands/rename-comment-writer-to-null.command";
+import { PostDeletedEvent } from "../../posts/events/post-deleted.event";
+import { DeleteOrphanCommentsCommand } from "../commands/delete-orphan-comments.command";
+import { PostModifiedEvent } from "../../posts/events/post-modified.event";
+import { SyncPostTitleOfCommentCommand } from "../commands/sync-post-title-of-comment.command";
+import { DeleteOrphanPostLikesCommand } from "../../posts/commands/delete-orphan-post-likes.command";
 
 @Injectable()
 export class CommentsSaga {
@@ -11,5 +16,34 @@ export class CommentsSaga {
     $events.pipe(
       ofType(UserDeletedEvent),
       map(({ nickname }) => new RenameCommentWriterToNullCommand(nickname)),
+    );
+
+  @Saga()
+  deleteOrphanComments = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostDeletedEvent),
+      map(
+        ({ postIdentifier }) => new DeleteOrphanCommentsCommand(postIdentifier),
+      ),
+    );
+
+  @Saga()
+  deleteOrphanPostLikes = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostDeletedEvent),
+      map(
+        ({ postIdentifier }) =>
+          new DeleteOrphanPostLikesCommand(postIdentifier),
+      ),
+    );
+
+  @Saga()
+  syncPostTitle = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostModifiedEvent),
+      map(
+        ({ postIdentifier }) =>
+          new SyncPostTitleOfCommentCommand(postIdentifier),
+      ),
     );
 }

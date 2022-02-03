@@ -4,11 +4,15 @@ import { filter, map, mergeMap, Observable } from "rxjs";
 import { CommentAddedEvent } from "../../comments/events/comment-added.event";
 import { AddNotificationCommand } from "../commands/add-notification.command";
 import {
+  CommentDeletedNotificationData,
   CommentNotificationData,
   FollowNotificationData,
   MentionNotificationData,
+  PostDeletedNotificationData,
 } from "../../models/notification.model";
 import { UserFollowedEvent } from "../../users/events/user-followed.event";
+import { PostDeletedByAdminEvent } from "../../admin/events/post-deleted-by-admin.event";
+import { CommentDeletedByAdminEvent } from "../../admin/events/comment-deleted-by-admin.event";
 
 @Injectable()
 export class NotificationSaga {
@@ -82,6 +86,40 @@ export class NotificationSaga {
             event.toNickname,
             new FollowNotificationData({
               followerNickname: event.fromNickname,
+            }),
+          ),
+      ),
+    );
+
+  @Saga()
+  postDeletedNotification = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostDeletedByAdminEvent),
+      map(
+        ({ postIdentifier: { postId, boardType }, writerNickname }) =>
+          new AddNotificationCommand(
+            writerNickname,
+            new PostDeletedNotificationData({ postId, boardType }),
+          ),
+      ),
+    );
+
+  @Saga()
+  commentDeletedNotification = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(CommentDeletedByAdminEvent),
+      map(
+        ({
+          commentWriterNickname,
+          commentId,
+          postIdentifier: { postId, boardType },
+        }) =>
+          new AddNotificationCommand(
+            commentWriterNickname,
+            new CommentDeletedNotificationData({
+              postId,
+              boardType,
+              commentId,
             }),
           ),
       ),

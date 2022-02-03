@@ -17,12 +17,10 @@ import { isEmpty } from "class-validator";
 import { QueryBus } from "@nestjs/cqrs";
 import { UnifiedSearchPostQuery } from "./queries/unified-search-post.query";
 import { UnifiedSearchPostsResultDto } from "./dto/unified-search-posts-result.dto";
-import { ApiParamBoardType } from "../common/decorator/swagger/api-param.decorator";
-import { BoardTypeValidationPipe } from "../common/pipes/board-type-validation-pipe";
-import { PostBoardType } from "../models/post.model";
 import { SearchPostQuery } from "./queries/search-post.query";
 import { SearchPostQueryDto } from "./dto/query/search-post-query.dto";
 import { SearchPostResultWithCursorDto } from "./dto/search-post-result-with-cursor.dto";
+import { BoardTypeParamDto } from "../posts/dto/param/board-type-param.dto";
 
 @ApiTags("SEARCH")
 @Controller("api/search")
@@ -35,7 +33,7 @@ export class SearchController {
   @ApiQuery({
     name: "query",
     type: String,
-    description: "톰합검색할 검색어",
+    description: "통합 검색할 검색어",
   })
   @ApiOkResponse({
     description: "통합 검색 성공",
@@ -54,7 +52,6 @@ export class SearchController {
   @ApiOperation({
     summary: "게시글 검색",
   })
-  @ApiParamBoardType()
   @ApiQuery({
     name: "cursor",
     description:
@@ -73,7 +70,7 @@ export class SearchController {
   })
   @Get(":boardType")
   async searchPosts(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
+    @Param() { boardType }: BoardTypeParamDto,
     @Query() { cursor, query }: SearchPostQueryDto,
   ) {
     const pageSize = 10;

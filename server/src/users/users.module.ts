@@ -1,4 +1,4 @@
-import { Global, Module } from "@nestjs/common";
+import { forwardRef, Global, Module } from "@nestjs/common";
 import { UsersController } from "./users.controller";
 import { MongooseModule } from "@nestjs/mongoose";
 import { UserDocument, UserSchema } from "../schemas/user.schema";
@@ -10,6 +10,8 @@ import { UserEventHandlers } from "./events/handlers";
 import { UserQueryHandlers } from "./queries/handlers";
 import { CqrsModule } from "@nestjs/cqrs";
 import { EmailSagas } from "./sagas/email.sagas";
+import { PostsModule } from "../posts/posts.module";
+import { CommentsModule } from "../comments/comments.module";
 
 @Global()
 @Module({
@@ -19,6 +21,8 @@ import { EmailSagas } from "./sagas/email.sagas";
     ]),
     EmailModule,
     CqrsModule,
+    forwardRef(() => PostsModule),
+    forwardRef(() => CommentsModule),
   ],
   controllers: [UsersController],
   providers: [

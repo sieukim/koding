@@ -46,10 +46,10 @@ export class WritePostHandler implements ICommandHandler<WritePostCommand> {
       imageUrls,
     });
     const resultPost = await this.postRepository.persist(post);
-    this.eventBus.publish(
+    this.eventBus.publishAll([
       new PostImageChangedEvent(post.postId, [], imageUrls),
-    );
-    this.eventBus.publish(new TagChangedEvent(boardType, [], tags));
+      new TagChangedEvent(boardType, [], tags),
+    ]);
     return resultPost;
   }
 }

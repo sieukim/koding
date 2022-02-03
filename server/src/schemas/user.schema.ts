@@ -5,6 +5,7 @@ import { IsEmail, IsNumber, IsUrl, Min } from "class-validator";
 import { currentTime } from "../common/utils/current-time.util";
 import { User } from "../models/user.model";
 import { Expose, plainToClass, Transform, Type } from "class-transformer";
+import { Role } from "../models/role.enum";
 
 export class GithubRepositoryInfo {
   @ApiProperty({
@@ -52,7 +53,7 @@ export class GithubUserInfo {
   avatarUrl: string;
 
   @ApiProperty({
-    description: "유저 이름",
+    description: "사용자 이름",
     example: "홍길동",
   })
   @Prop()
@@ -141,6 +142,18 @@ export class UserDocument extends Document {
 
   @Prop({ required: false })
   passwordResetToken?: string;
+
+  @Prop({
+    type: [{ type: String, enum: Object.values(Role) }],
+    default: [Role.User],
+  })
+  roles: Role[];
+
+  @Prop({
+    type: Date,
+    required: false,
+  })
+  accountSuspendedUntil: Date;
 
   createdAt: Date;
 

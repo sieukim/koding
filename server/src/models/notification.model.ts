@@ -1,5 +1,5 @@
-import { IsDate, IsIn, IsString } from "class-validator";
-import { PostBoardType, PostBoardTypes } from "./post.model";
+import { IsDate, IsEnum, IsIn, IsString } from "class-validator";
+import { PostBoardType } from "./post.model";
 import {
   ApiExtraModels,
   ApiProperty,
@@ -10,15 +10,21 @@ import { Types } from "mongoose";
 import { currentTime } from "../common/utils/current-time.util";
 import { Expose, Type } from "class-transformer";
 
-export const notificationTypes = ["comment", "follow", "mention"] as const;
-export type NotificationType = typeof notificationTypes[number];
+export type NotificationType = typeof NotificationTypes[number];
+export const NotificationTypes = [
+  "comment",
+  "follow",
+  "mention",
+  "commentDeleted",
+  "postDeleted",
+] as const;
 
 export abstract class NotificationData {
   @Expose()
-  @IsIn(notificationTypes)
+  @IsIn(NotificationTypes)
   @ApiProperty({
     description: "알림 타입",
-    enum: notificationTypes,
+    enum: NotificationTypes,
   })
   type: NotificationType;
 
@@ -29,10 +35,10 @@ export abstract class NotificationData {
 
 export class CommentNotificationData extends NotificationData {
   @Expose()
-  @IsIn(PostBoardTypes)
+  @IsEnum(PostBoardType)
   @ApiProperty({
     description: "댓글이 달린 게시글의 게시판",
-    enum: PostBoardTypes,
+    enum: PostBoardType,
   })
   boardType: PostBoardType;
   @Expose()
@@ -114,20 +120,89 @@ export class MentionNotificationData extends CommentNotificationData {
   }
 }
 
-export const notificationDataTypes = [
-  CommentNotificationData,
-  MentionNotificationData,
-  FollowNotificationData,
-] as const;
-export type NotificationDataType = InstanceType<
-  typeof notificationDataTypes[number]
->;
+export class PostDeletedNotificationData extends NotificationData {
+  @Expose()
+  @IsEnum(PostBoardType)
+  @ApiProperty({
+    description: "삭제된 게시글의 게시판",
+    enum: PostBoardType,
+  })
+  boardType: PostBoardType;
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "삭제된 게시글의 아이디",
+  })
+  postId: string;
 
-@ApiExtraModels(
-  CommentNotificationData,
+  constructor(param?: Omit<PostDeletedNotificationData, "type">) {
+    super("postDeleted");
+    if (param) {
+      Object.assign(this, param);
+    }
+  }
+}
+
+export class CommentDeletedNotificationData extends NotificationData {
+  @Expose()
+  @IsEnum(PostBoardType)
+  @ApiProperty({
+    description: "삭제된 댓글의 게시글의 게시판",
+    enum: PostBoardType,
+  })
+  boardType: PostBoardType;
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "삭제된 댓글의 게시글의 아이디",
+  })
+  postId: string;
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "삭제된 댓글 아이디",
+  })
+  commentId: string;
+
+  constructor(param?: Omit<CommentDeletedNotificationData, "type">) {
+    super("commentDeleted");
+    if (param) {
+      Object.assign(this, param);
+    }
+  }
+}
+
+export type NotificationDataType = InstanceType<
+  typeof NotificationDataTypes[number]
+>;
+export const NotificationDataTypes = [
   FollowNotificationData,
   MentionNotificationData,
-)
+  CommentNotificationData,
+  CommentDeletedNotificationData,
+  PostDeletedNotificationData,
+] as const;
+
+export const NotificationTypeMapping = {
+  comment: CommentNotificationData,
+  follow: FollowNotificationData,
+  mention: MentionNotificationData,
+  commentDeleted: CommentDeletedNotificationData,
+  postDeleted: PostDeletedNotificationData,
+} as Record<NotificationType, typeof NotificationDataTypes[number]>;
+
+// export const NotificationDataTypes = [
+//   CommentNotificationData,
+//   MentionNotificationData,
+//   FollowNotificationData,
+//   PostDeletedNotificationData,
+//   CommentDeletedNotificationData,
+// ] as const;
+// export type NotificationDataType = InstanceType<
+//   typeof NotificationDataTypes[number]
+// >;
+
+@ApiExtraModels(...NotificationDataTypes)
 export class Notification {
   @Expose()
   @ApiProperty({
@@ -150,20 +225,10 @@ export class Notification {
     keepDiscriminatorProperty: true,
     discriminator: {
       property: "type",
-      subTypes: [
-        {
-          name: "follow",
-          value: FollowNotificationData,
-        },
-        {
-          name: "mention",
-          value: MentionNotificationData,
-        },
-        {
-          name: "comment",
-          value: CommentNotificationData,
-        },
-      ],
+      subTypes: NotificationTypes.map((type) => ({
+        name: type,
+        value: NotificationTypeMapping[type],
+      })),
     },
   })
   @Expose()
@@ -171,13 +236,11 @@ export class Notification {
     description: "알림 타입 별 세부 정보",
     discriminator: {
       propertyName: "type",
-      mapping: {
-        mention: getSchemaPath(MentionNotificationData),
-        follow: getSchemaPath(FollowNotificationData),
-        comment: getSchemaPath(CommentNotificationData),
-      },
+      mapping: NotificationTypes.map((type) => ({
+        [type]: getSchemaPath(NotificationTypeMapping[type]),
+      })).reduce((prev, current) => ({ ...prev, ...current }), {}),
     },
-    oneOf: refs(...notificationDataTypes),
+    oneOf: refs(...NotificationDataTypes),
     // oneOf: notificationDataTypes.map((t) => ({ $ref: getSchemaPath(t) })),
   })
   data: NotificationDataType;

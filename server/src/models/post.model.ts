@@ -1,31 +1,39 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDate, IsIn, IsNumber, IsString, IsUrl, Min } from "class-validator";
+import {
+  IsDate,
+  IsEnum,
+  IsNumber,
+  IsString,
+  IsUrl,
+  Min,
+} from "class-validator";
 import { ForbiddenException } from "@nestjs/common";
 import { AggregateRoot } from "@nestjs/cqrs";
 import { User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
-import { IncreasePostReadCountEvent } from "../posts/events/increase-post-read-count.event";
+import { PostReadCountIncreasedEvent } from "../posts/events/post-read-count-increased.event";
 import { Types } from "mongoose";
 import { TagChangedEvent } from "../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../upload/event/post-image-changed.event";
 import { Expose } from "class-transformer";
+import { PostModifiedEvent } from "../posts/events/post-modified.event";
 
-export const PostBoardTypes = [
-  "common",
-  "question",
-  "career",
-  "recruit",
-  "study-group",
-  "column",
-] as const;
-export type PostBoardType = typeof PostBoardTypes[number];
+export enum PostBoardType {
+  Common = "common",
+  Question = "question",
+  Career = "career",
+  Recruit = "recruit",
+  StudyGroup = "study-group",
+  Column = "column",
+}
+
+export const PostBoardTypes = Object.values(PostBoardType);
 
 export class Post extends AggregateRoot {
   @Expose()
   @IsString()
   @ApiProperty({
     description: "게시글 고유 아이디",
-    type: String,
   })
   postId: string;
 
@@ -37,11 +45,11 @@ export class Post extends AggregateRoot {
   title: string;
 
   @Expose()
-  @IsIn(PostBoardTypes)
+  @IsEnum(PostBoardType)
   @ApiProperty({
     description: "게시판 타입",
     example: "common",
-    enum: PostBoardTypes,
+    enum: PostBoardType,
   })
   boardType: PostBoardType;
 
@@ -97,8 +105,27 @@ export class Post extends AggregateRoot {
   @ApiProperty({
     description: "게시글에서 사용하는 이미지 url들",
     type: [String],
+    format: "url",
   })
   imageUrls: string[];
+
+  @Expose()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: "게시글의 좋아요 수",
+    type: Number,
+  })
+  likeCount: number;
+
+  @Expose()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: "게시글의 댓글 수",
+    type: Number,
+  })
+  commentCount: number;
 
   constructor();
   constructor(param: {
@@ -130,6 +157,8 @@ export class Post extends AggregateRoot {
       this.htmlContent = param.htmlContent;
       this.imageUrls = param.imageUrls ?? [];
       this.readCount = 0;
+      this.likeCount = 0;
+      this.commentCount = 0;
       this.createdAt = currentTime();
     }
   }
@@ -154,6 +183,9 @@ export class Post extends AggregateRoot {
     this.apply(
       new PostImageChangedEvent(this.postId, this.imageUrls, imageUrls),
     );
+    this.apply(
+      new PostModifiedEvent({ postId: this.postId, boardType: this.boardType }),
+    );
     this.verifyOwner(requestUser);
     this.title = title ?? this.title;
     this.tags = tags ?? this.tags;
@@ -169,7 +201,7 @@ export class Post extends AggregateRoot {
 
   increaseReadCount() {
     this.apply(
-      new IncreasePostReadCountEvent({
+      new PostReadCountIncreasedEvent({
         postId: this.postId,
         boardType: this.boardType,
       }),

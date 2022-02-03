@@ -1,14 +1,14 @@
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { IncreasePostReadCountEvent } from "../increase-post-read-count.event";
+import { PostReadCountIncreasedEvent } from "../post-read-count-increased.event";
 import { PostsRepository } from "../../posts.repository";
 
-@EventsHandler(IncreasePostReadCountEvent)
-export class IncreasePostReadCountHandler
-  implements IEventHandler<IncreasePostReadCountEvent>
+@EventsHandler(PostReadCountIncreasedEvent)
+export class PostReadCountIncreasedHandler
+  implements IEventHandler<PostReadCountIncreasedEvent>
 {
   constructor(private readonly postRepository: PostsRepository) {}
 
-  async handle(event: IncreasePostReadCountEvent) {
+  async handle(event: PostReadCountIncreasedEvent) {
     const { postIdentifier } = event;
     await this.postRepository.increaseReadCount(postIdentifier);
     return;

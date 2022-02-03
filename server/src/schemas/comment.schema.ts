@@ -7,6 +7,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Comment } from "../models/comment.model";
 import { PostDocument } from "./post.schema";
 import { Expose, plainToClass, Transform, Type } from "class-transformer";
+import { PostBoardType, PostBoardTypes } from "../models/post.model";
 
 @Expose({ toClassOnly: true })
 @Schema({
@@ -26,6 +27,9 @@ export class CommentDocument extends Document {
   })
   postId: Types.ObjectId;
 
+  @Prop()
+  postTitle: string;
+
   @Type(() => PostDocument)
   @Transform(
     ({ value }) =>
@@ -33,6 +37,12 @@ export class CommentDocument extends Document {
     { toClassOnly: true },
   )
   post?: PostDocument;
+
+  @Prop({
+    type: String,
+    enum: PostBoardTypes,
+  })
+  boardType: PostBoardType;
 
   @Prop({ type: String, required: false })
   writerNickname?: string;

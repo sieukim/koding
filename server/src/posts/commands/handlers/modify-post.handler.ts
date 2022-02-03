@@ -35,11 +35,12 @@ export class ModifyPostHandler implements ICommandHandler<ModifyPostCommand> {
           "이미지 업로더와 게시글 작성자가 다릅니다",
         );
     });
-    if (images.length !== modifyPostRequest.imageUrls.length)
+    if (images.length !== (modifyPostRequest.imageUrls?.length ?? 0))
       throw new BadRequestException("만료되거나 잘못된 이미지 URL이 있습니다.");
     post = this.publisher.mergeObjectContext(post);
     post.modifyPost(requestUser, modifyPostRequest);
+    const result = await this.postRepository.update(post);
     post.commit();
-    return await this.postRepository.update(post);
+    return result;
   }
 }

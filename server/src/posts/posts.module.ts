@@ -1,6 +1,5 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { PostsController } from "./posts.controller";
-import { PostsService } from "./posts.service";
 import { MongooseModule } from "@nestjs/mongoose";
 import { PostDocument, PostSchema } from "../schemas/post.schema";
 import { PostCommandHandlers } from "./commands/handlers";
@@ -11,21 +10,24 @@ import { PostsRepository } from "./posts.repository";
 import { UsersModule } from "../users/users.module";
 import { UploadModule } from "../upload/upload.module";
 import { PostsSaga } from "./sagas/posts.saga";
+import { PostServices } from "./services";
+import { PostLikeDocument, PostLikeSchema } from "../schemas/post-like.schema";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: PostDocument.name, schema: PostSchema },
+      { name: PostLikeDocument.name, schema: PostLikeSchema },
     ]),
     CqrsModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
     UploadModule,
   ],
   controllers: [PostsController],
   providers: [
     PostsRepository,
-    PostsService,
     PostsSaga,
+    ...PostServices,
     ...PostCommandHandlers,
     ...PostEventHandlers,
     ...PostQueryHandlers,

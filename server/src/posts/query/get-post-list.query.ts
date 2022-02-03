@@ -6,6 +6,6 @@ export class GetPostListQuery implements ICommand {
     public readonly boardType: PostBoardType,
     public readonly pageSize: number,
     public readonly cursor?: string,
-    public readonly searchQuery?: { tags: string[] },
+    public readonly searchQuery?: { tags?: string[]; writer?: string },
   ) {}
 }

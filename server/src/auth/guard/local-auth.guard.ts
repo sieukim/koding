@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ExecutionContext,
+  HttpException,
   Injectable,
   Logger,
   UnauthorizedException,
@@ -21,9 +22,12 @@ export class LocalAuthGuard extends AuthGuard("local") {
 
   handleRequest(err: any, user: any, info: any, context: any, status: any) {
     if (err) this.logger.error(err);
+    if (err) {
+      if (err instanceof HttpException) throw err;
+      else throw new BadRequestException();
+    }
     if (!user)
       throw new UnauthorizedException("아이디 또는 비밀번호가 다릅니다");
-    if (err) throw new BadRequestException();
     return user;
   }
 }

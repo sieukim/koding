@@ -19,18 +19,12 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
-import {
-  ApiParamBoardType,
-  ApiParamPostId,
-} from "../common/decorator/swagger/api-param.decorator";
 import { AddCommentRequestDto } from "./dto/add-comment-request.dto";
 import { CommentInfoDto } from "./dto/comment-info.dto";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
-import { BoardTypeValidationPipe } from "../common/pipes/board-type-validation-pipe";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../models/user.model";
 import { ModifyCommentRequestDto } from "./dto/modify-comment-request.dto";
@@ -39,7 +33,8 @@ import { ReadCommentsDto } from "./dto/read-comments.dto";
 import { QueryBus } from "@nestjs/cqrs";
 import { ReadCommentsQuery } from "./queries/read-comments.query";
 import { ReadCommentsHandler } from "./queries/handler/read-comments.handler";
-import { PostBoardType } from "../models/post.model";
+import { PostIdentifierParamDto } from "../posts/dto/param/post-identifier-param.dto";
+import { CommentIdentifierParamDto } from "./dto/param/comment-identifier-param.dto";
 
 @ApiTags("POST/COMMENT")
 @ApiBadRequestResponse({
@@ -58,8 +53,6 @@ export class CommentsController {
   @ApiOperation({
     summary: "게시글의 댓글 조회",
   })
-  @ApiParamBoardType()
-  @ApiParamPostId()
   @ApiQuery({
     name: "cursor",
     description:
@@ -77,8 +70,7 @@ export class CommentsController {
   @HttpCode(HttpStatus.OK)
   @Get()
   readComments(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
-    @Param("postId") postId: string,
+    @Param() { boardType, postId }: PostIdentifierParamDto,
     @Query("cursor") cursor?: string,
   ) {
     const pageSize = 10;
@@ -97,8 +89,6 @@ export class CommentsController {
   @ApiOperation({
     summary: "댓글 작성",
   })
-  @ApiParamBoardType()
-  @ApiParamPostId()
   @ApiBody({
     type: AddCommentRequestDto,
   })
@@ -113,8 +103,7 @@ export class CommentsController {
   @HttpCode(HttpStatus.OK)
   @Post()
   async addComment(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
-    @Param("postId") postId: string,
+    @Param() { boardType, postId }: PostIdentifierParamDto,
     @LoginUser() user: User,
     @Body() body: AddCommentRequestDto,
   ) {
@@ -132,12 +121,6 @@ export class CommentsController {
   @ApiBody({
     type: ModifyCommentRequestDto,
   })
-  @ApiParamBoardType()
-  @ApiParamPostId()
-  @ApiParam({
-    name: "commentId",
-    description: "댓글 아이디",
-  })
   @ApiNotFoundResponse({
     description: "잘못된 게시글 혹은 댓글 아이디",
   })
@@ -149,9 +132,7 @@ export class CommentsController {
   @HttpCode(HttpStatus.OK)
   @Patch(":commentId")
   async modifyComment(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
-    @Param("postId") postId: string,
-    @Param("commentId") commentId: string,
+    @Param() { boardType, postId, commentId }: CommentIdentifierParamDto,
     @Body() body: ModifyCommentRequestDto,
     @LoginUser() user: User,
   ) {
@@ -167,12 +148,6 @@ export class CommentsController {
   @ApiOperation({
     summary: "댓글 삭제",
   })
-  @ApiParamBoardType()
-  @ApiParamPostId()
-  @ApiParam({
-    name: "commentId",
-    description: "댓글 아이디",
-  })
   @ApiNotFoundResponse({
     description: "잘못된 게시글 혹은 댓글 아이디",
   })
@@ -183,9 +158,7 @@ export class CommentsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":commentId")
   async deleteComment(
-    @Param("boardType", BoardTypeValidationPipe) boardType: PostBoardType,
-    @Param("postId") postId: string,
-    @Param("commentId") commentId: string,
+    @Param() { boardType, postId, commentId }: CommentIdentifierParamDto,
     @LoginUser() user: User,
   ) {
     await this.commentsService.deleteComment(

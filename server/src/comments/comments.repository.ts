@@ -1,9 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { CommentDocument } from "../schemas/comment.schema";
 import { Comment } from "../models/comment.model";
 import { MongooseBaseRepository } from "../common/repository/mongoose-base.repository";
 import { InjectModel } from "@nestjs/mongoose";
+import { PostIdentifier } from "../models/post.model";
 
 @Injectable()
 export class CommentsRepository extends MongooseBaseRepository<
@@ -69,5 +70,14 @@ export class CommentsRepository extends MongooseBaseRepository<
       .deleteOne({ _id: comment.commentId })
       .exec();
     return deleteResult.deletedCount === 1;
+  }
+
+  async removeComments({ postId }: PostIdentifier) {
+    const deletedResult = await this.commentModel
+      .deleteMany({
+        postId: new Types.ObjectId(postId),
+      })
+      .exec();
+    return deletedResult.deletedCount;
   }
 }

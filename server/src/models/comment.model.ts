@@ -1,8 +1,8 @@
 import { User } from "./user.model";
 import { currentTime } from "../common/utils/current-time.util";
-import { IsDate, IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { Post } from "./post.model";
+import { Post, PostBoardType } from "./post.model";
 import { Types } from "mongoose";
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { ModifyCommentRequestDto } from "../comments/dto/modify-comment-request.dto";
@@ -24,6 +24,21 @@ export class Comment {
     type: String,
   })
   postId: string;
+
+  @Expose()
+  @IsEnum(PostBoardType)
+  @ApiProperty({
+    description: "댓글의 부모 게시글의 게시판",
+    enum: PostBoardType,
+  })
+  boardType: PostBoardType;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "댓글의 부모 게시글의 제목",
+  })
+  postTitle: string;
 
   @Expose()
   post?: Post;
@@ -61,20 +76,22 @@ export class Comment {
 
   constructor();
   constructor(param: {
-    postId: string;
+    post: Post;
     writerNickname: string;
     content: string;
     mentionedNicknames: string[];
   });
   constructor(param?: {
-    postId: string;
+    post: Post;
     writerNickname: string;
     content: string;
     mentionedNicknames: string[];
   }) {
     if (param) {
       this.commentId = new Types.ObjectId().toString();
-      this.postId = param.postId;
+      this.postId = param.post.postId;
+      this.boardType = param.post.boardType;
+      this.postTitle = param.post.title;
       this.writerNickname = param.writerNickname;
       this.content = param.content;
       this.mentionedNicknames = param.mentionedNicknames ?? [];

@@ -4,11 +4,11 @@ import { User } from "../../models/user.model";
 
 export class FollowUserResultDto {
   @ApiProperty({
-    description: "팔로우를 요청한 유저",
+    description: "팔로우를 요청한 사용자",
   })
   from: UserInfoDto;
   @ApiProperty({
-    description: "팔로우한 유저",
+    description: "팔로우한 사용자",
   })
   to: UserInfoDto;
 

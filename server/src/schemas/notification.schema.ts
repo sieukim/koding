@@ -52,6 +52,10 @@ export class NotificationDocument extends Document {
 export const NotificationSchema =
   SchemaFactory.createForClass(NotificationDocument);
 NotificationSchema.index({ receiverNickname: 1, createdAt: 1 });
+NotificationSchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: 60 * 60 * 24 * 7 }, // 7일 뒤 자동삭제
+);
 NotificationSchema.virtual("notificationId")
   .get(function () {
     return this._id.toString();

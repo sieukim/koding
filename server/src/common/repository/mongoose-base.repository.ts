@@ -48,6 +48,28 @@ export abstract class MongooseBaseRepository<
     return documents.map(this.toModel);
   }
 
+  async updateAll(
+    findOption: FindOption<DomainModel>,
+    updateData: Partial<DomainModel>,
+  ) {
+    const findQuery: FilterQuery<ModelDocument> =
+      this.parseFindOption(findOption);
+    const query = this.mongooseModel.updateMany(findQuery, updateData);
+    const result = await query.exec();
+    return result.modifiedCount;
+  }
+
+  async updateOne(
+    findOption: FindOption<DomainModel>,
+    updateData: Partial<DomainModel>,
+  ) {
+    const findQuery: FilterQuery<ModelDocument> =
+      this.parseFindOption(findOption);
+    const query = this.mongooseModel.updateOne(findQuery, updateData);
+    const result = await query.exec();
+    return result.modifiedCount;
+  }
+
   async findOne(
     findOption: FindOption<DomainModel>,
     sortOption?: SortOption<DomainModel>,
@@ -63,9 +85,9 @@ export abstract class MongooseBaseRepository<
     const findQuery: FilterQuery<ModelDocument> =
       this.parseFindOption(findOption);
     const sortQuery = this.parseSortOption(sortOption);
-    let query = this.mongooseModel.findOne(findQuery);
-    if (populate) query = query.populate(populate);
-    if (sortOption) query = query.sort(sortQuery);
+    const query = this.mongooseModel.findOne(findQuery);
+    if (populate) query.populate(populate);
+    if (sortOption) query.sort(sortQuery);
     const document: ModelDocument | null = await query.exec();
     if (document) return this.toModel(document);
     return null;

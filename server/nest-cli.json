@@ -10,7 +10,9 @@
             ".dto.ts"
           ],
           "controllerFileNameSuffix": ".controller.ts",
-          "classValidatorShim": true
+          "classValidatorShim": true,
+          "introspectComments": true,
+          "controllerKeyOfComment": "summary"
         }
       }
     ]
