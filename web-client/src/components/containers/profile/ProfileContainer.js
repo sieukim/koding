@@ -4,13 +4,14 @@ import useAsync from '../../../hooks/useAsync';
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-const ProfileContainer = ({ profileUserNickname }) => {
+const ProfileContainer = ({ profileUser }) => {
+  // 로그인 유저
   const loginUser = useSelector((state) => state.auth.user);
 
-  /* 프로필 유저 정보 조회 */
+  // 프로필 유저
   const [getUserState] = useAsync(
-    () => api.getUser(profileUserNickname),
-    [profileUserNickname],
+    () => api.getUser(profileUser),
+    [profileUser],
     false,
   );
 
@@ -24,8 +25,7 @@ const ProfileContainer = ({ profileUserNickname }) => {
     }
   }, [getUserState.success]);
 
-  /* 팔로우 */
-  // 팔로우 버튼
+  // 팔로우
   const [followState, followFetch] = useAsync(
     async (loginUserNickname, followedUserNickname) => {
       const response = await api.follow(
@@ -45,7 +45,7 @@ const ProfileContainer = ({ profileUserNickname }) => {
     [followFetch],
   );
 
-  // 언팔로우 버튼
+  // 언팔로우
   const [unfollowState, unfollowFetch] = useAsync(
     async (loginUserNickname, unfollowedUserNickname) => {
       const response = await api.unfollow(
@@ -67,26 +67,26 @@ const ProfileContainer = ({ profileUserNickname }) => {
 
   // 팔로잉 조회
   const [getFollowingState] = useAsync(
-    () => api.getFollowing(profileUserNickname),
-    [profileUserNickname],
+    () => api.getFollowing(profileUser),
+    [profileUser],
     false,
   );
 
   // 팔로워 조회
   const [getFollowerState] = useAsync(
-    () => api.getFollower(profileUserNickname),
-    [profileUserNickname],
+    () => api.getFollower(profileUser),
+    [profileUser],
     false,
   );
 
   // 팔로우 여부 조회
   const [isFollowingState] = useAsync(
     async () => {
-      if (loginUser && loginUser.nickname !== profileUserNickname) {
-        return api.isFollowing(loginUser.nickname, profileUserNickname);
+      if (loginUser && loginUser.nickname !== profileUser) {
+        return api.isFollowing(loginUser.nickname, profileUser);
       }
     },
-    [loginUser, profileUserNickname, followers, followings],
+    [loginUser, profileUser, followers, followings],
     false,
   );
 
@@ -102,7 +102,7 @@ const ProfileContainer = ({ profileUserNickname }) => {
   return (
     <ProfilePresenter
       loginUser={loginUser}
-      profileUserNickname={profileUserNickname}
+      profileUser={profileUser}
       getUserData={getUserState.success?.data}
       followState={followState}
       follow={follow}

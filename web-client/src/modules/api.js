@@ -191,3 +191,23 @@ export const search = (boardType, cursor, query) => {
 
   return axios.get(`/api/search/${boardType}?${queries.toString()}`);
 };
+
+// 유저 게시글 조회
+export const getUserPosts = (nickname, boardType, cursor) => {
+  const query = new URLSearchParams();
+  if (cursor) query.set('cursor', cursor);
+
+  return axios.get(
+    `/api/users/${nickname}/posts/${boardType}?${query.toString()}`,
+  );
+};
+
+// 유저 댓글 조회
+export const getUserComments = (nickname, boardType, cursor) => {
+  const query = new URLSearchParams();
+  if (cursor) query.set('cursor', cursor);
+
+  return axios.get(
+    `/api/users/${nickname}/comments/${boardType}?${query.toString()}`,
+  );
+};
