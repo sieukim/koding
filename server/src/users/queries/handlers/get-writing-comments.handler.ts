@@ -18,6 +18,7 @@ export class GetWritingCommentsHandler
     const { nickname, pageSize, cursor, boardType } = query;
     const findOption: FindOption<Comment> = {
       writerNickname: { eq: nickname },
+      boardType: { eq: boardType },
     };
     if (cursor) findOption.commentId = { lte: cursor };
     const comments = await this.commentsRepository.findAll(
