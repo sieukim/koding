@@ -69,8 +69,10 @@ import { GetMyUserInfoHandler } from "./queries/handlers/get-my-user-info.handle
 import { NicknameParamDto } from "./dto/param/nickname-param.dto";
 import { GetWritingPostsQuery } from "./queries/get-writing-posts.query";
 import { WritingPostsInfoDto } from "./dto/writing-posts-info.dto";
-import { CommentInfoDto } from "../comments/dto/comment-info.dto";
 import { GetWritingCommentsQuery } from "./queries/get-writing-comments.query";
+import { NicknameAndBoardTypeParamDto } from "./dto/param/nickname-and-board-type-param.dto";
+import { CursorQueryDto } from "../common/dto/query/cursor-query.dto";
+import { WritingCommentsInfoDto } from "./dto/writing-comments-info.dto";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -422,9 +424,15 @@ export class UsersController {
     type: WritingPostsInfoDto,
   })
   @HttpCode(HttpStatus.OK)
-  @Get(":nickname/posts")
-  getAllPosts(@Param() { nickname }: NicknameParamDto) {
-    return this.queryBus.execute(new GetWritingPostsQuery(nickname));
+  @Get(":nickname/posts/:boardType")
+  getAllPosts(
+    @Param() { nickname, boardType }: NicknameAndBoardTypeParamDto,
+    @Query() { cursor }: CursorQueryDto,
+  ) {
+    const pageSize = 10;
+    return this.queryBus.execute(
+      new GetWritingPostsQuery(nickname, boardType, pageSize, cursor),
+    );
   }
 
   /*
@@ -432,11 +440,17 @@ export class UsersController {
    */
   @ApiOkResponse({
     description: "조회 성공",
-    type: [CommentInfoDto],
+    type: WritingCommentsInfoDto,
   })
   @HttpCode(HttpStatus.OK)
-  @Get(":nickname/comments")
-  getAllComments(@Param() { nickname }: NicknameParamDto) {
-    return this.queryBus.execute(new GetWritingCommentsQuery(nickname));
+  @Get(":nickname/comments/:boardType")
+  getAllComments(
+    @Param() { nickname, boardType }: NicknameAndBoardTypeParamDto,
+    @Query() { cursor }: CursorQueryDto,
+  ) {
+    const pageSize = 10;
+    return this.queryBus.execute(
+      new GetWritingCommentsQuery(nickname, boardType, pageSize, cursor),
+    );
   }
 }

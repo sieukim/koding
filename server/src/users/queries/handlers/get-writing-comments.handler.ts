@@ -2,21 +2,32 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetWritingCommentsQuery } from "../get-writing-comments.query";
 import { CommentsRepository } from "../../../comments/comments.repository";
 import { SortType } from "../../../common/repository/sort-option";
-import { CommentInfoDto } from "../../../comments/dto/comment-info.dto";
+import { FindOption } from "../../../common/repository/find-option";
+import { Comment } from "../../../models/comment.model";
+import { WritingCommentsInfoDto } from "../../dto/writing-comments-info.dto";
 
 @QueryHandler(GetWritingCommentsQuery)
 export class GetWritingCommentsHandler
-  implements IQueryHandler<GetWritingCommentsQuery, CommentInfoDto[]>
+  implements IQueryHandler<GetWritingCommentsQuery, WritingCommentsInfoDto>
 {
   constructor(private readonly commentsRepository: CommentsRepository) {}
 
-  async execute(query: GetWritingCommentsQuery): Promise<CommentInfoDto[]> {
-    const { nickname } = query;
+  async execute(
+    query: GetWritingCommentsQuery,
+  ): Promise<WritingCommentsInfoDto> {
+    const { nickname, pageSize, cursor, boardType } = query;
+    const findOption: FindOption<Comment> = {
+      writerNickname: { eq: nickname },
+    };
+    if (cursor) findOption.commentId = { lte: cursor };
     const comments = await this.commentsRepository.findAll(
-      { writerNickname: { eq: nickname } },
+      findOption,
       { commentId: SortType.DESC },
+      pageSize + 1,
     );
-
-    return comments.map(CommentInfoDto.fromModel);
+    let nextPageCursor: string | undefined;
+    if (comments.length === pageSize + 1)
+      nextPageCursor = comments.pop().commentId;
+    return new WritingCommentsInfoDto(comments, nextPageCursor);
   }
 }

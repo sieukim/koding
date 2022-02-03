@@ -1,32 +1,19 @@
-import { PostBoardType } from "../../models/post.model";
+import { Post } from "../../models/post.model";
 import { PostInfoDto } from "../../posts/dto/post-info.dto";
-import { Expose, plainToClass, Type } from "class-transformer";
 
-export class WritingPostsInfoDto
-  implements Record<PostBoardType, PostInfoDto[]>
-{
-  @Type(() => PostInfoDto)
-  @Expose()
-  "study-group": PostInfoDto[];
-  @Type(() => PostInfoDto)
-  @Expose()
-  career: PostInfoDto[];
-  @Type(() => PostInfoDto)
-  @Expose()
-  column: PostInfoDto[];
-  @Type(() => PostInfoDto)
-  @Expose()
-  common: PostInfoDto[];
-  @Type(() => PostInfoDto)
-  @Expose()
-  question: PostInfoDto[];
-  @Type(() => PostInfoDto)
-  @Expose()
-  recruit: PostInfoDto[];
+export class WritingPostsInfoDto {
+  /*
+   * 사용자가 작성한 게시글 리스트
+   */
+  posts: PostInfoDto[];
 
-  static fromJson(json: Record<PostBoardType, PostInfoDto[]>) {
-    return plainToClass(WritingPostsInfoDto, json, {
-      excludeExtraneousValues: true,
-    });
+  /*
+   * 다음 페이지를 가져오기 위한 커서 query 값. 마지막 페이지인 경우는 값 없음
+   */
+  nextPageCursor?: string;
+
+  constructor(posts: Post[], nextPageCursor?: string) {
+    this.posts = posts.map(PostInfoDto.fromModel);
+    this.nextPageCursor = nextPageCursor;
   }
 }
