@@ -49,4 +49,11 @@ export class NotificationsRepository extends MongooseBaseRepository<
   exists(findOption: FindOption<Notification>) {
     return this.notificationModel.exists(this.parseFindOption(findOption));
   }
+
+  async deleteAll(findOption: FindOption<Notification>) {
+    const deletedResult = await this.notificationModel
+      .deleteMany(this.parseFindOption(findOption))
+      .exec();
+    return deletedResult.deletedCount;
+  }
 }

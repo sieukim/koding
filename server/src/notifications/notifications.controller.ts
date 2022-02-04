@@ -39,6 +39,7 @@ import { CheckUnreadNotificationQueryDto } from "./dto/query/check-unread-notifi
 import { CheckUnreadNotificationQuery } from "./queries/check-unread-notification.query";
 import { CheckUnreadNotificationHandler } from "./queries/handlers/check-unread-notification.handler";
 import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dto";
+import { DeleteAllNotificationsCommand } from "./commands/delete-all-notifications.command";
 
 @ApiTags("NOTIFICATION")
 @ApiForbiddenResponse({
@@ -117,7 +118,7 @@ export class NotificationsController {
   @Patch()
   markReadAllNotifications(
     @Param() { nickname }: NicknameParamDto,
-    @Body() body: MarkReadNotificationRequestDto,
+    @Body() { read }: MarkReadNotificationRequestDto,
   ) {
     return this.commandBus.execute(
       new MarkReadAllNotificationsCommand(nickname),
@@ -147,16 +148,6 @@ export class NotificationsController {
   @ApiOperation({
     summary: "알림 삭제",
   })
-  @ApiParam({
-    name: "nickname",
-    description: "삭제할 알림을 받은 사용자 닉네임",
-    type: String,
-  })
-  @ApiParam({
-    name: "notificationId",
-    description: "삭제할 알림의 아이디",
-    type: String,
-  })
   @ApiNoContentResponse({
     description: "알림 삭제 성공",
   })
@@ -168,5 +159,17 @@ export class NotificationsController {
     return this.commandBus.execute(
       new DeleteNotificationCommand(nickname, notificationId),
     );
+  }
+
+  @ApiOperation({
+    summary: "알림 전체 삭제",
+  })
+  @ApiNoContentResponse({
+    description: "알림 전체 삭제 성공",
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete()
+  deleteAllNotification(@Param() { nickname }: NicknameParamDto) {
+    return this.commandBus.execute(new DeleteAllNotificationsCommand(nickname));
   }
 }
