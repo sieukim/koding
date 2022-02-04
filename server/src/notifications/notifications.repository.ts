@@ -1,8 +1,9 @@
 import { MongooseBaseRepository } from "../common/repository/mongoose-base.repository";
 import { Notification } from "../models/notification.model";
 import { NotificationDocument } from "../schemas/notification.schema";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { InjectModel } from "@nestjs/mongoose";
+import { FindOption } from "../common/repository/find-option";
 
 export class NotificationsRepository extends MongooseBaseRepository<
   Notification,
@@ -32,9 +33,9 @@ export class NotificationsRepository extends MongooseBaseRepository<
 
   async remove(model: Notification): Promise<boolean> {
     const deletedResult = await this.notificationModel
-      .deleteOne({
-        _id: new Types.ObjectId(model.notificationId),
-      })
+      .deleteOne(
+        this.parseFindOption({ notificationId: { eq: model.notificationId } }),
+      )
       .exec();
     return deletedResult.deletedCount === 1;
   }
@@ -43,5 +44,9 @@ export class NotificationsRepository extends MongooseBaseRepository<
     const document = this.fromModel(model, this.notificationModel);
     await this.notificationModel.replaceOne({ _id: document._id }, document);
     return this.toModel(document);
+  }
+
+  exists(findOption: FindOption<Notification>) {
+    return this.notificationModel.exists(this.parseFindOption(findOption));
   }
 }

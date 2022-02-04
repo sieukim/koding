@@ -29,7 +29,7 @@ export class User extends AggregateRoot {
   @Expose()
   @IsEmail()
   @ApiProperty({
-    example: "test@test.com",
+    example: "vvsos1@hotmail.co.kr",
     description: "사용자 이메일, 중복 불가",
     type: String,
   })
@@ -53,7 +53,7 @@ export class User extends AggregateRoot {
   @Length(8, 16)
   @IsString()
   @ApiProperty({
-    example: "abcd1234",
+    example: "11111111",
     description: "사용자 비밀번호",
     minLength: 8,
     maxLength: 16,

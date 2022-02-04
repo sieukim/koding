@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsIn, IsString } from "class-validator";
+import { IsBoolean, IsDate, IsEnum, IsIn, IsString } from "class-validator";
 import { PostBoardType } from "./post.model";
 import {
   ApiExtraModels,
@@ -215,12 +215,21 @@ export class Notification {
     description: "알림을 받는 사용자 닉네임",
   })
   receiverNickname: string;
+
+  @Expose()
+  @IsBoolean()
+  @ApiProperty({
+    description: "알림을 읽었는지 여부",
+  })
+  read: boolean;
+
   @Expose()
   @IsDate()
   @ApiProperty({
     description: "알림 생성일",
   })
   createdAt: Date;
+
   @Type(() => NotificationData, {
     keepDiscriminatorProperty: true,
     discriminator: {
@@ -247,13 +256,18 @@ export class Notification {
 
   constructor(); // for class-transformer
 
-  constructor(param: Omit<Notification, "notificationId" | "createdAt">);
+  constructor(
+    param: Omit<Notification, "notificationId" | "createdAt" | "read">,
+  );
 
-  constructor(param?: Omit<Notification, "notificationId" | "createdAt">) {
+  constructor(
+    param?: Omit<Notification, "notificationId" | "createdAt" | "read">,
+  ) {
     if (param) {
+      Object.assign(this, param);
       this.notificationId = new Types.ObjectId().toString();
       this.createdAt = currentTime();
-      Object.assign(this, param);
+      this.read = false;
     }
   }
 }

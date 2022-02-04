@@ -1,15 +1,21 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
+  Head,
   HttpCode,
   HttpStatus,
+  Logger,
+  NotFoundException,
   Param,
+  Patch,
   Query,
   UseGuards,
 } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import {
+  ApiBody,
   ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -22,21 +28,57 @@ import {
 import { ReadNotificationsDto } from "./dto/read-notifications.dto";
 import { ReadNotificationsHandler } from "./queries/handlers/read-notifications.handler";
 import { ReadNotificationsQuery } from "./queries/read-notifications.query";
-import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
-import { LoginUser } from "../common/decorator/login-user.decorator";
-import { User } from "../models/user.model";
 import { DeleteNotificationCommand } from "./commands/delete-notification.command";
+import { MarkReadNotificationRequestDto } from "./dto/mark-read-notification-request.dto";
+import { ParamNicknameSameUserGuard } from "../auth/guard/authorization/param-nickname-same-user.guard";
+import { NicknameParamDto } from "../users/dto/param/nickname-param.dto";
+import { MarkReadAllNotificationsCommand } from "./commands/mark-read-all-notifications.command";
+import { NotificationIdAndNicknameParamDto } from "./dto/param/notification-id-and-nickname-param.dto";
+import { MarkReadNotificationCommand } from "./commands/mark-read-notification.command";
+import { CheckUnreadNotificationQueryDto } from "./dto/query/check-unread-notification-query.dto";
+import { CheckUnreadNotificationQuery } from "./queries/check-unread-notification.query";
+import { CheckUnreadNotificationHandler } from "./queries/handlers/check-unread-notification.handler";
 
 @ApiTags("NOTIFICATION")
 @ApiForbiddenResponse({
   description: "권한 없음",
 })
-@Controller("api/notifications")
+@UseGuards(ParamNicknameSameUserGuard)
+@Controller("api/notifications/:nickname")
 export class NotificationsController {
+  private readonly logger = new Logger(NotificationsController.name);
+
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
   ) {}
+
+  /*
+   * 안 읽은 알람 확인
+   */
+  @ApiQuery({
+    name: "read",
+    type: Boolean,
+  })
+  @ApiNoContentResponse({
+    description: "안 읽은 알람이 있음",
+  })
+  @ApiNotFoundResponse({
+    description: "안 읽은 알람이 없음",
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Head()
+  async checkUnreadNotificationExistence(
+    @Param() { nickname }: NicknameParamDto,
+    @Query() { read }: CheckUnreadNotificationQueryDto,
+  ) {
+    const unreadNotificationExistence = (await this.queryBus.execute(
+      new CheckUnreadNotificationQuery(nickname),
+    )) as Awaited<ReturnType<CheckUnreadNotificationHandler["execute"]>>;
+    if (!unreadNotificationExistence)
+      throw new NotFoundException("안 읽은 알림이 없습니다");
+    return;
+  }
 
   @ApiOperation({
     summary: "알림 조회",
@@ -59,19 +101,54 @@ export class NotificationsController {
     description: "알림 조회 성공",
     type: ReadNotificationsDto,
   })
-  @UseGuards(VerifiedUserGuard)
   @HttpCode(HttpStatus.OK)
-  @Get(":nickname")
-  readNotifications(
-    @LoginUser() loginUser: User,
+  @Get()
+  getNotifications(
     @Param("nickname") nickname: string,
     @Query("cursor") cursor?: string,
   ) {
-    loginUser.verifySameUser(nickname);
+    this.logger.log(`getNotifications called`);
     const pageSize = 5;
     return this.queryBus.execute(
       new ReadNotificationsQuery(nickname, pageSize, cursor),
     ) as ReturnType<ReadNotificationsHandler["execute"]>;
+  }
+
+  /*
+   * 알림 모두 읽음 처리
+   */
+  @ApiNoContentResponse({
+    description: "알림 모두 읽음 처리 성공",
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch()
+  markReadAllNotifications(
+    @Param() { nickname }: NicknameParamDto,
+    @Body() body: MarkReadNotificationRequestDto,
+  ) {
+    return this.commandBus.execute(
+      new MarkReadAllNotificationsCommand(nickname),
+    );
+  }
+
+  /*
+   * 알림 읽음 처리
+   */
+  @ApiBody({
+    type: MarkReadNotificationRequestDto,
+  })
+  @ApiNoContentResponse({
+    description: "알림 읽음 처리 성공",
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Patch(":notificationId")
+  markReadNotifications(
+    @Param() { notificationId, nickname }: NotificationIdAndNicknameParamDto,
+    @Body() body: MarkReadNotificationRequestDto,
+  ) {
+    return this.commandBus.execute(
+      new MarkReadNotificationCommand(notificationId, nickname),
+    );
   }
 
   @ApiOperation({
@@ -90,17 +167,13 @@ export class NotificationsController {
   @ApiNoContentResponse({
     description: "알림 삭제 성공",
   })
-  @UseGuards(VerifiedUserGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(":nickname/:notificationId")
+  @Delete(":notificationId")
   deleteNotification(
-    @LoginUser() user: User,
-    @Param("nickname") nickname: string,
-    @Param("notificationId") notificationId: string,
+    @Param() { notificationId, nickname }: NotificationIdAndNicknameParamDto,
   ) {
-    user.verifySameUser(nickname);
     return this.commandBus.execute(
-      new DeleteNotificationCommand(user.nickname, notificationId),
+      new DeleteNotificationCommand(nickname, notificationId),
     );
   }
 }

@@ -28,6 +28,9 @@ export class NotificationDocument extends Document {
   @Prop({ type: String })
   receiverNickname: string;
 
+  @Prop({ type: Boolean, default: false })
+  read: boolean;
+
   createdAt: Date;
 
   @Prop({ type: SchemaTypes.Mixed })
@@ -51,7 +54,8 @@ export class NotificationDocument extends Document {
 
 export const NotificationSchema =
   SchemaFactory.createForClass(NotificationDocument);
-NotificationSchema.index({ receiverNickname: 1, createdAt: 1 });
+NotificationSchema.index({ receiverNickname: 1, createdAt: 1 }); // 사용자가 알림 조회 시 시간순으로 보여주기 위해
+NotificationSchema.index({ receiverNickname: 1, read: 1 }); // 사용자가 안 읽은 알람이 있는지 여부를 조회할 때, 안 읽은 알람을 모두 읽음 처리 할 때
 NotificationSchema.index(
   { createdAt: 1 },
   { expireAfterSeconds: 60 * 60 * 24 * 7 }, // 7일 뒤 자동삭제

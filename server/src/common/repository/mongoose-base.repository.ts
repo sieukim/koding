@@ -93,9 +93,10 @@ export abstract class MongooseBaseRepository<
     return null;
   }
 
-  private parseFindOption(
+  protected parseFindOption(
     findOption: FindOption<DomainModel>,
   ): FilterQuery<ModelDocument> {
+    console.log("before parse findOption", findOption);
     const findQuery: FilterQuery<ModelDocument> = {};
     Object.keys(findOption).forEach((key) => {
       let query;
@@ -196,6 +197,7 @@ export abstract class MongooseBaseRepository<
         findQuery[key] = query;
       }
     });
+    console.log("after parse findOption", findQuery);
     return findQuery;
   }
 

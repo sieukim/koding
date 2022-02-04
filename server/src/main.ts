@@ -8,6 +8,7 @@ import * as session from "express-session";
 import * as passport from "passport";
 import * as mongoose from "mongoose";
 import { NextFunction, Request, Response } from "express";
+import { RequestErrorLoggerInterceptor } from "./common/interceptors/request-error-logger.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -42,6 +43,7 @@ async function bootstrap() {
     credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalInterceptors(new RequestErrorLoggerInterceptor());
   const config = new DocumentBuilder()
     .setTitle("Koding API")
     // .setDescription("Sleact 개발을 위한 API 문서입니다.")

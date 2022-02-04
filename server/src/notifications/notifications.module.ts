@@ -24,8 +24,8 @@ import { NotificationQueryHandlers } from "./queries/handlers";
     NotificationsRepository,
     NotificationsService,
     NotificationSaga,
-    ...NotificationCommandHandlers,
     ...NotificationQueryHandlers,
+    ...NotificationCommandHandlers,
   ],
 })
 export class NotificationsModule {}

@@ -214,7 +214,7 @@ export class PostsController {
     description: "좋아요 요청 성공(이미 좋아요를 누른 경우도 포함)",
     type: PostLikeCountInfoDto,
   })
-  @UseGuards(VerifiedUserGuard, new ParamNicknameSameUserGuard("nickname"))
+  @UseGuards(VerifiedUserGuard, ParamNicknameSameUserGuard)
   @HttpCode(HttpStatus.OK)
   @Post(":boardType/:postId/like/:nickname")
   async likePost(
@@ -235,7 +235,7 @@ export class PostsController {
     description: "좋아요 취소 성공(이미 좋아요를 하지 않았던 경우도 포함)",
     type: PostLikeCountInfoDto,
   })
-  @UseGuards(VerifiedUserGuard, new ParamNicknameSameUserGuard("nickname"))
+  @UseGuards(VerifiedUserGuard, ParamNicknameSameUserGuard)
   @HttpCode(HttpStatus.OK)
   @Delete(":boardType/:postId/like/:nickname")
   async unlikePost(
