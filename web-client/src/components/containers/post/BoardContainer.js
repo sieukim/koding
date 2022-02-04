@@ -1,4 +1,4 @@
-import BoardPresenter from '../../presenters/board/BoardPresenter';
+import BoardPresenter from '../../presenters/post/BoardPresenter';
 import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
 import { useCallback } from 'react';

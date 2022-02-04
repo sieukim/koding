@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import { NavLink, useMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as api from '../modules/api';
-import { useCallback } from 'react';
-import { Avatar, Divider, Dropdown, Menu, message } from 'antd';
+import { useCallback, useEffect } from 'react';
+import { Avatar, Badge, Divider, Dropdown, Menu, message } from 'antd';
 import { setLogout } from '../modules/auth';
 import useAsync from '../hooks/useAsync';
 import { BellFilled, UserOutlined } from '@ant-design/icons';
@@ -57,9 +57,24 @@ const StyledHeader = styled.nav`
 `;
 
 const Notification = ({ loginUser }) => {
+  // 안 읽은 알림 여부 확인
+  const [checkNotificationState, checkNotificationFetch] = useAsync(
+    () => api.checkNotifications(loginUser),
+    [loginUser],
+    false,
+  );
+
+  // 안 읽은 알림 여부 확인
+  useEffect(() => {
+    const timerId = setInterval(() => checkNotificationFetch(), 5000);
+    return () => clearInterval(timerId);
+  }, []);
+
   return (
     <NavLink to={`/user/${loginUser}/notification`}>
-      <BellFilled style={{ fontSize: '24px' }} />
+      <Badge dot={checkNotificationState.success}>
+        <BellFilled style={{ fontSize: '24px' }} />
+      </Badge>
     </NavLink>
   );
 };
@@ -152,7 +167,7 @@ const Header = () => {
         )}
         {user && (
           <div className="icon-group">
-            <Notification loginUser={loginUser} />
+            <Notification loginUser={user.nickname} />
             <UserDropdown
               loginUser={loginUser}
               avatarUrl={avatarUrl}

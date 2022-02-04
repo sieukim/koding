@@ -10,18 +10,18 @@ import GithubSignupPage from './pages/auth/GithubSignupPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import WritePostPage from './pages/post/WritePostPage';
 import PostPage from './pages/post/PostPage';
-import BoardPage from './pages/board/BoardPage';
+import BoardPage from './pages/post/BoardPage';
 import EditPostPage from './pages/post/EditPostPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import FollowListPage from './pages/profile/FollowListPage';
 import EditProfilePage from './pages/profile/EditProfilePage';
-import NotificationPage from './pages/profile/NotificationPage';
+import NotificationPage from './pages/notification/NotificationPage';
 import IntegratedSearchPage from './pages/search/IntegratedSearchPage';
 import SearchPage from './pages/search/SearchPage';
 import styled from 'styled-components';
 
 const StyledPage = styled.div`
-  min-width: 800px;
+  min-width: 900px;
 
   .body {
     min-height: calc(100vh - 160px);

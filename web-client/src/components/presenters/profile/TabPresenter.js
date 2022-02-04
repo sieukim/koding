@@ -1,19 +1,26 @@
-import {
-  Collapse,
-  Comment,
-  Divider,
-  List,
-  Skeleton,
-  Tag,
-  Typography,
-} from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PostLink } from '../../../utils/PostLink';
 import markdownToTxt from 'markdown-to-txt';
 import styled from 'styled-components';
-import { EyeOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons';
+import {
+  Collapse,
+  Comment,
+  Divider,
+  List,
+  Skeleton,
+  Tabs,
+  Tag,
+  Typography,
+} from 'antd';
+import {
+  CommentOutlined,
+  EyeOutlined,
+  FormOutlined,
+  LikeOutlined,
+  MessageOutlined,
+} from '@ant-design/icons';
 import moment from 'moment';
 
 const { Panel } = Collapse;
@@ -56,11 +63,6 @@ const StyledPostList = styled.div`
     }
   }
 
-  .scrollableDiv {
-    overflow: auto;
-    height: 300px;
-  }
-
   .ant-tag:hover {
     cursor: pointer;
   }
@@ -79,102 +81,93 @@ const ItemList = ({ type, post, hasMore, next }) => {
   );
 
   return (
-    <div id="scrollableDiv" className="scrollableDiv">
-      <InfiniteScroll
-        next={next}
-        hasMore={hasMore}
-        loader={<Skeleton />}
-        dataLength={post.length}
-        endMessage={<Divider plain />}
-        scrollableTarget="scrollableDiv"
-      >
-        <List
-          dataSource={post}
-          renderItem={(item) =>
-            type === 'post' ? (
-              <List.Item>
-                <List.Item.Meta
-                  title={
-                    <>
-                      <PostLink
-                        boardType={item.boardType}
-                        postId={item.postId}
-                        postTitle={item.title}
-                      />
-                      <div className="meta-data">
-                        <LikeOutlined />
-                        {item.likeCount ?? 0}
-                        <MessageOutlined />
-                        {item.commentCount ?? 0}
-                        <EyeOutlined />
-                        {item.readCount ?? 0}
-                      </div>
-                    </>
-                  }
-                  description={
-                    <>
-                      <Paragraph ellipsis={{ rows: 3 }}>
-                        {markdownToTxt(item.markdownContent)}
-                      </Paragraph>
-                      {item.tags?.map((tag) => (
-                        <Tag
-                          key={tag}
-                          data-metadata={[item.boardType, tag]}
-                          onClick={onClickTag}
-                        >
-                          {tag}
-                        </Tag>
-                      ))}
-                    </>
-                  }
-                />
-              </List.Item>
-            ) : (
-              <List.Item>
-                <List.Item.Meta
-                  title={
+    <InfiniteScroll
+      next={next}
+      hasMore={hasMore}
+      loader={<Skeleton />}
+      dataLength={post.length}
+      endMessage={<Divider plain />}
+      height="300px"
+    >
+      <List
+        dataSource={post}
+        renderItem={(item) =>
+          type === 'post' ? (
+            <List.Item>
+              <List.Item.Meta
+                title={
+                  <>
                     <PostLink
                       boardType={item.boardType}
                       postId={item.postId}
-                      postTitle={item.postTitle}
+                      postTitle={item.title}
                     />
-                  }
-                  description={
-                    <>
-                      <Comment
-                        author={item.writerNickname}
-                        datetime={moment(item.createdAt).format(
-                          'YYYY-MM-DD HH:mm:ss',
-                        )}
-                        content={
-                          <Paragraph
-                            ellipsis={{ rows: 3 }}
-                            className="ant-comment-content-detail"
-                          >
-                            {markdownToTxt(item.content)}
-                          </Paragraph>
-                        }
-                      />
-                    </>
-                  }
-                />
-              </List.Item>
-            )
-          }
-        />
-      </InfiniteScroll>
-    </div>
+                    <div className="meta-data">
+                      <LikeOutlined />
+                      {item.likeCount ?? 0}
+                      <MessageOutlined />
+                      {item.commentCount ?? 0}
+                      <EyeOutlined />
+                      {item.readCount ?? 0}
+                    </div>
+                  </>
+                }
+                description={
+                  <>
+                    <Paragraph ellipsis={{ rows: 3 }}>
+                      {markdownToTxt(item.markdownContent)}
+                    </Paragraph>
+                    {item.tags?.map((tag) => (
+                      <Tag
+                        key={tag}
+                        data-metadata={[item.boardType, tag]}
+                        onClick={onClickTag}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
+                  </>
+                }
+              />
+            </List.Item>
+          ) : (
+            <List.Item>
+              <List.Item.Meta
+                title={
+                  <PostLink
+                    boardType={item.boardType}
+                    postId={item.postId}
+                    postTitle={item.postTitle}
+                  />
+                }
+                description={
+                  <>
+                    <Comment
+                      author={item.writerNickname}
+                      datetime={moment(item.createdAt).format(
+                        'YYYY-MM-DD HH:mm:ss',
+                      )}
+                      content={
+                        <Paragraph
+                          ellipsis={{ rows: 3 }}
+                          className="ant-comment-content-detail"
+                        >
+                          {markdownToTxt(item.content)}
+                        </Paragraph>
+                      }
+                    />
+                  </>
+                }
+              />
+            </List.Item>
+          )
+        }
+      />
+    </InfiniteScroll>
   );
 };
 
-const TabPresenter = ({
-  type,
-  items,
-  setItems,
-  getItems,
-  nextCursor,
-  setNextCursor,
-}) => {
+const Tab = ({ type, items, getItems, nextCursor }) => {
   return (
     <StyledPostList>
       <Collapse accordion className="collapse" ghost>
@@ -212,6 +205,52 @@ const TabPresenter = ({
         </Panel>
       </Collapse>
     </StyledPostList>
+  );
+};
+
+const TabPresenter = ({
+  posts,
+  getPosts,
+  nextPostCursor,
+  comments,
+  getComments,
+  nextCommentCursor,
+}) => {
+  return (
+    <Tabs defaultActiveKey="post" centered size="large">
+      <Tabs.TabPane
+        key="post"
+        tab={
+          <span>
+            <FormOutlined />
+            게시글
+          </span>
+        }
+      >
+        <Tab
+          type="post"
+          items={posts}
+          getItems={getPosts}
+          nextCursor={nextPostCursor}
+        />
+      </Tabs.TabPane>
+      <Tabs.TabPane
+        key="comment"
+        tab={
+          <span>
+            <CommentOutlined />
+            댓글
+          </span>
+        }
+      >
+        <Tab
+          type="comment"
+          items={comments}
+          getItems={getComments}
+          nextCursor={nextCommentCursor}
+        />
+      </Tabs.TabPane>
+    </Tabs>
   );
 };
 

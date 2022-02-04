@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { GetDate } from '../../../utils/GetDate';
-import { ProfileLink } from '../../../utils/ProfileLink';
+import { NicknameLink } from '../../../utils/NicknameLink';
 import { Chip } from '@material-ui/core';
 import { Viewer } from '../../../utils/Viewer';
 import { PostLink } from '../../../utils/PostLink';
@@ -110,7 +110,7 @@ const PostPresenter = ({
       <div className="post-header">
         <div className="post-info">
           <div className="post-title">{title}</div>
-          <ProfileLink nickname={writerNickname} str={writerNickname} />
+          <NicknameLink nickname={writerNickname} str={writerNickname} />
         </div>
         <GetDate date={createdAt} className="post-createdAt" />
       </div>

@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getMentionedList } from '../../../utils/getMentionedList';
 import { GetDate } from '../../../utils/GetDate';
-import { ProfileLink } from '../../../utils/ProfileLink';
+import { NicknameLink } from '../../../utils/NicknameLink';
 
 const StyledComment = styled.div`
   display: flex;
@@ -172,7 +172,7 @@ const CommentPresenter = ({
         <div key={comment.commentId} className="comment">
           <div className="comment-header">
             <div className="comment-info">
-              <ProfileLink nickname={comment.writerNickname} />
+              <NicknameLink nickname={comment.writerNickname} />
               <GetDate date={comment.createdAt} className="comment-createdAt" />
             </div>
             {user && user.nickname === comment.writerNickname && (

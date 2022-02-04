@@ -1,4 +1,4 @@
-import BoardContainer from '../../components/containers/board/BoardContainer';
+import BoardContainer from '../../components/containers/post/BoardContainer';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 

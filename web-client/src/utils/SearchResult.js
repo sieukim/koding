@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { Chip } from '@material-ui/core';
 import React from 'react';
 import { boardMap } from './boardMap';
-import { ProfileLink } from './ProfileLink';
+import { NicknameLink } from './NicknameLink';
 import { PostLink } from './PostLink';
 
 const StyledSearchResult = styled.div`
@@ -83,7 +83,7 @@ const SearchResult = ({ query, boardType, searchResults }) => {
                 ))}
               </div>
             </div>
-            <ProfileLink
+            <NicknameLink
               className="search-result-writer"
               nickname={searchResult.writerNickname}
             />

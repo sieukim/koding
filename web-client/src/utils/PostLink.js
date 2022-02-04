@@ -1,4 +1,3 @@
-// 게시글로 가는 NavLink
 import { NavLink } from 'react-router-dom';
 
 export const PostLink = (props) => {

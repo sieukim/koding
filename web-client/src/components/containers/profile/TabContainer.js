@@ -1,10 +1,6 @@
-import { Tabs } from 'antd';
-import { CommentOutlined, FormOutlined } from '@ant-design/icons';
 import { useCallback, useEffect, useState } from 'react';
 import * as api from '../../../modules/api';
 import TabPresenter from '../../presenters/profile/TabPresenter';
-
-const { TabPane } = Tabs;
 
 const TabContainer = ({ profileUser }) => {
   // 게시글
@@ -88,45 +84,16 @@ const TabContainer = ({ profileUser }) => {
     getUserComments('career');
     getUserComments('column');
   }, []);
+
   return (
-    <Tabs defaultActiveKey="post" centered size="large">
-      <TabPane
-        key="post"
-        tab={
-          <span>
-            <FormOutlined />
-            게시글
-          </span>
-        }
-      >
-        <TabPresenter
-          type="post"
-          items={posts}
-          setItems={setPosts}
-          getItems={getUserPosts}
-          nextCursor={nextPostCursor}
-          setNextCursor={setNextPostCursor}
-        />
-      </TabPane>
-      <TabPane
-        key="comment"
-        tab={
-          <span>
-            <CommentOutlined />
-            댓글
-          </span>
-        }
-      >
-        <TabPresenter
-          type="comment"
-          items={comments}
-          setItems={setComments}
-          nextCursor={nextCommentCursor}
-          setNextCursor={setNextCommentCursor}
-          getItems={getUserComments}
-        />
-      </TabPane>
-    </Tabs>
+    <TabPresenter
+      posts={posts}
+      getPosts={getUserPosts}
+      nextPostCursor={nextPostCursor}
+      comments={comments}
+      getComments={getUserComments}
+      nextCommentCursor={nextCommentCursor}
+    />
   );
 };
 

@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { GetDate } from '../../../utils/GetDate';
-import TagPresenter from '../post/TagPresenter';
-import { ProfileLink } from '../../../utils/ProfileLink';
+import TagPresenter from './TagPresenter';
+import { NicknameLink } from '../../../utils/NicknameLink';
 import { PostLink } from '../../../utils/PostLink';
 
 const StyledBoard = styled.div`
@@ -80,7 +80,7 @@ const BoardPresenter = ({
               postTitle={post.title}
             />
             <div className="post-info">
-              <ProfileLink nickname={post.writerNickname} />
+              <NicknameLink nickname={post.writerNickname} />
               <GetDate date={post.createdAt} className="post-createdAt" />
             </div>
           </div>
