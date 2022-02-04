@@ -19,8 +19,6 @@ export class ForceDeletePostHandler
     if (!post) throw new NotFoundException("없는 게시글");
     await this.postsRepository.remove(post);
     if (post.writerNickname)
-      this.eventBus.publish(
-        new PostDeletedByAdminEvent(postIdentifier, post.writerNickname),
-      );
+      this.eventBus.publish(new PostDeletedByAdminEvent(post));
   }
 }

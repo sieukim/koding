@@ -96,10 +96,10 @@ export class NotificationSaga {
     $events.pipe(
       ofType(PostDeletedByAdminEvent),
       map(
-        ({ postIdentifier: { postId, boardType }, writerNickname }) =>
+        ({ post: { postId, boardType, writerNickname, title } }) =>
           new AddNotificationCommand(
             writerNickname,
-            new PostDeletedNotificationData({ postId, boardType }),
+            new PostDeletedNotificationData({ postId, boardType, title }),
           ),
       ),
     );
@@ -110,9 +110,14 @@ export class NotificationSaga {
       ofType(CommentDeletedByAdminEvent),
       map(
         ({
-          commentWriterNickname,
-          commentId,
-          postIdentifier: { postId, boardType },
+          comment: {
+            writerNickname: commentWriterNickname,
+            commentId,
+            postTitle,
+            postId,
+            boardType,
+            content,
+          },
         }) =>
           new AddNotificationCommand(
             commentWriterNickname,
@@ -120,6 +125,8 @@ export class NotificationSaga {
               postId,
               boardType,
               commentId,
+              postTitle,
+              content,
             }),
           ),
       ),

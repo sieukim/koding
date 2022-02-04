@@ -135,6 +135,13 @@ export class PostDeletedNotificationData extends NotificationData {
   })
   postId: string;
 
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "삭제된 게시글의 제목",
+  })
+  title: string;
+
   constructor(param?: Omit<PostDeletedNotificationData, "type">) {
     super("postDeleted");
     if (param) {
@@ -157,12 +164,27 @@ export class CommentDeletedNotificationData extends NotificationData {
     description: "삭제된 댓글의 게시글의 아이디",
   })
   postId: string;
+
   @Expose()
   @IsString()
   @ApiProperty({
     description: "삭제된 댓글 아이디",
   })
   commentId: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "삭제된 댓글의 게시글의 제목",
+  })
+  postTitle: string;
+
+  @Expose()
+  @IsString()
+  @ApiProperty({
+    description: "삭제된 댓글의 내용",
+  })
+  content: string;
 
   constructor(param?: Omit<CommentDeletedNotificationData, "type">) {
     super("commentDeleted");

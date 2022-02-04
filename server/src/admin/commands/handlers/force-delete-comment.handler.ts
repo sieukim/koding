@@ -24,12 +24,6 @@ export class ForceDeleteCommentHandler
     if (!post || !comment) throw new NotFoundException("없는 댓글");
     await this.commentsRepository.remove(comment);
     if (comment.writerNickname)
-      this.eventBus.publish(
-        new CommentDeletedByAdminEvent(
-          postIdentifier,
-          commentId,
-          comment.writerNickname,
-        ),
-      );
+      this.eventBus.publish(new CommentDeletedByAdminEvent(comment));
   }
 }

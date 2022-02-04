@@ -1,10 +1,6 @@
 import { IEvent } from "@nestjs/cqrs";
-import { PostIdentifier } from "../../models/post.model";
+import { Comment } from "../../models/comment.model";
 
 export class CommentDeletedByAdminEvent implements IEvent {
-  constructor(
-    public readonly postIdentifier: PostIdentifier,
-    public readonly commentId: string,
-    public readonly commentWriterNickname: string,
-  ) {}
+  constructor(public readonly comment: Comment) {}
 }

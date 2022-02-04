@@ -10,6 +10,7 @@ export class NotificationInfoDto extends PickType(Notification, [
   "receiverNickname",
   "data",
   "createdAt",
+  "read",
 ] as const) {
   constructor(notification: Notification) {
     super();
