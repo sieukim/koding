@@ -1,5 +1,5 @@
+import EmailLoginContainer from '../../components/containers/auth/EmailLoginContainer';
 import styled from 'styled-components';
-import SignupContainer from '../../components/containers/auth/SignupContainer';
 
 const StyledPage = styled.div`
   display: flex;
@@ -8,12 +8,12 @@ const StyledPage = styled.div`
   width: 100%;
 `;
 
-const SignupPage = () => {
+const EmailLoginPage = () => {
   return (
     <StyledPage>
-      <SignupContainer />
+      <EmailLoginContainer />
     </StyledPage>
   );
 };
 
-export default SignupPage;
+export default EmailLoginPage;

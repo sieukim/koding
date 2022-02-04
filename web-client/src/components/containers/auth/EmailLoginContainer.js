@@ -1,4 +1,4 @@
-import LoginPresenter from '../../presenters/auth/LoginPresenter';
+import EmailLoginPresenter from '../../presenters/auth/EmailLoginPresenter';
 import * as api from '../../../modules/api';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { setLogin } from '../../../modules/auth';
 import useAsync from '../../../hooks/useAsync';
 
-const LoginContainer = () => {
+const EmailLoginContainer = () => {
   /* 로그인 */
 
   // login state
@@ -59,7 +59,9 @@ const LoginContainer = () => {
     }
   }, [loginState.success, navigate]);
 
-  return <LoginPresenter login={login} loginState={loginState} url={url} />;
+  return (
+    <EmailLoginPresenter login={login} loginState={loginState} url={url} />
+  );
 };
 
-export default LoginContainer;
+export default EmailLoginContainer;

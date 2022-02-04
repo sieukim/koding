@@ -31,7 +31,7 @@ const StyledForm = styled.div`
   }
 `;
 
-const LoginPresenter = ({ login, loginState, url }) => {
+const EmailLoginPresenter = ({ login, loginState, url }) => {
   // 로그인 Form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
     (values) => {
@@ -117,4 +117,4 @@ const LoginPresenter = ({ login, loginState, url }) => {
   );
 };
 
-export default LoginPresenter;
+export default EmailLoginPresenter;

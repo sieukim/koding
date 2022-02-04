@@ -4,8 +4,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { setLogin } from '../../modules/auth';
 import * as api from '../../modules/api';
 import { githubSignup } from '../../modules/github';
+import { message, Spin } from 'antd';
+import styled from 'styled-components';
 
-const GithubCallbackPage = () => {
+const StyledPage = styled.div`
+  display: flex;
+  height: 600px;
+  justify-content: center;
+  align-items: center;
+`;
+
+const GithubLoginPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const query = new URLSearchParams(location.search);
@@ -41,6 +50,7 @@ const GithubCallbackPage = () => {
         if (loggedUser.status === 200) {
           setExistingUser(true);
           onSetLogin(loggedUser.data);
+          message.success('오늘도 멋진 하루 보내세요 ✨');
         }
 
         // 신규 사용자 회원가입 & 로그인
@@ -48,16 +58,19 @@ const GithubCallbackPage = () => {
           setNewUser(true);
           onGithubSignup(loggedUser.data);
         }
-      } catch (e) {}
+      } catch (e) {
+        message.error('오류가 발생했어요 😭 잠시 후 다시 시도해주세요!');
+      }
     })();
   }, [onSetLogin, code, onGithubSignup]);
 
   return (
-    <>
+    <StyledPage>
+      <Spin size="large" tip="로딩 중..." />
       {existingUser && <Navigate to="/" />}
-      {newUser && <Navigate to="/github/verify" />}
-    </>
+      {newUser && <Navigate to="/github/signup" />}
+    </StyledPage>
   );
 };
 
-export default GithubCallbackPage;
+export default GithubLoginPage;

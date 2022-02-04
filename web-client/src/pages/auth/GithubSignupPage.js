@@ -1,19 +1,19 @@
-import GithubVerifyContainer from '../../components/containers/auth/GithubVerifyContainer';
+import GithubSignupContainer from '../../components/containers/auth/GithubSignupContainer.js';
 import styled from 'styled-components';
 
 const StyledGithubVerify = styled.div`
   display: flex;
   justify-content: center;
   margin: 0 auto;
-  width: 60%;
+  width: 100%;
 `;
 
-const GithubVerifyPage = () => {
+const GithubSignupPage = () => {
   return (
     <StyledGithubVerify>
-      <GithubVerifyContainer />
+      <GithubSignupContainer />
     </StyledGithubVerify>
   );
 };
 
-export default GithubVerifyPage;
+export default GithubSignupPage;

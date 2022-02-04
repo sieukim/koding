@@ -3,10 +3,10 @@ import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
-import SignupPage from './pages/auth/SignupPage';
-import LoginPage from './pages/auth/LoginPage';
-import GithubCallbackPage from './pages/auth/GithubCallbackPage';
-import GithubVerifyPage from './pages/auth/GithubVerifyPage';
+import EmailSignupPage from './pages/auth/EmailSignupPage';
+import EmailLoginPage from './pages/auth/EmailLoginPage';
+import GithubLoginPage from './pages/auth/GithubLoginPage';
+import GithubSignupPage from './pages/auth/GithubSignupPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import WritePostPage from './pages/post/WritePostPage';
 import PostPage from './pages/post/PostPage';
@@ -26,10 +26,10 @@ function App() {
       <div style={{ minHeight: '70%' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/github/login" element={<GithubCallbackPage />} />
-          <Route path="/github/verify" element={<GithubVerifyPage />} />
+          <Route path="/login" element={<EmailLoginPage />} />
+          <Route path="/signup" element={<EmailSignupPage />} />
+          <Route path="/github/login" element={<GithubLoginPage />} />
+          <Route path="/github/signup" element={<GithubSignupPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/board/:boardType" element={<BoardPage />} />
           <Route
