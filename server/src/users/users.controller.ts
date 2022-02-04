@@ -71,8 +71,8 @@ import { GetWritingPostsQuery } from "./queries/get-writing-posts.query";
 import { WritingPostsInfoDto } from "./dto/writing-posts-info.dto";
 import { GetWritingCommentsQuery } from "./queries/get-writing-comments.query";
 import { NicknameAndBoardTypeParamDto } from "./dto/param/nickname-and-board-type-param.dto";
-import { CursorQueryDto } from "../common/dto/query/cursor-query.dto";
 import { WritingCommentsInfoDto } from "./dto/writing-comments-info.dto";
+import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dto";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -427,9 +427,8 @@ export class UsersController {
   @Get(":nickname/posts/:boardType")
   getAllPosts(
     @Param() { nickname, boardType }: NicknameAndBoardTypeParamDto,
-    @Query() { cursor }: CursorQueryDto,
+    @Query() { cursor, pageSize }: CursorPagingQueryDto,
   ) {
-    const pageSize = 10;
     return this.queryBus.execute(
       new GetWritingPostsQuery(nickname, boardType, pageSize, cursor),
     );
@@ -446,9 +445,8 @@ export class UsersController {
   @Get(":nickname/comments/:boardType")
   getAllComments(
     @Param() { nickname, boardType }: NicknameAndBoardTypeParamDto,
-    @Query() { cursor }: CursorQueryDto,
+    @Query() { cursor, pageSize }: CursorPagingQueryDto,
   ) {
-    const pageSize = 10;
     return this.queryBus.execute(
       new GetWritingCommentsQuery(nickname, boardType, pageSize, cursor),
     );
