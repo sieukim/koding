@@ -10,12 +10,13 @@ export class DeleteNotificationHandler
     private readonly notificationsRepository: NotificationsRepository,
   ) {}
 
-  async execute(command: DeleteNotificationCommand): Promise<any> {
+  async execute(command: DeleteNotificationCommand): Promise<boolean> {
     const { notificationId, receiverNickname } = command;
     const notification = await this.notificationsRepository.findOne({
       notificationId: { eq: notificationId },
       receiverNickname: { eq: receiverNickname },
     });
+    if (!notification) return false;
     return this.notificationsRepository.remove(notification);
   }
 }
