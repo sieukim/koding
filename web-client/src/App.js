@@ -18,12 +18,21 @@ import EditProfilePage from './pages/profile/EditProfilePage';
 import NotificationPage from './pages/profile/NotificationPage';
 import IntegratedSearchPage from './pages/search/IntegratedSearchPage';
 import SearchPage from './pages/search/SearchPage';
+import styled from 'styled-components';
+
+const StyledPage = styled.div`
+  min-width: 800px;
+
+  .body {
+    min-height: calc(100vh - 160px);
+  }
+`;
 
 function App() {
   return (
-    <>
+    <StyledPage>
       <Header />
-      <div style={{ minHeight: '70%' }}>
+      <div className="body">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<EmailLoginPage />} />
@@ -59,7 +68,7 @@ function App() {
         </Routes>
       </div>
       <Footer />
-    </>
+    </StyledPage>
   );
 }
 
