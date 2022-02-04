@@ -53,13 +53,6 @@ export class SearchController {
     summary: "게시글 검색",
   })
   @ApiQuery({
-    name: "cursor",
-    description:
-      "조회를 시작할 기준이 되는 커서. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
-    type: String,
-    required: false,
-  })
-  @ApiQuery({
     name: "query",
     description: "검색할 검색어",
     type: String,
@@ -71,9 +64,8 @@ export class SearchController {
   @Get(":boardType")
   async searchPosts(
     @Param() { boardType }: BoardTypeParamDto,
-    @Query() { cursor, query }: SearchPostQueryDto,
+    @Query() { cursor, query, pageSize }: SearchPostQueryDto,
   ) {
-    const pageSize = 10;
     return this.queryBus.execute(
       new SearchPostQuery(query, boardType, pageSize, cursor),
     );

@@ -38,6 +38,7 @@ import { MarkReadNotificationCommand } from "./commands/mark-read-notification.c
 import { CheckUnreadNotificationQueryDto } from "./dto/query/check-unread-notification-query.dto";
 import { CheckUnreadNotificationQuery } from "./queries/check-unread-notification.query";
 import { CheckUnreadNotificationHandler } from "./queries/handlers/check-unread-notification.handler";
+import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dto";
 
 @ApiTags("NOTIFICATION")
 @ApiForbiddenResponse({
@@ -87,13 +88,6 @@ export class NotificationsController {
     name: "nickname",
     description: "알림을 조회할 사용자 닉네임",
   })
-  @ApiQuery({
-    name: "cursor",
-    description:
-      "조회를 시작할 기준이 되는 알림 아이디. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
-    type: String,
-    required: false,
-  })
   @ApiNotFoundResponse({
     description: "잘못된 사용자 닉네임",
   })
@@ -105,10 +99,9 @@ export class NotificationsController {
   @Get()
   getNotifications(
     @Param("nickname") nickname: string,
-    @Query("cursor") cursor?: string,
+    @Query() { cursor, pageSize }: CursorPagingQueryDto,
   ) {
     this.logger.log(`getNotifications called`);
-    const pageSize = 5;
     return this.queryBus.execute(
       new ReadNotificationsQuery(nickname, pageSize, cursor),
     ) as ReturnType<ReadNotificationsHandler["execute"]>;

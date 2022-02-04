@@ -19,7 +19,6 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
 import { AddCommentRequestDto } from "./dto/add-comment-request.dto";
@@ -35,6 +34,7 @@ import { ReadCommentsQuery } from "./queries/read-comments.query";
 import { ReadCommentsHandler } from "./queries/handler/read-comments.handler";
 import { PostIdentifierParamDto } from "../posts/dto/param/post-identifier-param.dto";
 import { CommentIdentifierParamDto } from "./dto/param/comment-identifier-param.dto";
+import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dto";
 
 @ApiTags("POST/COMMENT")
 @ApiBadRequestResponse({
@@ -53,13 +53,6 @@ export class CommentsController {
   @ApiOperation({
     summary: "게시글의 댓글 조회",
   })
-  @ApiQuery({
-    name: "cursor",
-    description:
-      "조회를 시작할 기준이 되는 게시글 아이디. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
-    type: String,
-    required: false,
-  })
   @ApiNotFoundResponse({
     description: "잘못된 게시글 아이디",
   })
@@ -71,9 +64,8 @@ export class CommentsController {
   @Get()
   readComments(
     @Param() { boardType, postId }: PostIdentifierParamDto,
-    @Query("cursor") cursor?: string,
+    @Query() { cursor, pageSize }: CursorPagingQueryDto,
   ) {
-    const pageSize = 10;
     return this.queryBus.execute(
       new ReadCommentsQuery(
         {

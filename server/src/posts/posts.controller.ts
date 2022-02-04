@@ -95,13 +95,6 @@ export class PostsController {
     summary: "게시글 목록 조회",
   })
   @ApiQuery({
-    name: "cursor",
-    description:
-      "조회를 시작할 기준이 되는 커서. 첫 페이지를 조회하는 경우에는 값을 넣지 않음",
-    type: String,
-    required: false,
-  })
-  @ApiQuery({
     required: false,
     name: "tags",
     description:
@@ -129,9 +122,8 @@ export class PostsController {
   @Get(":boardType")
   async readPosts(
     @Param() { boardType }: BoardTypeParamDto,
-    @Query() { cursor, tags, writer }: ReadPostQueryDto,
+    @Query() { cursor, tags, writer, pageSize }: ReadPostQueryDto,
   ) {
-    const pageSize = 10;
     return this.queryBus.execute(
       new GetPostListQuery(boardType, pageSize, cursor, { tags, writer }),
     );
