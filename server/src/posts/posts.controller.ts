@@ -29,7 +29,7 @@ import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.gua
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { ModifyPostRequestDto } from "./dto/modify-post-request.dto";
 
-import { PostListDto } from "./dto/post-list.dto";
+import { PostListWithCursorDto } from "./dto/post-list-with-cursor.dto";
 import { PostWithAroundInfoDto } from "./dto/post-with-around-info.dto";
 import { ReadPostQueryDto } from "./dto/query/read-post-query.dto";
 import { User } from "../models/user.model";
@@ -117,7 +117,7 @@ export class PostsController {
   })
   @ApiOkResponse({
     description: "게시글 목록 조회 성공",
-    type: PostListDto,
+    type: PostListWithCursorDto,
   })
   @Get(":boardType")
   async readPosts(

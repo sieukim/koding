@@ -96,7 +96,6 @@ export abstract class MongooseBaseRepository<
   protected parseFindOption(
     findOption: FindOption<DomainModel>,
   ): FilterQuery<ModelDocument> {
-    console.log("before parse findOption", findOption);
     const findQuery: FilterQuery<ModelDocument> = {};
     Object.keys(findOption).forEach((key) => {
       let query;
@@ -197,11 +196,14 @@ export abstract class MongooseBaseRepository<
         findQuery[key] = query;
       }
     });
-    console.log("after parse findOption", findQuery);
     return findQuery;
   }
 
-  private parseSortOption(sortOption?: SortOption<DomainModel>) {
+  count(findOption: FindOption<DomainModel>) {
+    return this.mongooseModel.count(this.parseFindOption(findOption)).exec();
+  }
+
+  protected parseSortOption(sortOption?: SortOption<DomainModel>) {
     if (!sortOption) return null;
     const sortQuery = {};
     Object.keys(sortOption).forEach((key) => {

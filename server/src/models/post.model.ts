@@ -10,7 +10,7 @@ import {
 import { ForbiddenException } from "@nestjs/common";
 import { AggregateRoot } from "@nestjs/cqrs";
 import { User } from "./user.model";
-import { currentTime } from "../common/utils/current-time.util";
+import { getCurrentUTCTime } from "../common/utils/time.util";
 import { PostReadCountIncreasedEvent } from "../posts/events/post-read-count-increased.event";
 import { Types } from "mongoose";
 import { TagChangedEvent } from "../tags/events/tag-changed.event";
@@ -159,7 +159,7 @@ export class Post extends AggregateRoot {
       this.readCount = 0;
       this.likeCount = 0;
       this.commentCount = 0;
-      this.createdAt = currentTime();
+      this.createdAt = getCurrentUTCTime();
     }
   }
 

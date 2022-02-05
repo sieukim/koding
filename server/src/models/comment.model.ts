@@ -1,5 +1,5 @@
 import { User } from "./user.model";
-import { currentTime } from "../common/utils/current-time.util";
+import { getCurrentUTCTime } from "../common/utils/time.util";
 import { IsDate, IsEnum, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Post, PostBoardType } from "./post.model";
@@ -95,7 +95,7 @@ export class Comment {
       this.writerNickname = param.writerNickname;
       this.content = param.content;
       this.mentionedNicknames = param.mentionedNicknames ?? [];
-      this.createdAt = currentTime();
+      this.createdAt = getCurrentUTCTime();
     }
   }
 

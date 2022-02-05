@@ -11,14 +11,14 @@ export class PostMetadataInfoDto extends PickType(Post, [
   "boardType",
   "writerNickname",
   "likeCount",
+  "commentCount",
+  "markdownContent",
 ] as const) {
   static fromModel(model: Post) {
-    return plainToClass(PostMetadataInfoDto, model, {
-      excludeExtraneousValues: true,
-    });
+    return PostMetadataInfoDto.fromJson(model);
   }
 
-  static fromJson(json: Record<any, any>) {
+  static fromJson(json: Readonly<PostMetadataInfoDto>) {
     return plainToClass(PostMetadataInfoDto, json, {
       excludeExtraneousValues: true,
     });

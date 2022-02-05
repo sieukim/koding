@@ -4,6 +4,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { Post, PostIdentifier } from "../models/post.model";
 import { MongooseBaseRepository } from "../common/repository/mongoose-base.repository";
+import { IncreaseType } from "./commands/increase-comment-count.command";
 
 @Injectable()
 export class PostsRepository extends MongooseBaseRepository<
@@ -76,6 +77,53 @@ export class PostsRepository extends MongooseBaseRepository<
       )
       .exec();
     return;
+  }
+
+  increaseLikeCount(postIdentifier: PostIdentifier) {
+    return this.modifyLikeCount(postIdentifier, IncreaseType.Positive);
+  }
+
+  decreaseLikeCount(postIdentifier: PostIdentifier) {
+    return this.modifyLikeCount(postIdentifier, IncreaseType.Negative);
+  }
+
+  increaseCommentCount(postIdentifier: PostIdentifier) {
+    return this.modifyCommentCount(postIdentifier, 1);
+  }
+
+  decreaseCommentCount(postIdentifier: PostIdentifier) {
+    return this.modifyCommentCount(postIdentifier, -1);
+  }
+
+  private async modifyLikeCount(
+    { postId, boardType }: PostIdentifier,
+    delta: 1 | -1,
+  ) {
+    const findOption = this.parseFindOption({
+      postId: { eq: postId },
+      boardType: { eq: boardType },
+    });
+    const post = await this.postModel
+      .findOneAndUpdate(
+        findOption,
+        { $inc: { likeCount: delta } },
+        { returnOriginal: false },
+      )
+      .exec();
+    return post.likeCount;
+  }
+
+  private modifyCommentCount(
+    { postId, boardType }: PostIdentifier,
+    delta: 1 | -1,
+  ) {
+    return this.postModel.updateOne(
+      {
+        _id: new Types.ObjectId(postId),
+        boardType,
+      },
+      { $inc: { commentCount: delta } },
+    );
   }
 
   async findByPostId(identifier: PostIdentifier): Promise<Post | null> {

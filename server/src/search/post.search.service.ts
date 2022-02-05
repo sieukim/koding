@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { PostMetadataInfoDto } from "../posts/dto/post-metadata-info.dto";
 import { SortType } from "../common/repository/sort-option";
 import { PostBoardType } from "../models/post.model";
-import { SearchPostResultWithCursorDto } from "./dto/search-post-result-with-cursor.dto";
+import { PostListWithCursorDto } from "../posts/dto/post-list-with-cursor.dto";
 
 export const PostSearchTypes = ["query", "tags"] as const;
 export type PostSearchType = typeof PostSearchTypes[number];
@@ -86,12 +86,12 @@ export class PostSearchService {
       );
     }
 
-    return new SearchPostResultWithCursorDto(
+    return new PostListWithCursorDto({
       posts,
       totalCount,
       prevPageCursor,
       nextPageCursor,
-    );
+    });
   }
 
   private async search(

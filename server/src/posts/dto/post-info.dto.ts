@@ -13,6 +13,7 @@ export class PostInfoDto extends PickType(Post, [
   "imageUrls",
   "writerNickname",
   "likeCount",
+  "commentCount",
 ] as const) {
   /*
    * 게시글에 대한 사용자의 좋아요 여부.

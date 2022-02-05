@@ -6,6 +6,7 @@ import { LikePostHandler } from "./like-post.handler";
 import { UnlikePostHandler } from "./unlike-post.handler";
 import { IncreaseCommentCountHandler } from "./increase-comment-count.handler";
 import { DeleteOrphanPostLikesHandler } from "./delete-orphan-post-likes.handler";
+import { IncreaseReadCountHandler } from "./increase-read-count.handler";
 
 export const PostCommandHandlers = [
   ModifyPostHandler,
@@ -16,4 +17,5 @@ export const PostCommandHandlers = [
   UnlikePostHandler,
   IncreaseCommentCountHandler,
   DeleteOrphanPostLikesHandler,
+  IncreaseReadCountHandler,
 ];

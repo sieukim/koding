@@ -1,6 +1,6 @@
 import { AggregateRoot } from "@nestjs/cqrs";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { currentTime } from "../common/utils/current-time.util";
+import { getCurrentUTCTime } from "../common/utils/time.util";
 import { compare, hash } from "bcrypt";
 import { v1 } from "uuid";
 import { randomInt } from "crypto";
@@ -289,7 +289,7 @@ export class User extends AggregateRoot {
       this.githubSignupVerified = false;
       this.followingNicknames = [];
       this.followerNicknames = [];
-      this.createdAt = currentTime();
+      this.createdAt = getCurrentUTCTime();
       this.roles = [Role.User];
     }
   }

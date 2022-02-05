@@ -1,11 +1,11 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { SearchPostQuery } from "../search-post.query";
 import { PostSearchService } from "../../post.search.service";
-import { SearchPostResultWithCursorDto } from "../../dto/search-post-result-with-cursor.dto";
+import { PostListWithCursorDto } from "../../../posts/dto/post-list-with-cursor.dto";
 
 @QueryHandler(SearchPostQuery)
 export class SearchPostHandler
-  implements IQueryHandler<SearchPostQuery, SearchPostResultWithCursorDto>
+  implements IQueryHandler<SearchPostQuery, PostListWithCursorDto>
 {
   constructor(private readonly postSearchService: PostSearchService) {}
 
@@ -14,7 +14,7 @@ export class SearchPostHandler
     query,
     pageSize,
     cursor,
-  }: SearchPostQuery): Promise<SearchPostResultWithCursorDto> {
+  }: SearchPostQuery): Promise<PostListWithCursorDto> {
     return this.postSearchService.searchPostsWithCursor(
       boardType,
       query,

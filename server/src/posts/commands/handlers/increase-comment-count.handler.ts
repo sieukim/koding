@@ -3,21 +3,18 @@ import {
   IncreaseCommentCountCommand,
   IncreaseType,
 } from "../increase-comment-count.command";
-import { PostCommentCountService } from "../../services/post-comment-count.service";
+import { PostsRepository } from "../../posts.repository";
 
 @CommandHandler(IncreaseCommentCountCommand)
 export class IncreaseCommentCountHandler
   implements ICommandHandler<IncreaseCommentCountCommand>
 {
-  constructor(
-    private readonly postCommentCountService: PostCommentCountService,
-  ) {}
+  constructor(private readonly postsRepository: PostsRepository) {}
 
   async execute(command: IncreaseCommentCountCommand): Promise<any> {
     const { postIdentifier, type } = command;
     if (type === IncreaseType.Positive)
-      return this.postCommentCountService.increaseCommentCount(postIdentifier);
-    else
-      return this.postCommentCountService.decreaseCommentCount(postIdentifier);
+      return this.postsRepository.increaseCommentCount(postIdentifier);
+    else return this.postsRepository.decreaseCommentCount(postIdentifier);
   }
 }

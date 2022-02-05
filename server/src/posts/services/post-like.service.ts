@@ -4,6 +4,8 @@ import { InjectModel } from "@nestjs/mongoose";
 import { PostIdentifier } from "../../models/post.model";
 import { PostLikeDocument } from "../../schemas/post-like.schema";
 import { PostsRepository } from "../posts.repository";
+import { PostRankingService } from "./post-ranking.service";
+import { getCurrentDate, isSameDate } from "../../common/utils/time.util";
 
 @Injectable()
 export class PostLikeService {
@@ -11,100 +13,78 @@ export class PostLikeService {
     @InjectModel(PostLikeDocument.name)
     private readonly postLikeModel: Model<PostLikeDocument>,
     private readonly postsRepository: PostsRepository,
+    private readonly postLikeRankingService: PostRankingService,
   ) {}
 
   async likePost({ postId, boardType }: PostIdentifier, nickname: string) {
-    await this.postLikeModel
-      .updateOne(
-        { _id: new Types.ObjectId(postId), boardType },
-        {
-          $setOnInsert: {
-            likeCount: 0,
-            boardType,
-          },
-          $addToSet: { likeUserNicknames: nickname },
-        },
-        { upsert: true },
-      )
-      .exec();
-    const likeCount = (
-      await this.postLikeModel.aggregate([
-        {
-          $match: { _id: new Types.ObjectId(postId), boardType },
-        },
-        {
-          $project: {
-            likeCount: { $size: "$likeUserNicknames" },
-          },
-        },
-      ])
-    )[0].likeCount;
-    await this.syncLikeCountToPost({ postId, boardType }, likeCount);
-    return likeCount;
+    console.log("likePost callend", postId, boardType);
+    const exists = await this.postLikeModel.exists({
+      postId: new Types.ObjectId(postId),
+      boardType,
+      likeUserNickname: nickname,
+    });
+    if (!exists) {
+      const [likeCount] = await Promise.all([
+        this.postsRepository.increaseLikeCount({
+          postId,
+          boardType,
+        }),
+        this.postLikeModel.create({
+          postId: new Types.ObjectId(postId),
+          likeUserNickname: nickname,
+          boardType,
+        }),
+        this.postLikeRankingService.increaseDailyLikeCount({
+          postId,
+          boardType,
+        }),
+      ]);
+      return likeCount;
+    } else {
+      const post = await this.postsRepository.findByPostId({
+        postId,
+        boardType,
+      });
+      return post.likeCount;
+    }
   }
 
   async unlikePost({ postId, boardType }: PostIdentifier, nickname: string) {
-    await this.postLikeModel
-      .updateOne(
-        { _id: new Types.ObjectId(postId), boardType },
-        {
-          $setOnInsert: {
-            likeCount: 0,
-            boardType,
-          },
-          $pull: { likeUserNicknames: nickname },
-        },
-        { upsert: true },
-      )
-      .exec();
-    const likeCount = (
-      await this.postLikeModel.aggregate([
-        {
-          $match: { _id: new Types.ObjectId(postId), boardType },
-        },
-        {
-          $project: {
-            likeCount: { $size: "$likeUserNicknames" },
-          },
-        },
-      ])
-    )[0].likeCount;
-    await this.syncLikeCountToPost({ postId, boardType }, likeCount);
-    return likeCount;
-  }
-
-  async getLikeCount({ postId, boardType }: PostIdentifier) {
-    const postLike = await this.postLikeModel
-      .findOne({
-        _id: new Types.ObjectId(postId),
+    const deletedPostLike = await this.postLikeModel
+      .findOneAndDelete({
+        postId: new Types.ObjectId(postId),
+        likeUserNickname: nickname,
         boardType,
       })
       .exec();
-    return postLike?.likeCount ?? 0;
+    if (deletedPostLike) {
+      if (isSameDate(getCurrentDate(), deletedPostLike.createdAt))
+        this.postLikeRankingService.decreaseDailyLikeCount({
+          postId,
+          boardType,
+        });
+      return this.postsRepository.decreaseLikeCount({
+        postId,
+        boardType,
+      });
+    } else {
+      const post = await this.postsRepository.findByPostId({
+        postId,
+        boardType,
+      });
+      return post.likeCount;
+    }
   }
 
   async isUserLikePost(
     { postId, boardType }: PostIdentifier,
     nickname: string,
   ): Promise<boolean> {
-    const count = await this.postLikeModel
-      .count({
-        _id: new Types.ObjectId(postId),
-        boardType,
-        likeUserNicknames: { $in: nickname },
-      })
-      .exec();
-    return count === 1;
-  }
-
-  private syncLikeCountToPost(
-    { postId, boardType }: PostIdentifier,
-    likeCount: number,
-  ) {
-    return this.postsRepository.updateOne(
-      { postId: { eq: postId }, boardType: { eq: boardType } },
-      { likeCount },
-    );
+    return this.postLikeModel.exists({
+      _id: new Types.ObjectId(postId),
+      boardType,
+      likeUserNickname: nickname,
+    });
   }
 
   removeOrphanPostLikes({ postId, boardType }: PostIdentifier) {

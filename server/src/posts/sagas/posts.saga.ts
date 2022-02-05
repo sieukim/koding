@@ -9,6 +9,8 @@ import {
   IncreaseCommentCountCommand,
   IncreaseType,
 } from "../commands/increase-comment-count.command";
+import { PostReadCountIncreasedEvent } from "../events/post-read-count-increased.event";
+import { IncreaseReadCountCommand } from "../commands/increase-read-count.command";
 
 @Injectable()
 export class PostsSaga {
@@ -17,6 +19,13 @@ export class PostsSaga {
     $events.pipe(
       ofType(UserDeletedEvent),
       map(({ nickname }) => new RenamePostWriterToNullCommand(nickname)),
+    );
+
+  @Saga()
+  increaseReadCount = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostReadCountIncreasedEvent),
+      map(({ postIdentifier }) => new IncreaseReadCountCommand(postIdentifier)),
     );
 
   @Saga()

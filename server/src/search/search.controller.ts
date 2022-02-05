@@ -19,8 +19,8 @@ import { UnifiedSearchPostQuery } from "./queries/unified-search-post.query";
 import { UnifiedSearchPostsResultDto } from "./dto/unified-search-posts-result.dto";
 import { SearchPostQuery } from "./queries/search-post.query";
 import { SearchPostQueryDto } from "./dto/query/search-post-query.dto";
-import { SearchPostResultWithCursorDto } from "./dto/search-post-result-with-cursor.dto";
 import { BoardTypeParamDto } from "../posts/dto/param/board-type-param.dto";
+import { PostListWithCursorDto } from "../posts/dto/post-list-with-cursor.dto";
 
 @ApiTags("SEARCH")
 @Controller("api/search")
@@ -59,7 +59,7 @@ export class SearchController {
   })
   @ApiOkResponse({
     description: "게시글 검색 성공",
-    type: SearchPostResultWithCursorDto,
+    type: PostListWithCursorDto,
   })
   @Get(":boardType")
   async searchPosts(

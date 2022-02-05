@@ -7,7 +7,7 @@ import {
   refs,
 } from "@nestjs/swagger";
 import { Types } from "mongoose";
-import { currentTime } from "../common/utils/current-time.util";
+import { getCurrentUTCTime } from "../common/utils/time.util";
 import { Expose, Type } from "class-transformer";
 
 export type NotificationType = typeof NotificationTypes[number];
@@ -288,7 +288,7 @@ export class Notification {
     if (param) {
       Object.assign(this, param);
       this.notificationId = new Types.ObjectId().toString();
-      this.createdAt = currentTime();
+      this.createdAt = getCurrentUTCTime();
       this.read = false;
     }
   }

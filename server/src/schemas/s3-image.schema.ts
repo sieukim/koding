@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { currentTime } from "../common/utils/current-time.util";
+import { getCurrentUTCTime } from "../common/utils/time.util";
 import { UserDocument } from "./user.schema";
 import { PostDocument } from "./post.schema";
 
@@ -8,7 +8,11 @@ import { PostDocument } from "./post.schema";
   id: false,
   _id: true,
   versionKey: false,
-  timestamps: { createdAt: true, updatedAt: false, currentTime },
+  timestamps: {
+    createdAt: true,
+    updatedAt: false,
+    currentTime: getCurrentUTCTime,
+  },
   autoIndex: true,
 })
 export class S3Image extends Document {

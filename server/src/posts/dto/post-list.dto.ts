@@ -1,7 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 import { PostMetadataInfoDto } from "./post-metadata-info.dto";
 import { Post } from "../../models/post.model";
+import { plainToClass } from "class-transformer";
+import { IsNumber, Min } from "class-validator";
 
 export class PostListDto {
   @ApiProperty({
@@ -10,33 +11,18 @@ export class PostListDto {
   })
   posts: PostMetadataInfoDto[];
 
-  @IsOptional()
-  @IsString()
-  @ApiPropertyOptional({
-    description:
-      "다음 페이지를 가져오기 위한 커서 query 값. 마지막 페이지인 경우는 값 없음",
-    example: "61d7238b7d7a9ad823c8d8a9",
+  @Min(0)
+  @IsNumber()
+  @ApiProperty({
+    description: "조건에 맞는 총 게시글 수",
   })
-  nextPageCursor?: string;
+  totalCount: number;
 
-  @IsOptional()
-  @IsString()
-  @ApiPropertyOptional({
-    description:
-      "이전 페이지를 가져오기 위한 커서 query 값. 첫 페이지인 경우는 값 없음",
-    example: "61d7238b7d7a9ad823c8d8a9",
-  })
-  prevPageCursor?: string;
-
-  constructor(
-    posts: Post[] | PostMetadataInfoDto[],
-    prevPageCursor?: string,
-    nextPageCursor?: string,
-  ) {
-    this.prevPageCursor = prevPageCursor;
-    this.nextPageCursor = nextPageCursor;
-    this.posts = posts.map((post) =>
-      post instanceof Post ? PostMetadataInfoDto.fromModel(post) : post,
+  static fromModel(models: Post[], totalCount: number) {
+    return plainToClass(
+      PostListDto,
+      { posts: models.map(PostMetadataInfoDto.fromModel), totalCount },
+      { excludeExtraneousValues: true },
     );
   }
 }

@@ -2,43 +2,57 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { PostDocument } from "./post.schema";
 import { Document, Types } from "mongoose";
 import { PostBoardType, PostBoardTypes } from "../models/post.model";
+import { UserDocument } from "./user.schema";
+import { getCurrentUTCTime } from "../common/utils/time.util";
 
 @Schema({
   _id: true,
   id: false,
   autoIndex: true,
   versionKey: false,
+  timestamps: {
+    createdAt: true,
+    updatedAt: false,
+    currentTime: getCurrentUTCTime,
+  },
 })
 export class PostLikeDocument extends Document {
-  postId: string;
+  @Prop({ type: Types.ObjectId })
+  postId: Types.ObjectId;
 
   @Prop({ type: String, enum: PostBoardTypes })
   boardType: PostBoardType;
 
   post?: PostDocument;
 
-  @Prop({ type: [String], default: [] })
-  likeUserNicknames: string[];
+  @Prop({ type: String })
+  likeUserNickname: string;
 
-  @Prop({ type: Number, default: 0, min: 0 })
-  likeCount = 0;
+  likeUser?: UserDocument;
+
+  createdAt: Date;
 }
 
 export const PostLikeSchema = SchemaFactory.createForClass(PostLikeDocument);
-PostLikeSchema.index({});
+PostLikeSchema.index(
+  {
+    postId: 1,
+    likeUserNickname: 1,
+    boardType: 1,
+  },
+  { unique: true },
+);
 PostLikeSchema.virtual("post", {
   ref: PostDocument.name,
   localField: "postId",
   foreignField: "_id",
   justOne: true,
 });
-PostLikeSchema.virtual("postId")
-  .get(function () {
-    return this._id.toString();
-  })
-  .set(function (value) {
-    if (value instanceof Types.ObjectId) this._id = value;
-    else this._id = new Types.ObjectId(value);
-  });
+PostLikeSchema.virtual("likeUser", {
+  ref: UserDocument.name,
+  localField: "likeUser",
+  foreignField: "nickname",
+  justOne: true,
+});
 PostLikeSchema.set("toObject", { virtuals: true });
 PostLikeSchema.set("toJSON", { virtuals: true });

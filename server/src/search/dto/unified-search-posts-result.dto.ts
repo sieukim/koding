@@ -1,23 +1,17 @@
 import { PostMetadataInfoDto } from "src/posts/dto/post-metadata-info.dto";
 import { PostBoardType } from "../../models/post.model";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, MaxLength, Min } from "class-validator";
+import { MaxLength } from "class-validator";
 import { Expose, plainToClass } from "class-transformer";
+import { PostListDto } from "../../posts/dto/post-list.dto";
 
-export class SearchPostResultDto {
+export class SearchPostResultDto extends PostListDto {
   @Expose()
   @MaxLength(5)
   @ApiProperty({
     description: "요약된 검색 결과.",
   })
   posts: PostMetadataInfoDto[];
-  @Expose()
-  @Min(0)
-  @IsNumber()
-  @ApiProperty({
-    description: "총 검색 결과 수",
-  })
-  totalCount: number;
 }
 
 export class UnifiedSearchPostsResultDto
