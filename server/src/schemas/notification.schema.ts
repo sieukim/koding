@@ -1,6 +1,6 @@
 import { Document, Model, SchemaTypes, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 import {
   Notification,
   NotificationDataType,
@@ -16,7 +16,7 @@ import { plainToClass } from "class-transformer";
   timestamps: {
     createdAt: true,
     updatedAt: false,
-    currentTime: getCurrentUTCTime,
+    currentTime: getCurrentTime,
   },
 })
 export class NotificationDocument extends Document {

@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 import { UserDocument } from "./user.schema";
 import { PostDocument } from "./post.schema";
 
@@ -11,7 +11,7 @@ import { PostDocument } from "./post.schema";
   timestamps: {
     createdAt: true,
     updatedAt: false,
-    currentTime: getCurrentUTCTime,
+    currentTime: getCurrentTime,
   },
   autoIndex: true,
 })

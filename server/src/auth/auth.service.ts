@@ -10,7 +10,7 @@ import { ResetPasswordCommand } from "../users/commands/reset-password.command";
 import { ResetPasswordHandler } from "../users/commands/handlers/reset-password.handler";
 import { CheckPasswordTokenValidityQuery } from "../users/queries/check-password-token-validity.query";
 import { CheckPasswordTokenValidityHandler } from "../users/queries/handlers/check-password-token-validity.handler";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 import { User } from "../models/user.model";
 
 @Injectable()
@@ -75,7 +75,7 @@ export class AuthService {
   checkAccountNotSuspended(user: User) {
     if (
       user.accountSuspendedUntil &&
-      user.accountSuspendedUntil.getTime() > getCurrentUTCTime().getTime()
+      user.accountSuspendedUntil.getTime() > getCurrentTime().getTime()
     ) {
       throw new ForbiddenException({
         message: "계정이 " + user.accountSuspendedUntil + "까지 정지되었습니다",

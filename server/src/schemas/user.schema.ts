@@ -2,7 +2,7 @@ import { Document, Model, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNumber, IsUrl, Min } from "class-validator";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 import { User } from "../models/user.model";
 import { Expose, plainToClass, Transform, Type } from "class-transformer";
 import { Role } from "../models/role.enum";
@@ -84,7 +84,7 @@ export class GithubUserInfo {
   timestamps: {
     createdAt: true,
     updatedAt: false,
-    currentTime: getCurrentUTCTime,
+    currentTime: getCurrentTime,
   },
 })
 export class UserDocument extends Document {
@@ -190,11 +190,7 @@ export class UserDocument extends Document {
   followerNicknames: string[];
 
   @Type(() => UserDocument)
-  @Transform(
-    ({ value }) =>
-      value instanceof UserDocument ? UserDocument.toModel(value) : value,
-    { toClassOnly: true },
-  )
+  @Transform(({ value }) => UserDocument.toModel(value), { toPlainOnly: true })
   followers?: UserDocument[];
 
   static toModel(userDocument: UserDocument): User {
@@ -221,12 +217,5 @@ UserSchema.virtual("followers", {
   foreignField: "nickname",
   localField: "followerNicknames",
 });
-// UserSchema.virtual("nickname")
-//   .get(function () {
-//     return this._id;
-//   })
-//   .set(function (value) {
-//     this._id = value;
-//   });
 UserSchema.set("toObject", { virtuals: true });
 UserSchema.set("toJSON", { virtuals: true });

@@ -10,7 +10,7 @@ import { PostDocument } from "./post.schema";
   autoIndex: true,
   versionKey: false,
 })
-export class PostLikeDailyRankingDocument extends Document {
+export class PostDailyRankingDocument extends Document {
   @Prop({ type: Types.ObjectId })
   postId: Types.ObjectId;
 
@@ -20,24 +20,33 @@ export class PostLikeDailyRankingDocument extends Document {
   boardType: PostBoardType;
 
   @Prop({ type: Number, default: 0 })
+  readCount = 0;
+
+  @Prop({ type: Number, default: 0 })
   likeCount = 0;
+
+  @Prop({ type: Number, default: 0 })
+  commentCount = 0;
+
+  @Prop({ type: Number, default: 0 })
+  scrapCount = 0;
 
   // 집계 날짜. 분,초 정보 없이 연,월,일 정보만 저장
   @Prop({ type: Date, default: getCurrentDate })
   aggregateDate: Date;
 }
 
-export const PostLikeDailyRankingSchema = SchemaFactory.createForClass(
-  PostLikeDailyRankingDocument,
+export const PostDailyRankingSchema = SchemaFactory.createForClass(
+  PostDailyRankingDocument,
 );
-PostLikeDailyRankingSchema.index({ postId: 1, aggregateDate: 1 });
-PostLikeDailyRankingSchema.index({
+PostDailyRankingSchema.index({ postId: 1, aggregateDate: 1 });
+PostDailyRankingSchema.index({
   aggregateDate: 1,
   boardType: 1,
   likeCount: 1,
   postId: 1,
 });
-PostLikeDailyRankingSchema.virtual("post", {
+PostDailyRankingSchema.virtual("post", {
   foreignField: "_id",
   localField: "postId",
   ref: PostDocument.name,

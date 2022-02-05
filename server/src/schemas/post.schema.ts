@@ -1,7 +1,7 @@
 import { Document, Model, Types } from "mongoose";
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "./user.schema";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 import { Post, PostBoardType, PostBoardTypes } from "../models/post.model";
 import { Expose, plainToClass, Transform, Type } from "class-transformer";
 
@@ -14,7 +14,7 @@ import { Expose, plainToClass, Transform, Type } from "class-transformer";
   timestamps: {
     createdAt: true,
     updatedAt: false,
-    currentTime: getCurrentUTCTime,
+    currentTime: getCurrentTime,
   },
 })
 export class PostDocument extends Document {
@@ -53,9 +53,6 @@ export class PostDocument extends Document {
   @Prop()
   htmlContent: string;
 
-  @Prop({ type: Number, default: 0 })
-  readCount: number;
-
   createdAt: Date;
 
   @Type(() => String)
@@ -63,10 +60,16 @@ export class PostDocument extends Document {
   imageUrls: string[];
 
   @Prop({ type: Number, default: 0 })
+  readCount: number;
+
+  @Prop({ type: Number, default: 0 })
   likeCount: number;
 
   @Prop({ type: Number, default: 0 })
   commentCount: number;
+
+  @Prop({ type: Number, default: 0 })
+  scrapCount: number;
 
   static toModel(postDocument: PostDocument): Post {
     return plainToClass(Post, postDocument, {

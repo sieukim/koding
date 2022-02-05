@@ -7,6 +7,7 @@ import { CheckFollowingHandler } from "./check-following.handler";
 import { GetMyUserInfoHandler } from "./get-my-user-info.handler";
 import { GetWritingPostsHandler } from "./get-writing-posts.handler";
 import { GetWritingCommentsHandler } from "./get-writing-comments.handler";
+import { GetScrapPostsHandler } from "./get-scrap-posts.handler";
 
 export const UserQueryHandlers = [
   GetFollowerUsersHandler,
@@ -18,4 +19,5 @@ export const UserQueryHandlers = [
   GetMyUserInfoHandler,
   GetWritingPostsHandler,
   GetWritingCommentsHandler,
+  GetScrapPostsHandler,
 ];

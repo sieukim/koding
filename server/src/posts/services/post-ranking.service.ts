@@ -2,15 +2,15 @@ import { Injectable } from "@nestjs/common";
 import { Model, Types } from "mongoose";
 import { PostBoardType, PostIdentifier } from "../../models/post.model";
 import { getCurrentDate } from "../../common/utils/time.util";
-import { PostLikeDailyRankingDocument } from "../../schemas/post-like-daliy-ranking.schema";
+import { PostDailyRankingDocument } from "../../schemas/post-daliy-ranking.schema";
 import { SortType } from "../../common/repository/sort-option";
 import { InjectModel } from "@nestjs/mongoose";
 
 @Injectable()
 export class PostRankingService {
   constructor(
-    @InjectModel(PostLikeDailyRankingDocument.name)
-    private readonly dailyRankingModel: Model<PostLikeDailyRankingDocument>,
+    @InjectModel(PostDailyRankingDocument.name)
+    private readonly dailyRankingModel: Model<PostDailyRankingDocument>,
   ) {}
 
   async increaseDailyLikeCount({ postId, boardType }: PostIdentifier) {
@@ -47,7 +47,7 @@ export class PostRankingService {
   async getDailyRanking(boardType: PostBoardType, pageSize) {
     const currentDate = getCurrentDate();
     const dailyRankings = await this.dailyRankingModel
-      .find({ aggregateDate: currentDate, boardType, likeCount: { $gte: 0 } })
+      .find({ aggregateDate: currentDate, boardType, likeCount: { $gt: 0 } })
       .sort({ likeCount: SortType.DESC, postId: SortType.DESC })
       .populate("post")
       .limit(pageSize)

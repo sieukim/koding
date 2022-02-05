@@ -10,7 +10,7 @@ import {
 import { ForbiddenException } from "@nestjs/common";
 import { AggregateRoot } from "@nestjs/cqrs";
 import { User } from "./user.model";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 import { PostReadCountIncreasedEvent } from "../posts/events/post-read-count-increased.event";
 import { Types } from "mongoose";
 import { TagChangedEvent } from "../tags/events/tag-changed.event";
@@ -86,14 +86,6 @@ export class Post extends AggregateRoot {
   htmlContent: string;
 
   @Expose()
-  @IsNumber()
-  @Min(0)
-  @ApiProperty({
-    description: "조회수",
-  })
-  readCount: number;
-
-  @Expose()
   @IsDate()
   @ApiProperty({
     description: "게시글 생성 시간",
@@ -127,6 +119,22 @@ export class Post extends AggregateRoot {
   })
   commentCount: number;
 
+  @Expose()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: "조회수",
+  })
+  readCount: number;
+
+  @Expose()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: "스크랩 수",
+  })
+  scrapCount: number;
+
   constructor();
   constructor(param: {
     title: string;
@@ -159,7 +167,7 @@ export class Post extends AggregateRoot {
       this.readCount = 0;
       this.likeCount = 0;
       this.commentCount = 0;
-      this.createdAt = getCurrentUTCTime();
+      this.createdAt = getCurrentTime();
     }
   }
 

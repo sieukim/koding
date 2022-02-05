@@ -3,7 +3,7 @@ import { DeleteUnusedFilesCommand } from "../delete-unused-files.command";
 import { InjectModel } from "@nestjs/mongoose";
 import { S3Image } from "../../../schemas/s3-image.schema";
 import { Model } from "mongoose";
-import { getCurrentUTCTime } from "../../../common/utils/time.util";
+import { getCurrentTime } from "../../../common/utils/time.util";
 
 @CommandHandler(DeleteUnusedFilesCommand)
 export class DeleteUnusedFilesHandler
@@ -15,7 +15,7 @@ export class DeleteUnusedFilesHandler
   ) {}
 
   async execute(command: DeleteUnusedFilesCommand): Promise<void> {
-    const deadline = getCurrentUTCTime();
+    const deadline = getCurrentTime();
     deadline.setHours(deadline.getHours() - S3Image.EXPIRE_HOUR);
     await this.fileModel.deleteMany({
       createdAt: { $gte: deadline },

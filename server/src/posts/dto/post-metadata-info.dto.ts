@@ -13,6 +13,7 @@ export class PostMetadataInfoDto extends PickType(Post, [
   "likeCount",
   "commentCount",
   "markdownContent",
+  "scrapCount",
 ] as const) {
   static fromModel(model: Post) {
     return PostMetadataInfoDto.fromJson(model);

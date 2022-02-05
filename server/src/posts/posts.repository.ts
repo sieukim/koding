@@ -95,6 +95,14 @@ export class PostsRepository extends MongooseBaseRepository<
     return this.modifyCommentCount(postIdentifier, -1);
   }
 
+  increaseScrapCount(postIdentifier: PostIdentifier) {
+    return this.modifyScrapCount(postIdentifier, 1);
+  }
+
+  decreaseScrapCount(postIdentifier: PostIdentifier) {
+    return this.modifyScrapCount(postIdentifier, -1);
+  }
+
   private async modifyLikeCount(
     { postId, boardType }: PostIdentifier,
     delta: 1 | -1,
@@ -123,6 +131,19 @@ export class PostsRepository extends MongooseBaseRepository<
         boardType,
       },
       { $inc: { commentCount: delta } },
+    );
+  }
+
+  private modifyScrapCount(
+    { postId, boardType }: PostIdentifier,
+    delta: 1 | -1,
+  ) {
+    return this.postModel.updateOne(
+      {
+        _id: new Types.ObjectId(postId),
+        boardType,
+      },
+      { $inc: { scrapCount: delta } },
     );
   }
 

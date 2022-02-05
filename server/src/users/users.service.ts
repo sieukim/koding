@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { UserDocument } from "../schemas/user.schema";
-import { FilterQuery, Model } from "mongoose";
+import { Model } from "mongoose";
 import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
 import { EmailService } from "../email/email.service";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
@@ -66,20 +66,6 @@ export class UsersService {
     );
   }
 
-  findUserByNickname(
-    nickname: string,
-    includePassword = false,
-    populate: (keyof UserDocument)[] = [],
-  ) {
-    if (populate.length <= 0)
-      return this.findUserByField({ nickname }, includePassword);
-    else return this.findUserByField({ nickname }, includePassword, populate);
-  }
-
-  findUserByEmail?(email: string, includePassword = false) {
-    return this.findUserByField({ email }, includePassword);
-  }
-
   checkExistence(key: "nickname" | "email", value: string) {
     return this.queryBus.execute(
       new CheckExistenceQuery(key, value),
@@ -96,16 +82,5 @@ export class UsersService {
     return this.commandBus.execute(
       new UnfollowUserCommand(from.nickname, to.nickname),
     ) as ReturnType<UnfollowUserHandler["execute"]>;
-  }
-
-  private findUserByField(
-    condition: FilterQuery<UserDocument>,
-    includePassword = false,
-    populate: (keyof UserDocument)[] = [],
-  ) {
-    let query = this.userModel.findOne(condition);
-    if (!includePassword) query = query.select("-password");
-    if (populate.length > 0) query = query.populate(populate);
-    return query.exec();
   }
 }

@@ -50,13 +50,11 @@ import { GetFollowerUsersHandler } from "./queries/handlers/get-follower-users.h
 import { GetUserInfoQuery } from "./queries/get-user-info.query";
 import { GetUserInfoHandler } from "./queries/handlers/get-user-info.handler";
 import { CheckFollowingQuery } from "./queries/check-following.query";
-import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../models/user.model";
 import { MyUserInfoDto } from "./dto/my-user-info.dto";
 import { ChangeProfileRequestDto } from "./dto/change-profile-request.dto";
 import { ChangeProfileCommand } from "./commands/change-profile.command";
-import { LoggedInGuard } from "../auth/guard/authorization/logged-in.guard";
 import { ChangeProfileHandler } from "./commands/handlers/change-profile.handler";
 import { ChangePasswordRequestDto } from "./dto/change-password-request.dto";
 import { ChangePasswordCommand } from "./commands/change-password.command";
@@ -73,6 +71,13 @@ import { GetWritingCommentsQuery } from "./queries/get-writing-comments.query";
 import { NicknameAndBoardTypeParamDto } from "./dto/param/nickname-and-board-type-param.dto";
 import { WritingCommentsInfoDto } from "./dto/writing-comments-info.dto";
 import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dto";
+import { ParamNicknameSameUserGuard } from "../auth/guard/authorization/param-nickname-same-user.guard";
+import { ScrapPostCommand } from "./commands/scrap-post.command";
+import { PostIdentifierWithNicknameParamDto } from "../posts/dto/param/post-identifier-with-nickname-param.dto";
+import { UnscrapPostCommand } from "./commands/unscrap-post.command";
+import { GetScrapPostsQuery } from "./queries/get-scrap-posts.query";
+import { PostListDto } from "../posts/dto/post-list.dto";
+import { GetScrapPostsHandler } from "./queries/handlers/get-scrap-posts.handler";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -143,7 +148,7 @@ export class UsersController {
   @ApiNoContentResponse({
     description: "사용자 삭제 성공 & 로그아웃 완료",
   })
-  @UseGuards(LoggedInGuard)
+  @UseGuards(ParamNicknameSameUserGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":nickname")
   async deleteAccount(
@@ -176,7 +181,7 @@ export class UsersController {
     description: "사용자 프로필 정보 변경 성공",
     type: MyUserInfoDto,
   })
-  @UseGuards(LoggedInGuard)
+  @UseGuards(ParamNicknameSameUserGuard)
   @HttpCode(HttpStatus.OK)
   @Patch(":nickname")
   async changeProfile(
@@ -205,7 +210,7 @@ export class UsersController {
   @ApiNoContentResponse({
     description: "사용자 비밀번호 변경 성공",
   })
-  @UseGuards(LoggedInGuard)
+  @UseGuards(ParamNicknameSameUserGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch(":nickname/password")
   changePassword(
@@ -300,7 +305,7 @@ export class UsersController {
     description: "팔로우 완료(원래 이미 팔로우하고 있었던 경우도 포함)",
     type: FollowUserResultDto,
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(ParamNicknameSameUserGuard)
   @HttpCode(HttpStatus.OK)
   @Post(":nickname/followings")
   async followUser(
@@ -335,7 +340,7 @@ export class UsersController {
     description: "언팔로우 완료(원래 팔로우하지 않았던 경우도 포함)",
     type: UnfollowUserResultDto,
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(ParamNicknameSameUserGuard)
   @HttpCode(HttpStatus.OK)
   @Delete(":nickname/followings/:followNickname")
   async unfollowUser(
@@ -450,5 +455,54 @@ export class UsersController {
     return this.queryBus.execute(
       new GetWritingCommentsQuery(nickname, boardType, pageSize, cursor),
     );
+  }
+
+  /*
+   * 게시글 스크랩
+   */
+  @ApiCreatedResponse({ description: "게시글 스크랩 성공" })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @Post(":nickname/scrap-posts/:boardType/:postId")
+  async scrapPost(
+    @Param()
+    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
+  ) {
+    await this.commandBus.execute(
+      new ScrapPostCommand({ postId, boardType }, nickname),
+    );
+    return;
+  }
+
+  /*
+   * 게시글 스크랩 취소
+   */
+  @ApiNoContentResponse({ description: "게시글 스크랩 취소 성공" })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":nickname/scrap-posts/:boardType/:postId")
+  async unscrapPost(
+    @Param()
+    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
+  ) {
+    await this.commandBus.execute(
+      new UnscrapPostCommand({ postId, boardType }, nickname),
+    );
+    return;
+  }
+
+  /*
+   * 스크랩한 게시글들 조회
+   */
+  @ApiOkResponse({
+    description: "스크랩한 게시글들 조회 성공",
+    type: PostListDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get(":nickname/scrap-posts")
+  getScrapPosts(@Param() { nickname }: NicknameParamDto) {
+    return this.queryBus.execute(
+      new GetScrapPostsQuery(nickname),
+    ) as ReturnType<GetScrapPostsHandler["execute"]>;
   }
 }

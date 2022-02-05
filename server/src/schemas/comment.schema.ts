@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 import { Document, Model, Types } from "mongoose";
 import { UserDocument } from "./user.schema";
 import { IsNotEmpty, IsString } from "class-validator";
@@ -17,7 +17,7 @@ import { PostBoardType, PostBoardTypes } from "../models/post.model";
   timestamps: {
     createdAt: true,
     updatedAt: false,
-    currentTime: getCurrentUTCTime,
+    currentTime: getCurrentTime,
   },
 })
 export class CommentDocument extends Document {

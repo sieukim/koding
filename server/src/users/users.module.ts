@@ -12,12 +12,18 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { EmailSagas } from "./sagas/email.sagas";
 import { PostsModule } from "../posts/posts.module";
 import { CommentsModule } from "../comments/comments.module";
+import {
+  ScrapPostDocument,
+  ScrapPostSchema,
+} from "../schemas/scrap-post.schema";
+import { UserServices } from "./services";
 
 @Global()
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: UserDocument.name, schema: UserSchema },
+      { name: ScrapPostDocument.name, schema: ScrapPostSchema },
     ]),
     EmailModule,
     CqrsModule,
@@ -29,6 +35,7 @@ import { CommentsModule } from "../comments/comments.module";
     UsersService,
     UsersRepository,
     EmailSagas,
+    ...UserServices,
     ...UserCommandHandlers,
     ...UserEventHandlers,
     ...UserQueryHandlers,

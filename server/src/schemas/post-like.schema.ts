@@ -3,7 +3,7 @@ import { PostDocument } from "./post.schema";
 import { Document, Types } from "mongoose";
 import { PostBoardType, PostBoardTypes } from "../models/post.model";
 import { UserDocument } from "./user.schema";
-import { getCurrentUTCTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../common/utils/time.util";
 
 @Schema({
   _id: true,
@@ -13,7 +13,7 @@ import { getCurrentUTCTime } from "../common/utils/time.util";
   timestamps: {
     createdAt: true,
     updatedAt: false,
-    currentTime: getCurrentUTCTime,
+    currentTime: getCurrentTime,
   },
 })
 export class PostLikeDocument extends Document {
