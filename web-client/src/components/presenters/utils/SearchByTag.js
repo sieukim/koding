@@ -4,7 +4,7 @@ import { Chip, TextField } from '@material-ui/core';
 
 const StyledTag = styled.div``;
 
-const TagPresenter = ({ onChangeTag, tags = [], defaultValue = [] }) => {
+const SearchByTag = ({ onChangeTag, tags = [], defaultValue = [] }) => {
   return (
     <StyledTag>
       <Autocomplete
@@ -36,4 +36,4 @@ const TagPresenter = ({ onChangeTag, tags = [], defaultValue = [] }) => {
   );
 };
 
-export default TagPresenter;
+export default SearchByTag;

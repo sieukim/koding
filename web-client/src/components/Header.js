@@ -72,13 +72,10 @@ const NavigationBar = () => {
   return (
     <Menu selectedKeys={[current]} mode="horizontal">
       <Menu.Item key="common">
-        <NavLink to="/board/common">자유</NavLink>
+        <NavLink to="/board/common">커뮤니티</NavLink>
       </Menu.Item>
       <Menu.Item key="question">
         <NavLink to="/board/question">Q&A</NavLink>
-      </Menu.Item>
-      <Menu.Item key="career">
-        <NavLink to="/board/career">취준 고민</NavLink>
       </Menu.Item>
       <Menu.Item key="recruit">
         <NavLink to="/board/recruit">채용 정보</NavLink>
@@ -124,7 +121,7 @@ const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
           <Menu.Item key="profile">
             <NavLink to={`/user/${loginUser}/profile`}>내 프로필</NavLink>
           </Menu.Item>
-          <Menu.Item key="profile-edit">
+          <Menu.Item key="edit-profile">
             <NavLink to={`/user/${loginUser}/profile/edit`}>
               프로필 편집
             </NavLink>

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { NicknameLink } from '../../../utils/NicknameLink';
+import { NicknameLink } from '../utils/link/NicknameLink';
 import { Button, List, Tabs } from 'antd';
 import { UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { useCallback, useEffect, useState } from 'react';

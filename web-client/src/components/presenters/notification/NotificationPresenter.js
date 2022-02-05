@@ -7,9 +7,9 @@ import {
   UserOutlined,
   WarningOutlined,
 } from '@ant-design/icons';
-import { NicknameLink } from '../../../utils/NicknameLink';
+import { NicknameLink } from '../utils/link/NicknameLink';
 import moment from 'moment';
-import { PostLink } from '../../../utils/PostLink';
+import { PostLink } from '../utils/link/PostLink';
 import { useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 

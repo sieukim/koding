@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { getMentionedList } from '../../../utils/getMentionedList';
 import { GetDate } from '../../../utils/GetDate';
-import { NicknameLink } from '../../../utils/NicknameLink';
+import { NicknameLink } from '../utils/link/NicknameLink';
 
 const StyledComment = styled.div`
   display: flex;

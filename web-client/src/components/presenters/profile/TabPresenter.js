@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { PostLink } from '../../../utils/PostLink';
+import { PostLink } from '../utils/link/PostLink';
 import markdownToTxt from 'markdown-to-txt';
 import styled from 'styled-components';
 import {

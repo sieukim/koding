@@ -1,5 +1,5 @@
-import * as api from '../modules/api';
-import useAsync from '../hooks/useAsync';
+import * as api from '../../../../modules/api';
+import useAsync from '../../../../hooks/useAsync';
 import { Avatar } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { NavLink } from 'react-router-dom';

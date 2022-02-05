@@ -2,10 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
 import { GetDate } from '../../../utils/GetDate';
-import { NicknameLink } from '../../../utils/NicknameLink';
+import { NicknameLink } from '../utils/link/NicknameLink';
 import { Chip } from '@material-ui/core';
-import { Viewer } from '../../../utils/Viewer';
-import { PostLink } from '../../../utils/PostLink';
+import { Viewer } from '../utils/editor/Viewer';
+import { PostLink } from '../utils/link/PostLink';
 
 const StyledReadPost = styled.div`
   display: flex;

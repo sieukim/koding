@@ -1,79 +1,56 @@
 import BoardPresenter from '../../presenters/post/BoardPresenter';
-import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-const BoardContainer = ({ boardType, cursor, tags }) => {
-  /* 게시글 목록 가져오기 */
+const BoardContainer = ({ boardType, tags }) => {
+  // 로그인 유저 정보
+  const user = useSelector((state) => state.auth.user);
 
-  // 현재 게시글 목록 가져오기
-  const [readBoardState] = useAsync(
-    () => api.readBoard(boardType, tags, cursor),
-    [boardType, tags, cursor],
-    false,
-  );
+  const [loading, setLoading] = useState(false);
+
+  // 게시글 목록
+  const [posts, setPosts] = useState([]);
+
+  const [nextPageCursor, setNextPageCursor] = useState(null);
+
+  const getPosts = useCallback(async () => {
+    if (!nextPageCursor) setLoading(true);
+    const response = await api.readBoard(boardType, tags, nextPageCursor);
+    setPosts((posts) => [...posts, ...response.data.posts]);
+    setNextPageCursor(response.data.nextPageCursor);
+    setLoading(false);
+  }, [boardType, tags, nextPageCursor]);
+
+  useEffect(() => {
+    getPosts();
+
+    return () => {
+      setPosts([]);
+      setNextPageCursor(null);
+    };
+  }, [boardType, tags]);
 
   const navigate = useNavigate();
 
-  // 다음 게시글 목록
-  const nextPageCursor = readBoardState.success?.data?.nextPageCursor;
-
-  // 다음 게시글 목록으로 이동 이벤트 리스너
-  const onClickNextCursor = useCallback(() => {
-    const query = new URLSearchParams();
-    if (tags && tags.length > 0) query.set('tags', tags);
-    if (nextPageCursor) query.set('cursor', nextPageCursor);
-    navigate(`/board/${boardType}?${query.toString()}`);
-  }, [navigate, boardType, nextPageCursor, tags]);
-
-  // 이전 게시글 목록
-  const prevPageCursor = readBoardState.success?.data?.prevPageCursor;
-
-  // 이전 게시글 목록으로 이동 이벤트 리스너
-  const onClickPrevCursor = useCallback(() => {
-    const query = new URLSearchParams();
-    if (tags && tags.length > 0) query.set('tags', tags);
-    if (prevPageCursor) query.set('cursor', prevPageCursor);
-    navigate(`/board/${boardType}?${query.toString()}`);
-  }, [navigate, boardType, prevPageCursor, tags]);
-
-  // 글쓰기 이벤트 리스너
-  const onClickWritePost = useCallback(() => {
-    navigate(`/board/${boardType}/post/write`);
+  // 게시글 작성 버튼 onClick 핸들러
+  const onClickWrite = useCallback(() => {
+    if (user) {
+      navigate(`/board/${boardType}/post/write`);
+    } else {
+      navigate(`/login`);
+    }
   }, [navigate, boardType]);
-
-  // 태그 변화 리스너
-  const onChangeTag = useCallback(
-    (e, value) => {
-      if (value.length === 0) {
-        navigate(`/board/${boardType}`);
-      } else {
-        navigate(`/board/${boardType}?tags=${value.join(',')}`);
-      }
-    },
-    [navigate],
-  );
-
-  /* 태그 목록 조회 */
-  const [getTagListState] = useAsync(
-    () => api.getTagList(boardType),
-    [boardType],
-    false,
-  );
 
   return (
     <BoardPresenter
+      loading={loading}
       boardType={boardType}
-      readBoardState={readBoardState}
-      hasNextPage={nextPageCursor}
-      hasPrevPage={prevPageCursor}
-      onClickNextCursor={onClickNextCursor}
-      onClickPrevCursor={onClickPrevCursor}
-      onClickWritePost={onClickWritePost}
-      onChangeTag={onChangeTag}
-      tagList={getTagListState.success?.data}
-      posts={readBoardState.success?.data?.posts}
+      posts={posts}
+      getPosts={getPosts}
+      nextPageCursor={nextPageCursor}
+      onClickWrite={onClickWrite}
     />
   );
 };

@@ -1,104 +1,141 @@
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
-import { GetDate } from '../../../utils/GetDate';
-import TagPresenter from './TagPresenter';
-import { NicknameLink } from '../../../utils/NicknameLink';
-import { PostLink } from '../../../utils/PostLink';
+import { PostList } from '../utils/PostList';
+import { Button, Divider, Input } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
 const StyledBoard = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+  margin: 50px 0;
+  width: 700px;
 
-  .board {
-    display: flex;
-    flex-direction: column;
-    padding: 5px;
-    background: wheat;
-    height: 632px;
+  .title-text {
+    text-align: center;
+    font-weight: bold;
+    font-size: 32px;
+    margin-bottom: 24px;
   }
 
-  .post-item {
+  .paragraph-text {
+    text-align: center;
+    font-weight: 200;
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .board-header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px;
-    margin: 10px;
-    background: gainsboro;
-  }
+    margin: 20px 0;
 
-  .post-info {
-    display: flex;
-    flex-direction: row;
-  }
+    .ant-input-affix-wrapper {
+      .ant-input-suffix {
+        font-size: 1rem;
+        color: rgba(0, 0, 0, 0.45);
+      }
+    }
 
-  .post-createdAt {
-    margin-left: 5px;
-  }
-
-  .paging-button {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-  }
-
-  button {
-    padding: 3px;
-    margin: 5px;
-    width: 10%;
-  }
-
-  .post-write {
-    align-self: end;
+    .ant-btn {
+      margin-left: 20px;
+    }
   }
 `;
 
-const BoardPresenter = ({
-  boardType,
-  readBoardState,
-  hasNextPage,
-  hasPrevPage,
-  onClickNextCursor,
-  onClickPrevCursor,
-  onClickWritePost,
-  onChangeTag,
-  tagList = [],
-  posts = [],
-}) => {
-  // 로그인 유저 정보
-  const user = useSelector((state) => state.auth.user);
+const CommunityMent = () => {
+  return (
+    <>
+      <div className="title-text">커뮤니티</div>
+      <p className="paragraph-text">
+        취준, 자소서, 코테 등의 다양한 이야기를 나누는 공간입니다.
+        <br />
+        🚫 타인에게 불쾌감을 주는 언행은 모두 신고해주세요! (비방, 욕설, 상업적
+        광고, 정치 등) 🚫
+      </p>
+    </>
+  );
+};
 
+const QnaMent = () => {
+  return (
+    <>
+      <div className="title-text">Q&A</div>
+      <p className="paragraph-text">
+        프로그래밍 관련 질문을 주고 받는 공간입니다.
+        <br />
+        🚫 타인에게 불쾌감을 주는 언행은 모두 신고해주세요! (비방, 욕설, 상업적
+        광고, 정치 등) 🚫
+      </p>
+    </>
+  );
+};
+
+const RecruitMent = () => {
+  return (
+    <>
+      <div className="title-text">채용 정보</div>
+      <p className="paragraph-text">
+        다양한 회사의 프로그래밍 관련 채용 공고를 확인하는 공간입니다.
+        <br />
+        🌸 모든 분들의 꽃길을 기원합니다. 🌸
+      </p>
+    </>
+  );
+};
+
+const StudyGroupMent = () => {
+  return (
+    <>
+      <div className="title-text">스터디 모집</div>
+      <p className="paragraph-text">
+        다양한 주제를 갖고 함께 공부할 그룹 스터디를 모집하는 공간힙니다.
+        <br />✨ 좋은 공부, 좋은 인연을 만들길 기원합니다. ✨
+      </p>
+    </>
+  );
+};
+
+const BlogMent = () => {
+  return (
+    <>
+      <div className="title-text">블로그</div>
+      <p className="paragraph-text">
+        관심있는 주제의 글을 작성하는 공간입니다.
+        <br />
+        📝 공부한 내용을 정리하여 기록해보아요! 📝
+      </p>
+    </>
+  );
+};
+
+const BoardPresenter = ({
+  loading,
+  boardType,
+  posts,
+  getPosts,
+  nextPageCursor,
+  onClickWrite,
+}) => {
   return (
     <StyledBoard>
-      <TagPresenter tags={tagList} onChangeTag={onChangeTag} />
-      <div className="board">
-        {posts.map((post) => (
-          <div className="post-item" key={post.postId}>
-            <PostLink
-              boardType={boardType}
-              postId={post.postId}
-              postTitle={post.title}
-            />
-            <div className="post-info">
-              <NicknameLink nickname={post.writerNickname} />
-              <GetDate date={post.createdAt} className="post-createdAt" />
-            </div>
-          </div>
-        ))}
-        <div className="paging-button">
-          <button onClick={onClickPrevCursor} disabled={!hasPrevPage}>
-            이전
-          </button>
-          <button onClick={onClickNextCursor} disabled={!hasNextPage}>
-            다음
-          </button>
-        </div>
-        {user && (
-          <button onClick={onClickWritePost} className="post-write">
-            글 쓰기
-          </button>
+      {boardType === 'common' && <CommunityMent />}
+      {boardType === 'question' && <QnaMent />}
+      {boardType === 'recruit' && <RecruitMent />}
+      {boardType === 'study-group' && <StudyGroupMent />}
+      {boardType === 'column' && <BlogMent />}
+      <div className="board-header">
+        <Input suffix={<SearchOutlined />} />
+        {boardType !== 'recruit' && (
+          <Button type="primary" onClick={onClickWrite}>
+            게시글 작성
+          </Button>
         )}
       </div>
+      <Divider />
+      <PostList
+        loading={loading}
+        posts={posts}
+        next={getPosts}
+        hasMore={nextPageCursor}
+      />
     </StyledBoard>
   );
 };

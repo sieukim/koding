@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import SearchBar from '../../../utils/SearchBar';
-import SearchResult from '../../../utils/SearchResult';
+import SearchBar from '../utils/SearchBar';
+import SearchResult from '../utils/SearchResult';
 
 const StyledPage = styled.div`
   display: flex;
