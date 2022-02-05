@@ -21,7 +21,7 @@ import SearchPage from './pages/search/SearchPage';
 import styled from 'styled-components';
 
 const StyledPage = styled.div`
-  min-width: 900px;
+  min-width: 1200px;
 
   .body {
     min-height: calc(100vh - 160px);

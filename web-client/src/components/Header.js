@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { NavLink, useMatch } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as api from '../modules/api';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Avatar, Badge, Divider, Dropdown, Menu, message } from 'antd';
 import { setLogout } from '../modules/auth';
 import useAsync from '../hooks/useAsync';
@@ -19,22 +19,20 @@ const StyledHeader = styled.nav`
     font-size: 30px;
   }
 
-  ul {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: auto 0;
-    padding: 0 0;
-    list-style: none;
+  .ant-menu-horizontal {
+    border-bottom: none;
+  }
 
-    li {
-      margin: auto 30px;
-      font-weight: bold;
-      font-size: 1rem;
-    }
+  li {
+    margin: auto 30px;
+    font-weight: bold;
+    font-size: 1rem;
+    color: grey;
   }
 
   .login {
+    width: 88px;
+    text-align: right;
     font-weight: bold;
     font-size: 1rem;
   }
@@ -56,6 +54,45 @@ const StyledHeader = styled.nav`
   }
 `;
 
+const NavigationBar = () => {
+  const [current, setCurrent] = useState(null);
+
+  const match = useMatch('/board/:boardType/*');
+  const boardType = match?.params?.boardType;
+
+  useEffect(() => {
+    if (boardType) {
+      setCurrent(boardType);
+    }
+    if (!match) {
+      setCurrent(null);
+    }
+  }, [boardType, match]);
+
+  return (
+    <Menu selectedKeys={[current]} mode="horizontal">
+      <Menu.Item key="common">
+        <NavLink to="/board/common">자유</NavLink>
+      </Menu.Item>
+      <Menu.Item key="question">
+        <NavLink to="/board/question">Q&A</NavLink>
+      </Menu.Item>
+      <Menu.Item key="career">
+        <NavLink to="/board/career">취준 고민</NavLink>
+      </Menu.Item>
+      <Menu.Item key="recruit">
+        <NavLink to="/board/recruit">채용 정보</NavLink>
+      </Menu.Item>
+      <Menu.Item key="study-group">
+        <NavLink to="/board/study-group">스터디 모집</NavLink>
+      </Menu.Item>
+      <Menu.Item key="column">
+        <NavLink to="/board/column">블로그</NavLink>
+      </Menu.Item>
+    </Menu>
+  );
+};
+
 const Notification = ({ loginUser }) => {
   // 안 읽은 알림 여부 확인
   const [checkNotificationState, checkNotificationFetch] = useAsync(
@@ -68,7 +105,7 @@ const Notification = ({ loginUser }) => {
   useEffect(() => {
     const timerId = setInterval(() => checkNotificationFetch(), 5000);
     return () => clearInterval(timerId);
-  }, []);
+  }, [checkNotificationFetch]);
 
   return (
     <NavLink to={`/user/${loginUser}/notification`}>
@@ -140,26 +177,7 @@ const Header = () => {
           Koding
         </NavLink>
         {/*{!match && <SearchBar className="header" />}*/}
-        <ul className="menu-group">
-          <li>
-            <NavLink to="/board/common">자유</NavLink>
-          </li>
-          <li>
-            <NavLink to="/board/question">Q&A</NavLink>
-          </li>
-          <li>
-            <NavLink to="/board/career">취준 고민</NavLink>
-          </li>
-          <li>
-            <NavLink to="/board/recruit">채용 정보</NavLink>
-          </li>
-          <li>
-            <NavLink to="/board/study-group">스터디 모집</NavLink>
-          </li>
-          <li>
-            <NavLink to="/board/column">블로그</NavLink>
-          </li>
-        </ul>
+        <NavigationBar />
         {!user && (
           <NavLink to="/login" className="login">
             로그인
