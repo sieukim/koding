@@ -5,14 +5,15 @@ import { plainToClass } from "class-transformer";
 export class PostMetadataInfoDto extends PickType(Post, [
   "postId",
   "title",
-  "readCount",
+  "writerNickname",
   "tags",
   "createdAt",
   "boardType",
-  "writerNickname",
+  "markdownContent",
+  "imageUrls",
+  "readCount",
   "likeCount",
   "commentCount",
-  "markdownContent",
   "scrapCount",
 ] as const) {
   static fromModel(model: Post) {

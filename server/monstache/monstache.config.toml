@@ -60,8 +60,12 @@ var newdoc = {
     writerNickname: doc.writerNickname,
     tags: doc.tags,
     htmlContent: doc.htmlContent,
+    imageUrls: doc.imageUrls,
+    createdAt: doc.createdAt,
     readCount: doc.readCount,
-    createdAt: doc.createdAt
+    likeCount: doc.likeCount,
+    commentCount: doc.commentCount,
+    scrapCount: doc.scrapCount
   }
   return newdoc;
 }

@@ -67,6 +67,11 @@
         "boost": 2,
         "normalizer": "post_tag_normalizer"
       },
+      "imageUrls": {
+        "type": "text",
+        "index": false,
+        "doc_values": false
+      },
       "createdAt": {
         "type": "date"
       },
@@ -74,6 +79,15 @@
         "type": "keyword"
       },
       "readCount": {
+        "type": "integer"
+      },
+      "likeCount": {
+        "type": "integer"
+      },
+      "commentCount": {
+        "type": "integer"
+      },
+      "scrapCount": {
         "type": "integer"
       }
     }
