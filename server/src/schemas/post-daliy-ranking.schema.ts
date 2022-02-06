@@ -20,6 +20,9 @@ export class PostDailyRankingDocument extends Document {
   boardType: PostBoardType;
 
   @Prop({ type: Number, default: 0 })
+  popularity = 0;
+
+  @Prop({ type: Number, default: 0 })
   readCount = 0;
 
   @Prop({ type: Number, default: 0 })
@@ -39,11 +42,11 @@ export class PostDailyRankingDocument extends Document {
 export const PostDailyRankingSchema = SchemaFactory.createForClass(
   PostDailyRankingDocument,
 );
-PostDailyRankingSchema.index({ postId: 1, aggregateDate: 1 });
+PostDailyRankingSchema.index({ postId: 1, aggregateDate: 1 }); // 필드 값 업데이트 쿼리를 위해
 PostDailyRankingSchema.index({
   aggregateDate: 1,
   boardType: 1,
-  likeCount: 1,
+  popularity: 1,
   postId: 1,
 });
 PostDailyRankingSchema.virtual("post", {

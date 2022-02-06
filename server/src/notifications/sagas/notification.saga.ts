@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ofType, Saga } from "@nestjs/cqrs";
-import { filter, map, mergeMap, Observable } from "rxjs";
+import { filter, map, mergeAll, mergeMap, Observable } from "rxjs";
 import { CommentAddedEvent } from "../../comments/events/comment-added.event";
 import { AddNotificationCommand } from "../commands/add-notification.command";
 import {
@@ -13,67 +13,69 @@ import {
 import { UserFollowedEvent } from "../../users/events/user-followed.event";
 import { PostDeletedByAdminEvent } from "../../admin/events/post-deleted-by-admin.event";
 import { CommentDeletedByAdminEvent } from "../../admin/events/comment-deleted-by-admin.event";
+import { CommentsRepository } from "../../comments/comments.repository";
+import { PostsRepository } from "../../posts/posts.repository";
 
 @Injectable()
 export class NotificationSaga {
+  constructor(
+    private readonly commentsRepository: CommentsRepository,
+    private readonly postsRepository: PostsRepository,
+  ) {}
+
   @Saga()
   commentNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(CommentAddedEvent),
-      filter(
-        // 본인 게시글에 본인이 댓글을 단 경우는 알람에서 제외
-        ({ commentWriterNickname, postWriterNickname }) =>
-          commentWriterNickname !== postWriterNickname,
-      ),
-      map(
-        ({
-          commentContent,
-          commentWriterNickname,
-          postWriterNickname,
-          postIdentifier: { postId, boardType },
-          postTitle,
-        }) =>
-          new AddNotificationCommand(
-            postWriterNickname,
-            new CommentNotificationData({
-              postTitle,
-              boardType,
-              postId,
-              commentContent,
-              commentWriterNickname,
-            }),
-          ),
-      ),
+      mergeMap(async ({ postIdentifier: { postId, boardType }, commentId }) => {
+        const [comment, post] = await Promise.all([
+          this.commentsRepository.findByCommentId(commentId),
+          this.postsRepository.findByPostId({ postId, boardType }),
+        ]);
+        if (comment.writerNickname !== post.writerNickname) {
+          // 본인 게시글에 본인이 댓글을 단 경우는 알람에서 제외
+          return null;
+        }
+        return new AddNotificationCommand(
+          post.writerNickname,
+          new CommentNotificationData({
+            commentId,
+            boardType,
+            postId,
+            commentContent: comment.content,
+            commentWriterNickname: comment.writerNickname,
+            postTitle: post.title,
+          }),
+        );
+      }),
+      filter((value) => value instanceof AddNotificationCommand),
     );
 
   @Saga()
   mentionNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(CommentAddedEvent),
-      mergeMap(
-        ({
-          mentionedUserNicknames,
-          commentWriterNickname,
-          commentContent,
-          postTitle,
-          postIdentifier: { postId, boardType },
-          commentId,
-        }) =>
-          mentionedUserNicknames.map(
-            (mentionedNickname) =>
-              new AddNotificationCommand(
-                mentionedNickname,
-                new MentionNotificationData({
-                  postId,
-                  postTitle,
-                  commentContent,
-                  commentId,
-                  commentWriterNickname,
-                  boardType,
-                }),
-              ),
-          ),
-      ),
+      mergeMap(async ({ postIdentifier: { postId, boardType }, commentId }) => {
+        const [comment, post] = await Promise.all([
+          this.commentsRepository.findByCommentId(commentId),
+          this.postsRepository.findByPostId({ postId, boardType }),
+        ]);
+        return comment.mentionedNicknames.map(
+          (mentionedNickname) =>
+            new AddNotificationCommand(
+              mentionedNickname,
+              new MentionNotificationData({
+                postId,
+                postTitle: post.title,
+                commentContent: comment.content,
+                commentId,
+                commentWriterNickname: comment.writerNickname,
+                boardType,
+              }),
+            ),
+        );
+      }),
+      mergeAll(), // 배열 flat
     );
 
   @Saga()

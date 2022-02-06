@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PostDocument } from "../schemas/post.schema";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { Model } from "mongoose";
 import { Post, PostIdentifier } from "../models/post.model";
 import { MongooseBaseRepository } from "../common/repository/mongoose-base.repository";
 import { IncreaseType } from "./commands/increase-comment-count.command";
@@ -63,88 +63,76 @@ export class PostsRepository extends MongooseBaseRepository<
     return deleteResult.deletedCount === 1;
   }
 
-  async increaseReadCount({
-    postId,
-    boardType,
-  }: PostIdentifier): Promise<void> {
-    await this.postModel
-      .updateOne(
-        {
-          _id: new Types.ObjectId(postId),
-          boardType,
-        },
-        { $inc: { readCount: 1 } },
-      )
-      .exec();
-    return;
+  increaseReadCount(postIdentifier: PostIdentifier) {
+    return this.increaseField(
+      "readCount",
+      postIdentifier,
+      IncreaseType.Positive,
+    );
   }
 
   increaseLikeCount(postIdentifier: PostIdentifier) {
-    return this.modifyLikeCount(postIdentifier, IncreaseType.Positive);
+    return this.increaseField(
+      "likeCount",
+      postIdentifier,
+      IncreaseType.Positive,
+    );
   }
 
   decreaseLikeCount(postIdentifier: PostIdentifier) {
-    return this.modifyLikeCount(postIdentifier, IncreaseType.Negative);
+    return this.increaseField(
+      "likeCount",
+      postIdentifier,
+      IncreaseType.Negative,
+    );
   }
 
   increaseCommentCount(postIdentifier: PostIdentifier) {
-    return this.modifyCommentCount(postIdentifier, 1);
+    return this.increaseField(
+      "commentCount",
+      postIdentifier,
+      IncreaseType.Positive,
+    );
   }
 
   decreaseCommentCount(postIdentifier: PostIdentifier) {
-    return this.modifyCommentCount(postIdentifier, -1);
+    return this.increaseField(
+      "commentCount",
+      postIdentifier,
+      IncreaseType.Negative,
+    );
   }
 
   increaseScrapCount(postIdentifier: PostIdentifier) {
-    return this.modifyScrapCount(postIdentifier, 1);
+    return this.increaseField(
+      "scrapCount",
+      postIdentifier,
+      IncreaseType.Positive,
+    );
   }
 
   decreaseScrapCount(postIdentifier: PostIdentifier) {
-    return this.modifyScrapCount(postIdentifier, -1);
+    return this.increaseField(
+      "scrapCount",
+      postIdentifier,
+      IncreaseType.Negative,
+    );
   }
 
-  private async modifyLikeCount(
+  async increaseField(
+    fieldName: keyof Post &
+      ("likeCount" | "commentCount" | "readCount" | "scrapCount"),
     { postId, boardType }: PostIdentifier,
-    delta: 1 | -1,
+    delta: IncreaseType,
   ) {
     const findOption = this.parseFindOption({
       postId: { eq: postId },
       boardType: { eq: boardType },
     });
-    const post = await this.postModel
-      .findOneAndUpdate(
-        findOption,
-        { $inc: { likeCount: delta } },
-        { returnOriginal: false },
-      )
+    await this.postModel
+      .updateOne(findOption, { $inc: { [fieldName]: delta } })
       .exec();
-    return post.likeCount;
-  }
-
-  private modifyCommentCount(
-    { postId, boardType }: PostIdentifier,
-    delta: 1 | -1,
-  ) {
-    return this.postModel.updateOne(
-      {
-        _id: new Types.ObjectId(postId),
-        boardType,
-      },
-      { $inc: { commentCount: delta } },
-    );
-  }
-
-  private modifyScrapCount(
-    { postId, boardType }: PostIdentifier,
-    delta: 1 | -1,
-  ) {
-    return this.postModel.updateOne(
-      {
-        _id: new Types.ObjectId(postId),
-        boardType,
-      },
-      { $inc: { scrapCount: delta } },
-    );
+    return;
   }
 
   async findByPostId(identifier: PostIdentifier): Promise<Post | null> {

@@ -98,6 +98,7 @@ export class Post extends AggregateRoot {
     description: "게시글에서 사용하는 이미지 url들",
     type: [String],
     format: "url",
+    example: [],
   })
   imageUrls: string[];
 

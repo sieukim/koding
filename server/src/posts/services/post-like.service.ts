@@ -4,8 +4,14 @@ import { InjectModel } from "@nestjs/mongoose";
 import { PostIdentifier } from "../../models/post.model";
 import { PostLikeDocument } from "../../schemas/post-like.schema";
 import { PostsRepository } from "../posts.repository";
-import { PostRankingService } from "./post-ranking.service";
-import { getCurrentDate, isSameDate } from "../../common/utils/time.util";
+import {
+  getCurrentDate,
+  getCurrentTime,
+  isSameDate,
+} from "../../common/utils/time.util";
+import { EventBus } from "@nestjs/cqrs";
+import { PostLikedEvent } from "../events/post-liked.event";
+import { PostUnlikedEvent } from "../events/post-unliked.event";
 
 @Injectable()
 export class PostLikeService {
@@ -13,18 +19,18 @@ export class PostLikeService {
     @InjectModel(PostLikeDocument.name)
     private readonly postLikeModel: Model<PostLikeDocument>,
     private readonly postsRepository: PostsRepository,
-    private readonly postLikeRankingService: PostRankingService,
+    private readonly eventBus: EventBus,
   ) {}
 
-  async likePost({ postId, boardType }: PostIdentifier, nickname: string) {
-    console.log("likePost callend", postId, boardType);
+  async likePost(postIdentifier: PostIdentifier, nickname: string) {
+    const { postId, boardType } = postIdentifier;
     const exists = await this.postLikeModel.exists({
       postId: new Types.ObjectId(postId),
       boardType,
       likeUserNickname: nickname,
     });
     if (!exists) {
-      const [likeCount] = await Promise.all([
+      await Promise.all([
         this.postsRepository.increaseLikeCount({
           postId,
           boardType,
@@ -34,22 +40,15 @@ export class PostLikeService {
           likeUserNickname: nickname,
           boardType,
         }),
-        this.postLikeRankingService.increaseDailyLikeCount({
-          postId,
-          boardType,
-        }),
       ]);
-      return likeCount;
-    } else {
-      const post = await this.postsRepository.findByPostId({
-        postId,
-        boardType,
-      });
-      return post.likeCount;
+      this.eventBus.publish(
+        new PostLikedEvent(postIdentifier, nickname, getCurrentTime()),
+      );
     }
   }
 
-  async unlikePost({ postId, boardType }: PostIdentifier, nickname: string) {
+  async unlikePost(postIdentifier: PostIdentifier, nickname: string) {
+    const { postId, boardType } = postIdentifier;
     const deletedPostLike = await this.postLikeModel
       .findOneAndDelete({
         postId: new Types.ObjectId(postId),
@@ -59,20 +58,13 @@ export class PostLikeService {
       .exec();
     if (deletedPostLike) {
       if (isSameDate(getCurrentDate(), deletedPostLike.createdAt))
-        this.postLikeRankingService.decreaseDailyLikeCount({
+        await this.postsRepository.decreaseLikeCount({
           postId,
           boardType,
         });
-      return this.postsRepository.decreaseLikeCount({
-        postId,
-        boardType,
-      });
-    } else {
-      const post = await this.postsRepository.findByPostId({
-        postId,
-        boardType,
-      });
-      return post.likeCount;
+      this.eventBus.publish(
+        new PostUnlikedEvent(postIdentifier, nickname, getCurrentTime()),
+      );
     }
   }
 

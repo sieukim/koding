@@ -93,6 +93,10 @@ export abstract class MongooseBaseRepository<
     return null;
   }
 
+  count(findOption: FindOption<DomainModel>) {
+    return this.mongooseModel.count(this.parseFindOption(findOption)).exec();
+  }
+
   protected parseFindOption(
     findOption: FindOption<DomainModel>,
   ): FilterQuery<ModelDocument> {
@@ -197,10 +201,6 @@ export abstract class MongooseBaseRepository<
       }
     });
     return findQuery;
-  }
-
-  count(findOption: FindOption<DomainModel>) {
-    return this.mongooseModel.count(this.parseFindOption(findOption)).exec();
   }
 
   protected parseSortOption(sortOption?: SortOption<DomainModel>) {

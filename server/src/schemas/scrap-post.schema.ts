@@ -29,6 +29,8 @@ export class ScrapPostDocument extends Document {
   nickname: string;
 
   user?: UserDocument;
+
+  createdAt: Date;
 }
 
 export const ScrapPostSchema = SchemaFactory.createForClass(ScrapPostDocument);

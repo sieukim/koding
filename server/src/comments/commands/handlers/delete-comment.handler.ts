@@ -1,9 +1,10 @@
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { DeleteCommentCommand } from "../delete-comment.command";
 import { UsersRepository } from "../../../users/users.repository";
 import { PostsRepository } from "../../../posts/posts.repository";
 import { CommentsRepository } from "../../comments.repository";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { CommentDeletedEvent } from "../../events/comment-deleted.event";
 
 @CommandHandler(DeleteCommentCommand)
 export class DeleteCommentHandler
@@ -13,6 +14,7 @@ export class DeleteCommentHandler
     private readonly userRepository: UsersRepository,
     private readonly postRepository: PostsRepository,
     private readonly commentRepository: CommentsRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: DeleteCommentCommand): Promise<void> {
@@ -28,6 +30,13 @@ export class DeleteCommentHandler
     comment.verifyOwnerPost(post);
     comment.verifyOwner(requestUser);
     await this.commentRepository.remove(comment);
+    this.eventBus.publish(
+      new CommentDeletedEvent(
+        postIdentifier,
+        comment.commentId,
+        comment.createdAt,
+      ),
+    );
     return;
   }
 }

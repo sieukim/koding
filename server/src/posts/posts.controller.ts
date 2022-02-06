@@ -44,12 +44,9 @@ import { ModifyPostCommand } from "./commands/modify-post.command";
 import { ModifyPostHandler } from "./commands/handlers/modify-post.handler";
 import { DeletePostCommand } from "./commands/delete-post.command";
 import { PostIdentifierWithNicknameParamDto } from "./dto/param/post-identifier-with-nickname-param.dto";
-import { PostLikeCountInfoDto } from "./dto/post-like-count-info.dto";
 import { ParamNicknameSameUserGuard } from "../auth/guard/authorization/param-nickname-same-user.guard";
 import { LikePostCommand } from "./commands/like-post.command";
-import { LikePostHandler } from "./commands/handlers/like-post.handler";
 import { UnlikePostCommand } from "./commands/unlike-post.command";
-import { UnlikePostHandler } from "./commands/handlers/unlike-post.handler";
 import { UserLikePostInfoDto } from "./dto/user-like-post-info.dto";
 import { CheckUserLikePostQuery } from "./query/check-user-like-post.query";
 
@@ -200,44 +197,40 @@ export class PostsController {
 
   /*
    * 좋아요 요청
-   * @description 이미 좋아요를 눌렀던 경우에도 API는 정상적으로 200 OK를 반환
+   * @description 이미 좋아요를 눌렀던 경우에도 API는 정상적으로 204 NO CONTENT 를 반환
    */
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: "좋아요 요청 성공(이미 좋아요를 누른 경우도 포함)",
-    type: PostLikeCountInfoDto,
   })
-  @UseGuards(VerifiedUserGuard, ParamNicknameSameUserGuard)
-  @HttpCode(HttpStatus.OK)
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Post(":boardType/:postId/like/:nickname")
   async likePost(
     @Param()
     { postId, boardType, nickname }: PostIdentifierWithNicknameParamDto,
   ) {
-    const likeCount = (await this.commandBus.execute(
+    await this.commandBus.execute(
       new LikePostCommand({ postId, boardType }, nickname),
-    )) as Awaited<ReturnType<LikePostHandler["execute"]>>;
-    return new PostLikeCountInfoDto({ postId, boardType }, likeCount);
+    );
   }
 
   /*
    * 좋아요 취소 요청
-   * @description 이미 좋아요를 하지 않았던 경우에도 API는 정상적으로 200 OK를 반환
+   * @description 이미 좋아요를 하지 않았던 경우에도 API는 정상적으로 204 NO CONTENT 를 반환
    */
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: "좋아요 취소 성공(이미 좋아요를 하지 않았던 경우도 포함)",
-    type: PostLikeCountInfoDto,
   })
-  @UseGuards(VerifiedUserGuard, ParamNicknameSameUserGuard)
-  @HttpCode(HttpStatus.OK)
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":boardType/:postId/like/:nickname")
   async unlikePost(
     @Param()
     { postId, boardType, nickname }: PostIdentifierWithNicknameParamDto,
   ) {
-    const likeCount = (await this.commandBus.execute(
+    await this.commandBus.execute(
       new UnlikePostCommand({ postId, boardType }, nickname),
-    )) as Awaited<ReturnType<UnlikePostHandler["execute"]>>;
-    return new PostLikeCountInfoDto({ postId, boardType }, likeCount);
+    );
   }
 
   /*

@@ -455,15 +455,6 @@ export class User extends AggregateRoot {
     this.emailSignupVerified = true;
   }
 
-  private setNewPasswordResetToken() {
-    const randomDigits = Array.from({ length: 6 }, () => randomInt(0, 9));
-    this.passwordResetToken = randomDigits.join("");
-  }
-
-  private setNewEmailSignupVerifyToken() {
-    this.emailSignupVerifyToken = v1();
-  }
-
   async changePassword(
     requestUser: User,
     currentPassword: string,
@@ -474,5 +465,14 @@ export class User extends AggregateRoot {
       throw new BadRequestException("잘못된 확인 비밀번호");
     this.password = newPassword;
     await this.hashPassword();
+  }
+
+  private setNewPasswordResetToken() {
+    const randomDigits = Array.from({ length: 6 }, () => randomInt(0, 9));
+    this.passwordResetToken = randomDigits.join("");
+  }
+
+  private setNewEmailSignupVerifyToken() {
+    this.emailSignupVerifyToken = v1();
   }
 }

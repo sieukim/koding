@@ -20,7 +20,13 @@ export class AuthService {
     private readonly queryBus: QueryBus,
   ) {}
 
-  validateUser({ email, password }: { email: string; password: string }) {
+  validateUser({
+    email,
+    password,
+  }: {
+    email: string;
+    password: string;
+  }): Promise<User | null> {
     return this.commandBus.execute(
       new ComparePasswordCommand(email, password),
     ) as ReturnType<ComparePasswordHandler["execute"]>;
@@ -72,8 +78,9 @@ export class AuthService {
     ) as ReturnType<CheckPasswordTokenValidityHandler["execute"]>;
   }
 
-  checkAccountNotSuspended(user: User) {
+  checkAccountNotSuspended(user: User | null) {
     if (
+      user &&
       user.accountSuspendedUntil &&
       user.accountSuspendedUntil.getTime() > getCurrentTime().getTime()
     ) {

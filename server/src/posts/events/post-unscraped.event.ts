@@ -1,10 +1,10 @@
 import { IEvent } from "@nestjs/cqrs";
 import { PostIdentifier } from "../../models/post.model";
 
-export class CommentAddedEvent implements IEvent {
+export class PostUnscrapedEvent implements IEvent {
   constructor(
     public readonly postIdentifier: PostIdentifier,
-    public readonly commentId: string,
-    public readonly commentCreatedAt: Date,
+    public readonly nickname: string,
+    public readonly scrapDate: Date,
   ) {}
 }

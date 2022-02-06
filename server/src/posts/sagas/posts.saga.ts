@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ofType, Saga } from "@nestjs/cqrs";
-import { map, Observable } from "rxjs";
+import { filter, map, Observable } from "rxjs";
 import { UserDeletedEvent } from "../../users/events/user-deleted.event";
 import { RenamePostWriterToNullCommand } from "../commands/rename-post-writer-to-null.command";
 import { CommentAddedEvent } from "../../comments/events/comment-added.event";
@@ -31,17 +31,21 @@ export class PostsSaga {
   @Saga()
   syncCommentCount = ($events: Observable<any>) =>
     $events.pipe(
-      ofType(CommentAddedEvent, CommentDeletedEvent),
+      filter(
+        (event): event is CommentAddedEvent | CommentDeletedEvent =>
+          event instanceof CommentAddedEvent ||
+          event instanceof CommentDeletedEvent,
+      ),
       map((event) => {
-        if (event instanceof CommentAddedEvent)
+        if (event instanceof CommentDeletedEvent)
           return new IncreaseCommentCountCommand(
             event.postIdentifier,
-            IncreaseType.Positive,
+            IncreaseType.Negative,
           );
         else
           return new IncreaseCommentCountCommand(
             event.postIdentifier,
-            IncreaseType.Negative,
+            IncreaseType.Positive,
           );
       }),
     );

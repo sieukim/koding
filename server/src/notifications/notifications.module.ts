@@ -11,6 +11,8 @@ import { NotificationSaga } from "./sagas/notification.saga";
 import { NotificationCommandHandlers } from "./commands/handlers";
 import { NotificationsRepository } from "./notifications.repository";
 import { NotificationQueryHandlers } from "./queries/handlers";
+import { CommentsModule } from "../comments/comments.module";
+import { PostsModule } from "../posts/posts.module";
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { NotificationQueryHandlers } from "./queries/handlers";
     MongooseModule.forFeature([
       { name: NotificationDocument.name, schema: NotificationSchema },
     ]),
+    CommentsModule,
+    PostsModule,
   ],
   controllers: [NotificationsController],
   providers: [

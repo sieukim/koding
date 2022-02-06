@@ -4,12 +4,13 @@ import { PostLikeService } from "../../services/post-like.service";
 
 @CommandHandler(UnlikePostCommand)
 export class UnlikePostHandler
-  implements ICommandHandler<UnlikePostCommand, number>
+  implements ICommandHandler<UnlikePostCommand, void>
 {
   constructor(private readonly postLikeService: PostLikeService) {}
 
-  async execute(command: UnlikePostCommand): Promise<number> {
+  async execute(command: UnlikePostCommand): Promise<void> {
     const { postIdentifier, nickname } = command;
-    return this.postLikeService.unlikePost(postIdentifier, nickname);
+    await this.postLikeService.unlikePost(postIdentifier, nickname);
+    return;
   }
 }

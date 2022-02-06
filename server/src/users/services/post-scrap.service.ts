@@ -6,6 +6,10 @@ import { PostsRepository } from "../../posts/posts.repository";
 import { SortType } from "../../common/repository/sort-option";
 import { PostDocument } from "../../schemas/post.schema";
 import { InjectModel } from "@nestjs/mongoose";
+import { EventBus } from "@nestjs/cqrs";
+import { PostScrapedEvent } from "../../posts/events/post-scraped.event";
+import { getCurrentTime } from "../../common/utils/time.util";
+import { PostUnscrapedEvent } from "../../posts/events/post-unscraped.event";
 
 @Injectable()
 export class PostScrapService {
@@ -13,6 +17,7 @@ export class PostScrapService {
     @InjectModel(ScrapPostDocument.name)
     private readonly scrapPostModel: Model<ScrapPostDocument>,
     private readonly postsRepository: PostsRepository,
+    private readonly eventBus: EventBus,
   ) {}
 
   async scrapPost(postIdentifier: PostIdentifier, nickname: string) {
@@ -26,20 +31,30 @@ export class PostScrapService {
       .exec();
     if (updateResult.upsertedCount === 1) {
       await this.postsRepository.increaseScrapCount(postIdentifier);
+      this.eventBus.publish(
+        new PostScrapedEvent(postIdentifier, nickname, getCurrentTime()),
+      );
     }
     return;
   }
 
   async unscrapPost(postIdentifier: PostIdentifier, nickname: string) {
     const { postId, boardType } = postIdentifier;
-    const deletedResult = await this.scrapPostModel
-      .deleteOne({
+    const deletedScrapPost = await this.scrapPostModel
+      .findOneAndDelete({
         postId: new Types.ObjectId(postId),
         nickname,
       })
       .exec();
-    if (deletedResult.deletedCount === 1) {
+    if (deletedScrapPost) {
       await this.postsRepository.increaseScrapCount(postIdentifier);
+      this.eventBus.publish(
+        new PostUnscrapedEvent(
+          postIdentifier,
+          nickname,
+          deletedScrapPost.createdAt,
+        ),
+      );
     }
     return;
   }

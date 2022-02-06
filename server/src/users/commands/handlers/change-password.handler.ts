@@ -8,6 +8,7 @@ export class ChangePasswordHandler
   implements ICommandHandler<ChangePasswordCommand, void>
 {
   constructor(private readonly usersRepository: UsersRepository) {}
+
   async execute(command: ChangePasswordCommand): Promise<void> {
     const { newPassword, currentPassword, nickname, requestUserNickname } =
       command;
