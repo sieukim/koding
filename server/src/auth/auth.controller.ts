@@ -28,7 +28,6 @@ import {
 } from "@nestjs/swagger";
 import { LocalAuthGuard } from "./guard/local-auth.guard";
 import { LoginLocalRequest } from "./dto/login-local-request";
-import { LoggedInGuard } from "./guard/authorization/logged-in.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { UserInfoDto } from "../users/dto/user-info.dto";
 import { Response } from "express";
@@ -39,10 +38,9 @@ import { PasswordResetRequestDto } from "./dto/password-reset.request.dto";
 import { PasswordResetTokenVerifyRequestDto } from "./dto/password-reset-token-verify-request.dto";
 import { User } from "../models/user.model";
 import { QueryBus } from "@nestjs/cqrs";
-import { GetMyUserInfoQuery } from "../users/queries/get-my-user-info.query";
 import { MyUserInfoDto } from "../users/dto/my-user-info.dto";
-import { GetMyUserInfoHandler } from "../users/queries/handlers/get-my-user-info.handler";
 import { GithubUserGuard } from "./guard/authorization/github-user.guard";
+import { LoginUserInfoDto } from "./dto/login-user-info.dto";
 
 @ApiTags("AUTH")
 @Controller("api/auth")
@@ -138,19 +136,18 @@ export class AuthController {
   }
 
   @ApiOperation({
-    summary: "로그인 사용자 정보 확인",
+    summary: "로그인 여부 확인",
   })
   @ApiOkResponse({
-    description: "사용자 정보 확인 성공",
-    type: MyUserInfoDto,
+    description: "로그인 여부 확인 성공",
+    type: LoginUserInfoDto,
   })
   @HttpCode(HttpStatus.OK)
-  @UseGuards(LoggedInGuard)
   @Get()
-  getCurrentUser(@LoginUser() user: User) {
-    return this.queryBus.execute(
-      new GetMyUserInfoQuery(user.nickname),
-    ) as ReturnType<GetMyUserInfoHandler["execute"]>;
+  async getCurrentUser(@LoginUser() user?: User) {
+    if (!user) return new LoginUserInfoDto();
+    const myUserInfo = MyUserInfoDto.fromModel(user);
+    return new LoginUserInfoDto(myUserInfo);
   }
 
   @ApiOperation({
