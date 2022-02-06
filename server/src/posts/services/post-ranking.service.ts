@@ -79,7 +79,9 @@ export class PostRankingService {
       .limit(pageSize)
       .exec();
     console.log("dailyRankings", dailyRankings);
-    return dailyRankings.map((dailyRanking) => dailyRanking.post);
+    return dailyRankings
+      .map((dailyRanking) => dailyRanking.post)
+      .filter((post) => post != null);
   }
 
   private async modifyAggregateField(
@@ -116,5 +118,11 @@ export class PostRankingService {
       case "readCount":
         return 1;
     }
+  }
+
+  removeOrphanPostRanking({ postId, boardType }: PostIdentifier) {
+    return this.dailyRankingModel
+      .deleteMany({ postId: new Types.ObjectId(postId), boardType })
+      .exec();
   }
 }

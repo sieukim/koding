@@ -26,8 +26,8 @@ export class PostLikeService {
     const { postId, boardType } = postIdentifier;
     const exists = await this.postLikeModel.exists({
       postId: new Types.ObjectId(postId),
-      boardType,
       likeUserNickname: nickname,
+      boardType,
     });
     if (!exists) {
       await Promise.all([
@@ -74,8 +74,8 @@ export class PostLikeService {
   ): Promise<boolean> {
     return this.postLikeModel.exists({
       _id: new Types.ObjectId(postId),
-      boardType,
       likeUserNickname: nickname,
+      boardType,
     });
   }
 
