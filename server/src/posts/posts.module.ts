@@ -17,6 +17,7 @@ import {
   PostDailyRankingSchema,
 } from "../schemas/post-daliy-ranking.schema";
 import { PostRankingController } from "./post-ranking.controller";
+import { PostScrapService } from "./services/post-scrap.service";
 
 @Module({
   imports: [
@@ -41,6 +42,6 @@ import { PostRankingController } from "./post-ranking.controller";
     ...PostEventHandlers,
     ...PostQueryHandlers,
   ],
-  exports: [PostsRepository],
+  exports: [PostsRepository, PostScrapService],
 })
 export class PostsModule {}

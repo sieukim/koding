@@ -73,7 +73,7 @@ export class PostLikeService {
     nickname: string,
   ): Promise<boolean> {
     return this.postLikeModel.exists({
-      _id: new Types.ObjectId(postId),
+      postId: new Types.ObjectId(postId),
       likeUserNickname: nickname,
       boardType,
     });
@@ -81,7 +81,7 @@ export class PostLikeService {
 
   removeOrphanPostLikes({ postId, boardType }: PostIdentifier) {
     return this.postLikeModel
-      .deleteMany({ _id: new Types.ObjectId(postId), boardType })
+      .deleteMany({ postId: new Types.ObjectId(postId), boardType })
       .exec();
   }
 }

@@ -17,6 +17,8 @@ import { getCurrentTime } from "../common/utils/time.util";
   },
 })
 export class PostLikeDocument extends Document {
+  _id: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId })
   postId: Types.ObjectId;
 

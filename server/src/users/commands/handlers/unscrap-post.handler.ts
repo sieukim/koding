@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { UnscrapPostCommand } from "../unscrap-post.command";
-import { PostScrapService } from "../../services/post-scrap.service";
+import { PostScrapService } from "../../../posts/services/post-scrap.service";
 
 @CommandHandler(UnscrapPostCommand)
 export class UnscrapPostHandler implements ICommandHandler<UnscrapPostCommand> {

@@ -6,20 +6,20 @@ import { NotFoundException } from "@nestjs/common";
 import { Post } from "../../../models/post.model";
 import { SortType } from "../../../common/repository/sort-option";
 import { PostLikeService } from "../../services/post-like.service";
+import { PostScrapService } from "../../services/post-scrap.service";
 
 @QueryHandler(ReadPostQuery)
 export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
   constructor(
     private readonly postRepository: PostsRepository,
     private readonly postLikeService: PostLikeService,
+    private readonly postScrapService: PostScrapService,
     private readonly publisher: EventPublisher,
   ) {}
 
   async execute(query: ReadPostQuery): Promise<PostWithAroundInfoDto> {
-    const {
-      postIdentifier: { postId, boardType },
-      readerNickname,
-    } = query;
+    const { postIdentifier, readerNickname } = query;
+    const { postId, boardType } = postIdentifier;
     let post = (await this.postRepository.findOneWith(
       {
         boardType: { eq: boardType },
@@ -30,12 +30,12 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
     if (!post) throw new NotFoundException("잘못된 게시글 아이디");
     post = this.publisher.mergeObjectContext(post);
     post.increaseReadCount();
-    const [liked, prevPost, nextPost] = await Promise.all([
+    const [liked, scraped, prevPost, nextPost] = await Promise.all([
       readerNickname
-        ? this.postLikeService.isUserLikePost(
-            { postId, boardType },
-            readerNickname,
-          )
+        ? this.postLikeService.isUserLikePost(postIdentifier, readerNickname)
+        : false,
+      readerNickname
+        ? this.postScrapService.isUserScrapPost(postIdentifier, readerNickname)
         : false,
       this.postRepository.findOne(
         {
@@ -53,6 +53,6 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
       ),
     ]);
     post.commit();
-    return new PostWithAroundInfoDto(post, liked, prevPost, nextPost);
+    return new PostWithAroundInfoDto(post, liked, scraped, prevPost, nextPost);
   }
 }

@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetScrapPostsQuery } from "../get-scrap-posts.query";
-import { PostScrapService } from "../../services/post-scrap.service";
+import { PostScrapService } from "../../../posts/services/post-scrap.service";
 import { PostListDto } from "../../../posts/dto/post-list.dto";
 
 @QueryHandler(GetScrapPostsQuery)

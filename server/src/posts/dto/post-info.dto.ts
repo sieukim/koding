@@ -17,10 +17,16 @@ export class PostInfoDto extends PickType(Post, [
   "scrapCount",
 ] as const) {
   /*
-   * 게시글에 대한 사용자의 좋아요 여부.
+   * 게시글에 대한 사용자의 좋아요 여부. 로그인한 사용자가 없을 경우엔 false
    */
   @Expose()
-  liked?: boolean;
+  liked?: boolean = false;
+
+  /*
+   * 게시글에 대한 사용자의 스크랩 여부. 로그인한 사용자가 없을 경우엔 false
+   */
+  @Expose()
+  scraped?: boolean = false;
 
   static fromModel(model: Post) {
     return plainToClass(PostInfoDto, model, { excludeExtraneousValues: true });

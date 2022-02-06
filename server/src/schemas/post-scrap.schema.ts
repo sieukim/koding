@@ -16,7 +16,9 @@ import { PostBoardType, PostBoardTypes } from "../models/post.model";
     currentTime: getCurrentTime,
   },
 })
-export class ScrapPostDocument extends Document {
+export class PostScrapDocument extends Document {
+  _id: Types.ObjectId;
+
   @Prop({ type: Types.ObjectId })
   postId: Types.ObjectId;
 
@@ -33,19 +35,22 @@ export class ScrapPostDocument extends Document {
   createdAt: Date;
 }
 
-export const ScrapPostSchema = SchemaFactory.createForClass(ScrapPostDocument);
-ScrapPostSchema.index({ nickname: 1, postId: 1 });
-ScrapPostSchema.virtual("post", {
+export const PostScrapSchema = SchemaFactory.createForClass(PostScrapDocument);
+PostScrapSchema.index(
+  { nickname: 1, postId: 1, boardType: 1 },
+  { unique: true },
+);
+PostScrapSchema.virtual("post", {
   ref: PostDocument.name,
   localField: "postId",
   foreignField: "_id",
   justOne: true,
 });
-ScrapPostSchema.virtual("user", {
+PostScrapSchema.virtual("user", {
   ref: UserDocument.name,
   localField: "nickname",
   foreignField: "nickname",
   justOne: true,
 });
-ScrapPostSchema.set("toJSON", { virtuals: true });
-ScrapPostSchema.set("toObject", { virtuals: true });
+PostScrapSchema.set("toJSON", { virtuals: true });
+PostScrapSchema.set("toObject", { virtuals: true });

@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ScrapPostCommand } from "../scrap-post.command";
-import { PostScrapService } from "../../services/post-scrap.service";
+import { PostScrapService } from "../../../posts/services/post-scrap.service";
 
 @CommandHandler(ScrapPostCommand)
 export class ScrapPostHandler implements ICommandHandler<ScrapPostCommand> {
