@@ -1,6 +1,5 @@
 import { Module } from "@nestjs/common";
 import { MulterModule } from "@nestjs/platform-express";
-import { MulterConfigService } from "./multer-config.service";
 import { UploadController } from "./upload.controller";
 import { CqrsModule } from "@nestjs/cqrs";
 import { UploadCommandHandlers } from "./commands/handlers";
@@ -19,21 +18,17 @@ import { UploadRepository } from "./upload.repository";
         schema: S3ImageSchema,
       },
     ]),
-    MulterModule.registerAsync({
-      imports: [UploadModule],
-      useExisting: MulterConfigService,
-    }),
+    MulterModule.register(),
     CqrsModule,
   ],
   providers: [
     UploadRepository,
     S3Service,
     UploadService,
-    MulterConfigService,
     ...UploadCommandHandlers,
     ...UploadEventHandlers,
   ],
   controllers: [UploadController],
-  exports: [UploadRepository, MulterConfigService],
+  exports: [UploadRepository],
 })
 export class UploadModule {}

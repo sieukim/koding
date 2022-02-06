@@ -5,7 +5,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
 import {
   ApiBody,
   ApiConsumes,
@@ -21,6 +20,7 @@ import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.gua
 import { User } from "../models/user.model";
 import { PostImageUploadResultDto } from "./dto/post-image-upload-result.dto";
 import { PostImageUploadRequestDto } from "./dto/post-image-upload-request.dto";
+import { PostImageUploadInterceptor } from "./interceptors/post-image-upload.interceptor";
 
 @ApiTags("UPLOAD")
 @Controller("api/upload")
@@ -36,7 +36,7 @@ export class UploadController {
     description: "이미지 업로드 성공",
     type: PostImageUploadResultDto,
   })
-  @UseInterceptors(FileInterceptor("image"))
+  @UseInterceptors(PostImageUploadInterceptor)
   @UseGuards(VerifiedUserGuard)
   @Post("/posts")
   saveFile(

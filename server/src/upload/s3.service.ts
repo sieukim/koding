@@ -4,9 +4,12 @@ import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class S3Service {
-  private readonly s3: S3;
-  private readonly postImageBucketName: string;
+  public readonly s3: S3;
+  public readonly bucketName: string;
   private readonly logger = new Logger(S3Service.name);
+
+  public readonly postImageKeyPrefix: string;
+  public readonly profileAvatarKeyPrefix: string;
 
   constructor(configService: ConfigService) {
     this.s3 = new S3({
@@ -17,40 +20,39 @@ export class S3Service {
       },
       region: configService.get<string>("aws.s3.region"),
     });
-    this.postImageBucketName = configService.get<string>("aws.s3.bucket");
-  }
-
-  getPostImageBucketName(): string {
-    return this.postImageBucketName;
-  }
-
-  getS3(): S3 {
-    return this.s3;
+    this.bucketName = configService.get<string>("aws.s3.bucket");
+    this.postImageKeyPrefix = configService.get<string>(
+      "aws.s3.key-prefix.post-image",
+    );
+    this.profileAvatarKeyPrefix = configService.get<string>(
+      "aws.s3.key-prefix.profile-avatar",
+    );
   }
 
   async deleteS3PostImageFiles(fileKeys: string[]) {
     return new Promise<string[]>((res, rej) => {
       if (fileKeys.length <= 0) res([]);
-      else
-        this.s3.deleteObjects(
-          {
-            Bucket: this.postImageBucketName.split("/")[1],
-            Delete: {
-              Quiet: false,
-              Objects: fileKeys.map((fileKey) => ({ Key: fileKey })),
-            },
+      else {
+        const deleteParams = {
+          Bucket: this.bucketName,
+          Delete: {
+            Quiet: false,
+            Objects: fileKeys.map((fileKey) => ({
+              Key: `${this.postImageKeyPrefix}/${fileKey}`,
+            })),
           },
-          (err, data) => {
-            if (data)
-              this.logger.log(
-                `${
-                  data.Deleted.length
-                } Image deleted from AWS S3, ${data.Deleted.toString()}`,
-              );
-            if (err) rej(err);
-            else res(data.Deleted.map(({ Key }) => Key));
-          },
-        );
+        };
+        this.s3.deleteObjects(deleteParams, (err, data) => {
+          if (data)
+            this.logger.log(
+              `${
+                data.Deleted.length
+              } Image deleted from AWS S3, ${JSON.stringify(data.Deleted)}`,
+            );
+          if (err) rej(err);
+          else res(data.Deleted.map(({ Key }) => Key));
+        });
+      }
     });
   }
 }

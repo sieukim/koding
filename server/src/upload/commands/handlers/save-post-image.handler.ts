@@ -18,7 +18,12 @@ export class SavePostImageHandler
     command: SavePostImageCommand,
   ): Promise<PostImageUploadResultDto> {
     const { s3FileKey, s3FileUrl, uploaderNickname } = command;
-    const file = new this.fileModel({ uploaderNickname, s3FileUrl, s3FileKey });
+    const file = new this.fileModel({
+      uploaderNickname,
+      s3FileUrl,
+      s3FileKey,
+      postId: null,
+    });
     await file.save();
     return new PostImageUploadResultDto(file.s3FileUrl);
   }
