@@ -7,14 +7,14 @@ const TabContainer = ({ profileUser }) => {
   const [posts, setPosts] = useState({
     common: [],
     question: [],
-    career: [],
+    [`study-group`]: [],
     column: [],
   });
 
   const [nextPostCursor, setNextPostCursor] = useState({
     common: null,
     question: null,
-    career: null,
+    [`study-group`]: null,
     column: null,
   });
 
@@ -40,7 +40,7 @@ const TabContainer = ({ profileUser }) => {
   useEffect(() => {
     getUserPosts('common');
     getUserPosts('question');
-    getUserPosts('career');
+    getUserPosts('study-group');
     getUserPosts('column');
   }, []);
 
@@ -48,14 +48,14 @@ const TabContainer = ({ profileUser }) => {
   const [comments, setComments] = useState({
     common: [],
     question: [],
-    career: [],
+    [`study-group`]: [],
     column: [],
   });
 
   const [nextCommentCursor, setNextCommentCursor] = useState({
     common: null,
     question: null,
-    career: null,
+    [`study-group`]: null,
     column: null,
   });
 
@@ -81,7 +81,7 @@ const TabContainer = ({ profileUser }) => {
   useEffect(() => {
     getUserComments('common');
     getUserComments('question');
-    getUserComments('career');
+    getUserComments(`study-group`);
     getUserComments('column');
   }, []);
 

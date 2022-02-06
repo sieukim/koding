@@ -1,9 +1,9 @@
 import { List, Spin } from 'antd';
-import { PostLink } from './link/PostLink';
+import { PostLink } from '../link/PostLink';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styled from 'styled-components';
-import { Tags } from './post/Tags';
-import { IconText } from './post/IconText';
+import { Tags } from './Tags';
+import { IconText } from './IconText';
 import {
   EyeOutlined,
   FieldTimeOutlined,
@@ -12,9 +12,9 @@ import {
   StarOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { NicknameLink } from './link/NicknameLink';
+import { NicknameLink } from '../link/NicknameLink';
 import React from 'react';
-import { getRelativeCreatedAt } from './function/getCreatedAt';
+import { getRelativeCreatedAt } from '../function/getCreatedAt';
 
 const StyledPostList = styled.div`
   .spinner {

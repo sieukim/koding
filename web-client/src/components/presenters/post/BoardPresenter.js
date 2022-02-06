@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { PostList } from '../utils/PostList';
+import { PostList } from '../utils/post/PostList';
 import { Button, Divider, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { SearchByTag } from '../utils/search/SearchByTag';
