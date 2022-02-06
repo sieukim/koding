@@ -5,8 +5,11 @@ import { SearchOutlined } from '@ant-design/icons';
 import { SearchByTag } from '../utils/search/SearchByTag';
 
 const StyledBoard = styled.div`
+  border: 1px solid rgb(217, 217, 217);
+  border-radius: 8px;
   margin: 50px 0;
-  width: 700px;
+  padding: 32px;
+  width: 900px;
 
   .title-text {
     text-align: center;

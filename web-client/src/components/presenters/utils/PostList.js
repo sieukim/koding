@@ -1,61 +1,20 @@
-import { List, Space, Spin, Tag } from 'antd';
+import { List, Spin } from 'antd';
+import { PostLink } from './link/PostLink';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import styled from 'styled-components';
+import { Tags } from './post/Tags';
+import { IconText } from './post/IconText';
 import {
-  EditOutlined,
   EyeOutlined,
+  FieldTimeOutlined,
   LikeOutlined,
   MessageOutlined,
   StarOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import moment from 'moment';
-import { PostLink } from './link/PostLink';
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { NicknameLink } from './link/NicknameLink';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import styled from 'styled-components';
-import { getTagColor } from './function/getTagColor';
-
-const IconText = ({ icon, text, className }) => (
-  <Space className={className}>
-    {icon}
-    {text}
-  </Space>
-);
-
-const StyledTags = styled.div`
-  .ant-tag:hover {
-    cursor: pointer;
-  }
-`;
-
-const Tags = ({ post, tags }) => {
-  const navigate = useNavigate();
-
-  // 태그 onClick 핸들러
-  const onClickTag = useCallback(
-    (e) => {
-      const [boardType, tags] = e.target.dataset.metadata.split(',');
-      navigate(`/board/${boardType}?tags=${tags}`);
-    },
-    [navigate],
-  );
-
-  return (
-    <StyledTags>
-      {tags.map((tag) => (
-        <Tag
-          key={tag}
-          color={getTagColor(tag)}
-          onClick={onClickTag}
-          data-metadata={[post.boardType, tag]}
-        >
-          {tag}
-        </Tag>
-      ))}
-    </StyledTags>
-  );
-};
+import React from 'react';
+import { getRelativeCreatedAt } from './function/getCreatedAt';
 
 const StyledPostList = styled.div`
   .spinner {
@@ -96,6 +55,21 @@ const StyledPostList = styled.div`
       color: #096dd9 !important;
     }
   }
+
+  .ant-list-item-main {
+    padding: 20px;
+  }
+
+  .ant-list-item-extra {
+    display: flex;
+    align-items: center;
+
+    a:hover {
+      * {
+        color: #f5f5f5 !important;
+      }
+    }
+  }
 `;
 
 export const PostList = ({ loading, posts, next, hasMore }) => {
@@ -114,36 +88,49 @@ export const PostList = ({ loading, posts, next, hasMore }) => {
                 key={post.postId}
                 actions={[
                   <IconText
+                    key="nickname"
                     icon={<UserOutlined />}
                     text={<NicknameLink nickname={post.writerNickname} />}
                     className="item-nickname"
                   />,
                   <IconText
+                    key="likeCount"
                     icon={<LikeOutlined />}
                     text={post.likeCount ?? 0}
                     className="item-like"
                   />,
                   <IconText
+                    key="commentCount"
                     icon={<MessageOutlined />}
                     text={post.commentCount ?? 0}
                     className="item-comment"
                   />,
                   <IconText
+                    key="scrapCount"
                     icon={<StarOutlined />}
                     text={post.scrapCount ?? 0}
                     className="item-scrap"
                   />,
                   <IconText
+                    key="readCount"
                     icon={<EyeOutlined />}
                     text={post.readCount ?? 0}
                     className="item-read"
                   />,
                   <IconText
-                    icon={<EditOutlined />}
-                    text={moment(post.createdAt).format('YYYY.MM.DD HH:MM')}
+                    key="createdAt"
+                    icon={<FieldTimeOutlined />}
+                    text={getRelativeCreatedAt(post.createdAt)}
                     className="item-createdAt"
                   />,
                 ]}
+                extra={
+                  <PostLink
+                    boardType={post.boardType}
+                    postId={post.postId}
+                    imageUrls={post.imageUrls}
+                  />
+                }
               >
                 <List.Item.Meta
                   title={
@@ -157,7 +144,7 @@ export const PostList = ({ loading, posts, next, hasMore }) => {
                 <PostLink
                   boardType={post.boardType}
                   postId={post.postId}
-                  markdownContent={post.markdownContent ?? ''}
+                  markdownContent={post.markdownContent}
                 />
                 <Tags post={post} tags={post.tags} />
               </List.Item>

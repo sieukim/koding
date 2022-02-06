@@ -132,6 +132,26 @@ export const removePost = (boardType, postId) => {
   return axios.delete(`/api/posts/${boardType}/${postId}`);
 };
 
+// 게시글 좋아요 api 호출
+export const likePost = (boardType, postId, nickname) => {
+  return axios.post(`/api/posts/${boardType}/${postId}/like/${nickname}`);
+};
+
+// 게시글 좋아요 취소 api 호출
+export const unlikePost = (boardType, postId, nickname) => {
+  return axios.delete(`/api/posts/${boardType}/${postId}/like/${nickname}`);
+};
+
+// 게시글 스크랩 api 호출
+export const scrapPost = (boardType, postId, nickname) => {
+  return axios.post(`/api/posts/${boardType}/${postId}/scrap/${nickname}`);
+};
+
+// 게시글 스크랩 취소 api 호출
+export const unscrapPost = (boardType, postId, nickname) => {
+  return axios.delete(`/api/posts/${boardType}/${postId}/scrap/${nickname}`);
+};
+
 // 댓글 읽기 api 호출
 export const readComment = (boardType, postId, cursor) => {
   const query = new URLSearchParams();

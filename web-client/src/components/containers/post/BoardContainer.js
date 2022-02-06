@@ -38,11 +38,11 @@ const BoardContainer = ({ boardType, tagsParams }) => {
   // 게시글 작성 버튼 onClick 핸들러
   const onClickWrite = useCallback(() => {
     if (user) {
-      navigate(`/board/${boardType}/post/write`);
+      navigate(`/board/${boardType}/write`);
     } else {
       navigate(`/login`);
     }
-  }, [navigate, boardType]);
+  }, [navigate, boardType, user]);
 
   // 게시판 내 존재하는 태그 배열 조회
   const [getTagsListState] = useAsync(

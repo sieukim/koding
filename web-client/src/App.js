@@ -41,13 +41,10 @@ function App() {
           <Route path="/github/signup" element={<GithubSignupPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/board/:boardType" element={<BoardPage />} />
+          <Route path="/board/:boardType/write" element={<WritePostPage />} />
+          <Route path="/board/:boardType/:postId" element={<PostPage />} />
           <Route
-            path="/board/:boardType/post/write"
-            element={<WritePostPage />}
-          />
-          <Route path="/board/:boardType/post/:postId" element={<PostPage />} />
-          <Route
-            path="/board/:boardType/post/:postId/edit"
+            path="/board/:boardType/:postId/edit"
             element={<EditPostPage />}
           />
           <Route path="/user/:nickname/profile" element={<ProfilePage />} />

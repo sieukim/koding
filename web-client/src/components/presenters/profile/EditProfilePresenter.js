@@ -45,7 +45,7 @@ const StyledEditProfile = styled.div`
 `;
 
 const EditProfilePresenter = ({
-  getLoginUserData = {},
+  user,
   changeUserInfoState,
   changeUserInfoFetch,
   revokeState,
@@ -56,14 +56,14 @@ const EditProfilePresenter = ({
 
   useEffect(() => {
     profileForm.setFieldsValue({
-      blogUrl: getLoginUserData.blogUrl,
-      githubUrl: getLoginUserData.githubUrl,
-      portfolioUrl: getLoginUserData.portfolioUrl,
-      isBlogUrlPublic: getLoginUserData.isBlogUrlPublic,
-      isGithubUrlPublic: getLoginUserData.isGithubUrlPublic,
-      isPortfolioUrlPublic: getLoginUserData.isPortfolioUrlPublic,
+      blogUrl: user.blogUrl,
+      githubUrl: user.githubUrl,
+      portfolioUrl: user.portfolioUrl,
+      isBlogUrlPublic: user.isBlogUrlPublic,
+      isGithubUrlPublic: user.isGithubUrlPublic,
+      isPortfolioUrlPublic: user.isPortfolioUrlPublic,
     });
-  }, [getLoginUserData, profileForm]);
+  }, [user, profileForm]);
 
   // 프로필 편집 버튼 onFinish(onSubmit) 핸들러
   const onFinishEditProfile = useCallback(
@@ -82,8 +82,8 @@ const EditProfilePresenter = ({
 
   // 탈퇴 버튼 onClick 핸들러
   const onClickRevoke = useCallback(() => {
-    revokeFetch(getLoginUserData.nickname);
-  }, [revokeFetch, getLoginUserData]);
+    revokeFetch(user.nickname);
+  }, [revokeFetch, user]);
 
   useEffect(() => {
     if (revokeState.success) {
@@ -102,25 +102,25 @@ const EditProfilePresenter = ({
       <Form
         className="nothing"
         initialValues={{
-          blogUrl: getLoginUserData.blogUrl,
-          githubUrl: getLoginUserData.githubUrl,
-          portfolioUrl: getLoginUserData.portfolioUrl,
-          isBlogUrlPublic: getLoginUserData.isBlogUrlPublic,
-          isGithubUrlPublic: getLoginUserData.isGithubUrlPublic,
-          isPortfolioUrlPublic: getLoginUserData.isPortfolioUrlPublic,
+          blogUrl: user.blogUrl,
+          githubUrl: user.githubUrl,
+          portfolioUrl: user.portfolioUrl,
+          isBlogUrlPublic: user.isBlogUrlPublic,
+          isGithubUrlPublic: user.isGithubUrlPublic,
+          isPortfolioUrlPublic: user.isPortfolioUrlPublic,
         }}
       >
         <Form.Item>
           <span className="ant-input-affix-wrapper">
             <UserOutlined className="site-form-item-icon ant-input-prefix" />
-            {getLoginUserData.nickname}
+            {user.nickname}
           </span>
         </Form.Item>
 
         <Form.Item>
           <span className="ant-input-affix-wrapper">
             <MailOutlined className="site-form-item-icon ant-input-prefix" />
-            {getLoginUserData.email}
+            {user.email}
           </span>
         </Form.Item>
       </Form>
@@ -213,7 +213,7 @@ const EditProfilePresenter = ({
         </Button>
       </Form>
 
-      {getLoginUserData.isEmailUser && (
+      {user.isEmailUser && (
         <Button type="primary" className="edit-password-button">
           <NavLink to="/reset-password">비밀번호 변경</NavLink>
         </Button>

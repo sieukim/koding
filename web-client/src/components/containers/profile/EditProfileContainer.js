@@ -1,19 +1,21 @@
 import EditProfilePresenter from '../../presenters/profile/EditProfilePresenter';
 import * as api from '../../../modules/api';
 import useAsync from '../../../hooks/useAsync';
+import { useDispatch, useSelector } from 'react-redux';
+import { editProfile } from '../../../modules/auth';
 
 const EditProfileContainer = ({ profileNickname }) => {
-  // 로그인 유저 정보 가져오기
-  const [getLoginUserState] = useAsync(
-    () => api.getLoginUser(),
-    [profileNickname],
-    false,
-  );
+  const user = useSelector((state) => state.auth.user);
+
+  const dispatch = useDispatch();
 
   // 유저 정보 변경
   const [changeUserInfoState, changeUserInfoFetch] = useAsync(
-    (userInfo) => api.changeUserInfo(profileNickname, userInfo),
-    [profileNickname],
+    async (userInfo) => {
+      const response = await api.changeUserInfo(profileNickname, userInfo);
+      dispatch(editProfile(response.data));
+    },
+    [profileNickname, dispatch],
     true,
   );
 
@@ -26,8 +28,7 @@ const EditProfileContainer = ({ profileNickname }) => {
 
   return (
     <EditProfilePresenter
-      getLoginUserState={getLoginUserState}
-      getLoginUserData={getLoginUserState.success?.data}
+      user={user ?? {}}
       changeUserInfoState={changeUserInfoState}
       changeUserInfoFetch={changeUserInfoFetch}
       revokeState={revokeState}

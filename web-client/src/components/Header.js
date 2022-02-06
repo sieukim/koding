@@ -1,9 +1,9 @@
 import styled from 'styled-components';
-import { NavLink, useMatch } from 'react-router-dom';
+import { NavLink, useMatch, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as api from '../modules/api';
 import { useCallback, useEffect, useState } from 'react';
-import { Avatar, Badge, Divider, Dropdown, Menu, message } from 'antd';
+import { Avatar, Badge, Dropdown, Menu, message } from 'antd';
 import { setLogout } from '../modules/auth';
 import useAsync from '../hooks/useAsync';
 import { BellFilled, UserOutlined } from '@ant-design/icons';
@@ -14,6 +14,8 @@ const StyledHeader = styled.nav`
   padding: 16px 32px;
   justify-content: space-between;
   align-items: center;
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
   .web-title {
     font-size: 30px;
@@ -100,7 +102,7 @@ const Notification = ({ loginUser }) => {
 
   // 안 읽은 알림 여부 확인
   useEffect(() => {
-    const timerId = setInterval(() => checkNotificationFetch(), 5000);
+    const timerId = setInterval(() => checkNotificationFetch(), 10000);
     return () => clearInterval(timerId);
   }, [checkNotificationFetch]);
 
@@ -114,21 +116,22 @@ const Notification = ({ loginUser }) => {
 };
 
 const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
+  const navigate = useNavigate();
+
+  // menu item onClick 핸들러
+  const onClick = ({ key }) => {
+    if (key === 'profile') navigate(`/user/${loginUser}/profile`);
+    if (key === 'edit-profile') navigate(`/user/${loginUser}/profile/edit`);
+    if (key === 'logout') logout();
+  };
+
   return (
     <Dropdown
       overlay={
-        <Menu>
-          <Menu.Item key="profile">
-            <NavLink to={`/user/${loginUser}/profile`}>내 프로필</NavLink>
-          </Menu.Item>
-          <Menu.Item key="edit-profile">
-            <NavLink to={`/user/${loginUser}/profile/edit`}>
-              프로필 편집
-            </NavLink>
-          </Menu.Item>
-          <Menu.Item key="logout">
-            <div onClick={logout}>로그아웃</div>
-          </Menu.Item>
+        <Menu onClick={onClick}>
+          <Menu.Item key="profile">내 프로필</Menu.Item>
+          <Menu.Item key="edit-profile">프로필 편집</Menu.Item>
+          <Menu.Item key="logout">로그아웃</Menu.Item>
         </Menu>
       }
       placement="bottomRight"
@@ -144,11 +147,6 @@ const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
 
 const Header = () => {
   const user = useSelector((state) => state.auth.user);
-
-  // 유저 정보 가져오기
-  const [loginUserState] = useAsync(() => api.getLoginUser(), [], false);
-  const loginUser = loginUserState.success?.data?.nickname;
-  const avatarUrl = loginUserState.success?.data?.avatarUrl;
 
   // 로그아웃
   const dispatch = useDispatch();
@@ -168,31 +166,28 @@ const Header = () => {
   const match = useMatch('/search');
 
   return (
-    <>
-      <StyledHeader>
-        <NavLink className="web-title" to="/">
-          Koding
+    <StyledHeader>
+      <NavLink className="web-title" to="/">
+        Koding
+      </NavLink>
+      {/*{!match && <SearchBar className="header" />}*/}
+      <NavigationBar />
+      {!user && (
+        <NavLink to="/login" className="login">
+          로그인
         </NavLink>
-        {/*{!match && <SearchBar className="header" />}*/}
-        <NavigationBar />
-        {!user && (
-          <NavLink to="/login" className="login">
-            로그인
-          </NavLink>
-        )}
-        {user && (
-          <div className="icon-group">
-            <Notification loginUser={user.nickname} />
-            <UserDropdown
-              loginUser={loginUser}
-              avatarUrl={avatarUrl}
-              logout={logout}
-            />
-          </div>
-        )}
-      </StyledHeader>
-      <Divider style={{ margin: '0 0', padding: '0 16px' }} />
-    </>
+      )}
+      {user && (
+        <div className="icon-group">
+          <Notification loginUser={user.nickname} />
+          <UserDropdown
+            loginUser={user.nickname}
+            avatarUrl={user.avatarUrl}
+            logout={logout}
+          />
+        </div>
+      )}
+    </StyledHeader>
   );
 };
 
