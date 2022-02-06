@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { NicknameLink } from './link/NicknameLink';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styled from 'styled-components';
+import { getTagColor } from './function/getTagColor';
 
 const IconText = ({ icon, text, className }) => (
   <Space className={className}>
@@ -45,6 +46,7 @@ const Tags = ({ post, tags }) => {
       {tags.map((tag) => (
         <Tag
           key={tag}
+          color={getTagColor(tag)}
           onClick={onClickTag}
           data-metadata={[post.boardType, tag]}
         >

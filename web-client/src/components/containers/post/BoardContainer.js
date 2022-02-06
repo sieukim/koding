@@ -3,8 +3,9 @@ import * as api from '../../../modules/api';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import useAsync from '../../../hooks/useAsync';
 
-const BoardContainer = ({ boardType, tags }) => {
+const BoardContainer = ({ boardType, tagsParams }) => {
   // 로그인 유저 정보
   const user = useSelector((state) => state.auth.user);
 
@@ -17,11 +18,11 @@ const BoardContainer = ({ boardType, tags }) => {
 
   const getPosts = useCallback(async () => {
     if (!nextPageCursor) setLoading(true);
-    const response = await api.readBoard(boardType, tags, nextPageCursor);
+    const response = await api.readBoard(boardType, tagsParams, nextPageCursor);
     setPosts((posts) => [...posts, ...response.data.posts]);
     setNextPageCursor(response.data.nextPageCursor);
     setLoading(false);
-  }, [boardType, tags, nextPageCursor]);
+  }, [boardType, tagsParams, nextPageCursor]);
 
   useEffect(() => {
     getPosts();
@@ -30,7 +31,7 @@ const BoardContainer = ({ boardType, tags }) => {
       setPosts([]);
       setNextPageCursor(null);
     };
-  }, [boardType, tags]);
+  }, [boardType, tagsParams]);
 
   const navigate = useNavigate();
 
@@ -43,6 +44,16 @@ const BoardContainer = ({ boardType, tags }) => {
     }
   }, [navigate, boardType]);
 
+  // 게시판 내 존재하는 태그 배열 조회
+  const [getTagsListState] = useAsync(
+    async () => {
+      const response = await api.getTagList(boardType);
+      return response.data.map((value) => ({ label: value, value: value }));
+    },
+    [boardType],
+    false,
+  );
+
   return (
     <BoardPresenter
       loading={loading}
@@ -51,6 +62,8 @@ const BoardContainer = ({ boardType, tags }) => {
       getPosts={getPosts}
       nextPageCursor={nextPageCursor}
       onClickWrite={onClickWrite}
+      tagsParams={tagsParams}
+      tagsList={getTagsListState.success ?? []}
     />
   );
 };

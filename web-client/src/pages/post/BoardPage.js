@@ -15,11 +15,11 @@ const BoardPage = () => {
 
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
-  const tags = searchParams.get('tags');
+  const tags = searchParams.get('tags')?.split(',') ?? [];
 
   return (
     <StyledPage>
-      <BoardContainer boardType={boardType} tags={tags} />
+      <BoardContainer boardType={boardType} tagsParams={tags} />
     </StyledPage>
   );
 };
