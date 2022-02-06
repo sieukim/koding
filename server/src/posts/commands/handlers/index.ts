@@ -8,6 +8,7 @@ import { IncreaseCommentCountHandler } from "./increase-comment-count.handler";
 import { DeleteOrphanPostLikesHandler } from "./delete-orphan-post-likes.handler";
 import { IncreaseReadCountHandler } from "./increase-read-count.handler";
 import { DeleteOrphanPostRankingHandler } from "./delete-orphan-post-ranking.handler";
+import { DeleteOrphanPostScrapsHandler } from "./delete-orphan-post-scraps.handler";
 
 export const PostCommandHandlers = [
   ModifyPostHandler,
@@ -20,4 +21,5 @@ export const PostCommandHandlers = [
   DeleteOrphanPostLikesHandler,
   IncreaseReadCountHandler,
   DeleteOrphanPostRankingHandler,
+  DeleteOrphanPostScrapsHandler,
 ];

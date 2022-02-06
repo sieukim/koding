@@ -72,12 +72,11 @@ import { NicknameAndBoardTypeParamDto } from "./dto/param/nickname-and-board-typ
 import { WritingCommentsInfoDto } from "./dto/writing-comments-info.dto";
 import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dto";
 import { ParamNicknameSameUserGuard } from "../auth/guard/authorization/param-nickname-same-user.guard";
-import { ScrapPostCommand } from "./commands/scrap-post.command";
-import { PostIdentifierWithNicknameParamDto } from "../posts/dto/param/post-identifier-with-nickname-param.dto";
-import { UnscrapPostCommand } from "./commands/unscrap-post.command";
 import { GetScrapPostsQuery } from "./queries/get-scrap-posts.query";
 import { PostListDto } from "../posts/dto/post-list.dto";
 import { GetScrapPostsHandler } from "./queries/handlers/get-scrap-posts.handler";
+import { GetLikePostsQuery } from "./queries/get-like-posts.query";
+import { GetLikePostsHandler } from "./queries/handlers/get-like-posts.handler";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -255,7 +254,10 @@ export class UsersController {
     @Query("key") key: string,
     @Query("value") value: string,
   ) {
-    if (!["nickname", "email"].includes(key)) throw new BadRequestException();
+    if (!["nickname", "email"].includes(key))
+      throw new BadRequestException(
+        `key 값은 ["nickname", "email"] 중 하나여아 합니다. ${key}`,
+      );
     if (
       await this.usersService.checkExistence(key as "nickname" | "email", value)
     )
@@ -458,40 +460,6 @@ export class UsersController {
   }
 
   /*
-   * 게시글 스크랩
-   */
-  @ApiCreatedResponse({ description: "게시글 스크랩 성공" })
-  @UseGuards(ParamNicknameSameUserGuard)
-  @HttpCode(HttpStatus.CREATED)
-  @Post(":nickname/scrap-posts/:boardType/:postId")
-  async scrapPost(
-    @Param()
-    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
-  ) {
-    await this.commandBus.execute(
-      new ScrapPostCommand({ postId, boardType }, nickname),
-    );
-    return;
-  }
-
-  /*
-   * 게시글 스크랩 취소
-   */
-  @ApiNoContentResponse({ description: "게시글 스크랩 취소 성공" })
-  @UseGuards(ParamNicknameSameUserGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(":nickname/scrap-posts/:boardType/:postId")
-  async unscrapPost(
-    @Param()
-    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
-  ) {
-    await this.commandBus.execute(
-      new UnscrapPostCommand({ postId, boardType }, nickname),
-    );
-    return;
-  }
-
-  /*
    * 스크랩한 게시글들 조회
    */
   @ApiOkResponse({
@@ -504,5 +472,20 @@ export class UsersController {
     return this.queryBus.execute(
       new GetScrapPostsQuery(nickname),
     ) as ReturnType<GetScrapPostsHandler["execute"]>;
+  }
+
+  /*
+   * 좋아요한 게시글들 조회
+   */
+  @ApiOkResponse({
+    description: "좋아요한 게시글들 조회 성공",
+    type: PostListDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get(":nickname/like-posts")
+  getLikePosts(@Param() { nickname }: NicknameParamDto) {
+    return this.queryBus.execute(new GetLikePostsQuery(nickname)) as ReturnType<
+      GetLikePostsHandler["execute"]
+    >;
   }
 }

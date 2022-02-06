@@ -37,6 +37,7 @@ export class PostScrapDocument extends Document {
 
 export const PostScrapSchema = SchemaFactory.createForClass(PostScrapDocument);
 PostScrapSchema.index(
+  // 게시글 스크랩, 스크랩 취소, 스크랩 여부 조회, 스크랩한 게시글들 조회 시
   { nickname: 1, postId: 1, boardType: 1 },
   { unique: true },
 );

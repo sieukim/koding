@@ -12,17 +12,12 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { EmailSagas } from "./sagas/email.sagas";
 import { PostsModule } from "../posts/posts.module";
 import { CommentsModule } from "../comments/comments.module";
-import {
-  PostScrapDocument,
-  PostScrapSchema,
-} from "../schemas/post-scrap.schema";
 
 @Global()
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: UserDocument.name, schema: UserSchema },
-      { name: PostScrapDocument.name, schema: PostScrapSchema },
     ]),
     EmailModule,
     CqrsModule,

@@ -49,6 +49,9 @@ import { LikePostCommand } from "./commands/like-post.command";
 import { UnlikePostCommand } from "./commands/unlike-post.command";
 import { UserLikePostInfoDto } from "./dto/user-like-post-info.dto";
 import { CheckUserLikePostQuery } from "./query/check-user-like-post.query";
+import { ScrapPostCommand } from "../users/commands/scrap-post.command";
+import { UnscrapPostCommand } from "../users/commands/unscrap-post.command";
+import { CheckUserScrapPostQuery } from "./query/check-user-scrap-post.query";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -197,7 +200,7 @@ export class PostsController {
 
   /*
    * 좋아요 요청
-   * @description 이미 좋아요를 눌렀던 경우에도 API는 정상적으로 204 NO CONTENT 를 반환
+   * @description 이미 좋아요를 눌렀던 경우에도 API 는 정상적으로 204 NO CONTENT 를 반환
    */
   @ApiNoContentResponse({
     description: "좋아요 요청 성공(이미 좋아요를 누른 경우도 포함)",
@@ -212,11 +215,12 @@ export class PostsController {
     await this.commandBus.execute(
       new LikePostCommand({ postId, boardType }, nickname),
     );
+    return;
   }
 
   /*
    * 좋아요 취소 요청
-   * @description 이미 좋아요를 하지 않았던 경우에도 API는 정상적으로 204 NO CONTENT 를 반환
+   * @description 이미 좋아요를 하지 않았던 경우에도 API 는 정상적으로 204 NO CONTENT 를 반환
    */
   @ApiNoContentResponse({
     description: "좋아요 취소 성공(이미 좋아요를 하지 않았던 경우도 포함)",
@@ -231,6 +235,7 @@ export class PostsController {
     await this.commandBus.execute(
       new UnlikePostCommand({ postId, boardType }, nickname),
     );
+    return;
   }
 
   /*
@@ -242,12 +247,71 @@ export class PostsController {
   })
   @HttpCode(HttpStatus.OK)
   @Get(":boardType/:postId/like/:nickname")
-  async likedPost(
+  async isUserLikedPost(
     @Param()
     { postId, boardType, nickname }: PostIdentifierWithNicknameParamDto,
   ) {
     return this.queryBus.execute(
       new CheckUserLikePostQuery({ postId, boardType }, nickname),
+    );
+  }
+
+  /*
+   * 게시글 스크랩
+   * @description 이미 스크랩을 했던 경우에도 API 는 정상적으로 204 NO CONTENT 를 반환
+   */
+  @ApiNoContentResponse({
+    description: "게시글 스크랩 성공(이미 스크랩 하고 있던 경우도 포함)",
+  })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post(":boardType/:postId/scrap/:nickname")
+  async scrapPost(
+    @Param()
+    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
+  ) {
+    await this.commandBus.execute(
+      new ScrapPostCommand({ postId, boardType }, nickname),
+    );
+    return;
+  }
+
+  /*
+   * 게시글 스크랩 취소
+   * @description 이미 스크랩하지 않았던 경우에도 API 는 정상적으로 204 NO CONTENT 를 반환
+   */
+  @ApiNoContentResponse({
+    description:
+      "게시글 스크랩 취소 성공(이미 스크랩하지 않고 있던 경우도 포함)",
+  })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":boardType/:postId/scrap/:nickname")
+  async unscrapPost(
+    @Param()
+    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
+  ) {
+    await this.commandBus.execute(
+      new UnscrapPostCommand({ postId, boardType }, nickname),
+    );
+    return;
+  }
+
+  /*
+   * 게시글에 대한 사용자의 스크랩 여부 조회
+   */
+  @ApiOkResponse({
+    description: "게시글에 대한 사용자의 스크랩 여부 조회 성공",
+    type: UserLikePostInfoDto,
+  })
+  @HttpCode(HttpStatus.OK)
+  @Get(":boardType/:postId/like/:nickname")
+  async isUserScrapedPost(
+    @Param()
+    { postId, boardType, nickname }: PostIdentifierWithNicknameParamDto,
+  ) {
+    return this.queryBus.execute(
+      new CheckUserScrapPostQuery({ postId, boardType }, nickname),
     );
   }
 }

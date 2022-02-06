@@ -17,13 +17,17 @@ import {
   PostDailyRankingSchema,
 } from "../schemas/post-daliy-ranking.schema";
 import { PostRankingController } from "./post-ranking.controller";
-import { PostScrapService } from "./services/post-scrap.service";
+import {
+  PostScrapDocument,
+  PostScrapSchema,
+} from "../schemas/post-scrap.schema";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: PostDocument.name, schema: PostSchema },
       { name: PostLikeDocument.name, schema: PostLikeSchema },
+      { name: PostScrapDocument.name, schema: PostScrapSchema },
       {
         name: PostDailyRankingDocument.name,
         schema: PostDailyRankingSchema,
@@ -42,6 +46,6 @@ import { PostScrapService } from "./services/post-scrap.service";
     ...PostEventHandlers,
     ...PostQueryHandlers,
   ],
-  exports: [PostsRepository, PostScrapService],
+  exports: [PostsRepository, ...PostServices],
 })
 export class PostsModule {}

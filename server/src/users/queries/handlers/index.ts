@@ -8,6 +8,7 @@ import { GetMyUserInfoHandler } from "./get-my-user-info.handler";
 import { GetWritingPostsHandler } from "./get-writing-posts.handler";
 import { GetWritingCommentsHandler } from "./get-writing-comments.handler";
 import { GetScrapPostsHandler } from "./get-scrap-posts.handler";
+import { GetLikePostsHandler } from "./get-like-posts.handler";
 
 export const UserQueryHandlers = [
   GetFollowerUsersHandler,
@@ -20,4 +21,5 @@ export const UserQueryHandlers = [
   GetWritingPostsHandler,
   GetWritingCommentsHandler,
   GetScrapPostsHandler,
+  GetLikePostsHandler,
 ];

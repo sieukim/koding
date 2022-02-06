@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ofType, Saga } from "@nestjs/cqrs";
-import { filter, map, Observable } from "rxjs";
+import { filter, map, mergeMap, Observable } from "rxjs";
 import { UserDeletedEvent } from "../../users/events/user-deleted.event";
 import { RenamePostWriterToNullCommand } from "../commands/rename-post-writer-to-null.command";
 import { CommentAddedEvent } from "../../comments/events/comment-added.event";
@@ -11,6 +11,10 @@ import {
 } from "../commands/increase-comment-count.command";
 import { PostReadCountIncreasedEvent } from "../events/post-read-count-increased.event";
 import { IncreaseReadCountCommand } from "../commands/increase-read-count.command";
+import { PostDeletedEvent } from "../events/post-deleted.event";
+import { DeleteOrphanPostLikesCommand } from "../commands/delete-orphan-post-likes.command";
+import { DeleteOrphanPostScrapsCommand } from "../commands/delete-orphan-post-scraps.command";
+import { DeleteOrphanPostRankingCommand } from "../commands/delete-orphan-post-ranking.command";
 
 @Injectable()
 export class PostsSaga {
@@ -48,5 +52,16 @@ export class PostsSaga {
             IncreaseType.Positive,
           );
       }),
+    );
+
+  @Saga()
+  deleteOrphanPostAggregates = ($events: Observable<any>) =>
+    $events.pipe(
+      ofType(PostDeletedEvent),
+      mergeMap(({ postIdentifier }) => [
+        new DeleteOrphanPostLikesCommand(postIdentifier),
+        new DeleteOrphanPostScrapsCommand(postIdentifier),
+        new DeleteOrphanPostRankingCommand(postIdentifier),
+      ]),
     );
 }

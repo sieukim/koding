@@ -9,7 +9,7 @@ export class GetScrapPostsHandler implements IQueryHandler<GetScrapPostsQuery> {
 
   async execute(query: GetScrapPostsQuery) {
     const { nickname } = query;
-    const posts = await this.postScrapService.getScrapPost(nickname);
+    const posts = await this.postScrapService.getScrapPosts(nickname);
     return PostListDto.fromModel(posts, posts.length);
   }
 }

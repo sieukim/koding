@@ -12,6 +12,8 @@ import {
 import { EventBus } from "@nestjs/cqrs";
 import { PostLikedEvent } from "../events/post-liked.event";
 import { PostUnlikedEvent } from "../events/post-unliked.event";
+import { SortType } from "../../common/repository/sort-option";
+import { PostDocument } from "../../schemas/post.schema";
 
 @Injectable()
 export class PostLikeService {
@@ -26,7 +28,7 @@ export class PostLikeService {
     const { postId, boardType } = postIdentifier;
     const exists = await this.postLikeModel.exists({
       postId: new Types.ObjectId(postId),
-      likeUserNickname: nickname,
+      nickname,
       boardType,
     });
     if (!exists) {
@@ -37,7 +39,7 @@ export class PostLikeService {
         }),
         this.postLikeModel.create({
           postId: new Types.ObjectId(postId),
-          likeUserNickname: nickname,
+          nickname,
           boardType,
         }),
       ]);
@@ -52,7 +54,7 @@ export class PostLikeService {
     const deletedPostLike = await this.postLikeModel
       .findOneAndDelete({
         postId: new Types.ObjectId(postId),
-        likeUserNickname: nickname,
+        nickname,
         boardType,
       })
       .exec();
@@ -74,9 +76,20 @@ export class PostLikeService {
   ): Promise<boolean> {
     return this.postLikeModel.exists({
       postId: new Types.ObjectId(postId),
-      likeUserNickname: nickname,
+      nickname,
       boardType,
     });
+  }
+
+  async getLikePosts(nickname: string) {
+    const likePosts = await this.postLikeModel
+      .find({ nickname })
+      .sort({ _id: SortType.ASC }) // 스크랩한지 오래된 순으로
+      .populate("post")
+      .exec();
+    return likePosts
+      .filter((likePost) => likePost.post !== null)
+      .map((likePost) => PostDocument.toModel(likePost.post));
   }
 
   removeOrphanPostLikes({ postId, boardType }: PostIdentifier) {

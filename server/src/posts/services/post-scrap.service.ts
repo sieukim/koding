@@ -15,16 +15,16 @@ import { PostUnscrapedEvent } from "../events/post-unscraped.event";
 export class PostScrapService {
   constructor(
     @InjectModel(PostScrapDocument.name)
-    private readonly scrapPostModel: Model<PostScrapDocument>,
+    private readonly postScrapModel: Model<PostScrapDocument>,
     private readonly postsRepository: PostsRepository,
     private readonly eventBus: EventBus,
   ) {}
 
   async scrapPost(postIdentifier: PostIdentifier, nickname: string) {
     const { postId, boardType } = postIdentifier;
-    const updateResult = await this.scrapPostModel
+    const updateResult = await this.postScrapModel
       .updateOne(
-        { postId: new Types.ObjectId(postId), nickname },
+        { nickname, postId: new Types.ObjectId(postId) },
         { $setOnInsert: { boardType } },
         { upsert: true },
       )
@@ -40,10 +40,10 @@ export class PostScrapService {
 
   async unscrapPost(postIdentifier: PostIdentifier, nickname: string) {
     const { postId, boardType } = postIdentifier;
-    const deletedScrapPost = await this.scrapPostModel
+    const deletedScrapPost = await this.postScrapModel
       .findOneAndDelete({
-        postId: new Types.ObjectId(postId),
         nickname,
+        postId: new Types.ObjectId(postId),
       })
       .exec();
     if (deletedScrapPost) {
@@ -59,23 +59,31 @@ export class PostScrapService {
     return;
   }
 
-  async getScrapPost(nickname: string) {
-    const scrapPosts = await this.scrapPostModel
+  async getScrapPosts(nickname: string) {
+    const scrapPosts = await this.postScrapModel
       .find({ nickname })
       .sort({ _id: SortType.ASC }) // 스크랩한지 오래된 순으로
       .populate("post")
       .exec();
-    return scrapPosts.map((post) => PostDocument.toModel(post.post));
+    return scrapPosts
+      .filter((scrapPost) => scrapPost.post !== null)
+      .map((scrapPost) => PostDocument.toModel(scrapPost.post));
   }
 
   async isUserScrapPost(
     { postId, boardType }: PostIdentifier,
     nickname: string,
   ): Promise<boolean> {
-    return this.scrapPostModel.exists({
+    return this.postScrapModel.exists({
+      nickname,
       postId: new Types.ObjectId(postId),
-      likeUserNickname: nickname,
       boardType,
     });
+  }
+
+  removeOrphanPostScraps({ postId, boardType }: PostIdentifier) {
+    return this.postScrapModel
+      .deleteMany({ postId: new Types.ObjectId(postId), boardType })
+      .exec();
   }
 }

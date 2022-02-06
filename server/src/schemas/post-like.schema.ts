@@ -28,31 +28,37 @@ export class PostLikeDocument extends Document {
   post?: PostDocument;
 
   @Prop({ type: String })
-  likeUserNickname: string;
+  nickname: string;
 
-  likeUser?: UserDocument;
+  user?: UserDocument;
 
   createdAt: Date;
 }
 
 export const PostLikeSchema = SchemaFactory.createForClass(PostLikeDocument);
 PostLikeSchema.index(
+  // 게시글 좋아요, 좋아요 취소, 좋아요 여부 조회 ,고아 도큐먼트 삭제 시
   {
     postId: 1,
-    likeUserNickname: 1,
+    nickname: 1,
     boardType: 1,
   },
   { unique: true },
 );
+PostLikeSchema.index({
+  // 사용자가 좋아요한 게시글들 조회 시
+  nickname: 1,
+  _id: 1,
+});
 PostLikeSchema.virtual("post", {
   ref: PostDocument.name,
   localField: "postId",
   foreignField: "_id",
   justOne: true,
 });
-PostLikeSchema.virtual("likeUser", {
+PostLikeSchema.virtual("user", {
   ref: UserDocument.name,
-  localField: "likeUser",
+  localField: "nickname",
   foreignField: "nickname",
   justOne: true,
 });
