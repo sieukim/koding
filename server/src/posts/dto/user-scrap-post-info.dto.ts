@@ -10,17 +10,17 @@ export class UserScrapPostInfoDto extends IntersectionType(
   /*
    * 게시글에 대한 사용자의 스크랩 여부
    */
-  scraped: boolean;
+  scrapped: boolean;
 
   constructor(
     { boardType, postId }: PostIdentifier,
     nickname: string,
-    scraped: boolean,
+    scrapped: boolean,
   ) {
     super();
     this.boardType = boardType;
     this.postId = postId;
     this.nickname = nickname;
-    this.scraped = scraped;
+    this.scrapped = scrapped;
   }
 }

@@ -20,7 +20,7 @@ export class PostWithAroundInfoDto {
   constructor(
     post: Post,
     liked: boolean,
-    scraped: boolean,
+    scrapped: boolean,
     prevPost?: Post,
     nextPost?: Post,
   ) {
@@ -32,6 +32,6 @@ export class PostWithAroundInfoDto {
       : undefined;
     this.post = PostWithWriterInfoDto.fromModel(post);
     this.post.liked = liked;
-    this.post.scraped = scraped;
+    this.post.scrapped = scrapped;
   }
 }

@@ -30,7 +30,7 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
     if (!post) throw new NotFoundException("잘못된 게시글 아이디");
     post = this.publisher.mergeObjectContext(post);
     post.increaseReadCount();
-    const [liked, scraped, prevPost, nextPost] = await Promise.all([
+    const [liked, scrapped, prevPost, nextPost] = await Promise.all([
       readerNickname
         ? this.postLikeService.isUserLikePost(postIdentifier, readerNickname)
         : false,
@@ -53,6 +53,6 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
       ),
     ]);
     post.commit();
-    return new PostWithAroundInfoDto(post, liked, scraped, prevPost, nextPost);
+    return new PostWithAroundInfoDto(post, liked, scrapped, prevPost, nextPost);
   }
 }

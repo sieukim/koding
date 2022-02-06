@@ -7,9 +7,9 @@ import { SortType } from "../../common/repository/sort-option";
 import { PostDocument } from "../../schemas/post.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { EventBus } from "@nestjs/cqrs";
-import { PostScrapedEvent } from "../events/post-scraped.event";
+import { PostScrappedEvent } from "../events/post-scrapped.event";
 import { getCurrentTime } from "../../common/utils/time.util";
-import { PostUnscrapedEvent } from "../events/post-unscraped.event";
+import { PostUnscrappedEvent } from "../events/post-unscrapped.event";
 
 @Injectable()
 export class PostScrapService {
@@ -32,7 +32,7 @@ export class PostScrapService {
     if (updateResult.upsertedCount === 1) {
       await this.postsRepository.increaseScrapCount(postIdentifier);
       this.eventBus.publish(
-        new PostScrapedEvent(postIdentifier, nickname, getCurrentTime()),
+        new PostScrappedEvent(postIdentifier, nickname, getCurrentTime()),
       );
     }
     return;
@@ -44,12 +44,13 @@ export class PostScrapService {
       .findOneAndDelete({
         nickname,
         postId: new Types.ObjectId(postId),
+        boardType,
       })
       .exec();
     if (deletedScrapPost) {
       await this.postsRepository.increaseScrapCount(postIdentifier);
       this.eventBus.publish(
-        new PostUnscrapedEvent(
+        new PostUnscrappedEvent(
           postIdentifier,
           nickname,
           deletedScrapPost.createdAt,

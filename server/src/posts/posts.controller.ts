@@ -99,21 +99,12 @@ export class PostsController {
     name: "tags",
     description:
       "검색할 태그들. 여러개인 경우 , 로 구분하며, 각각은 OR로 묶임. 검색이 필요 없는 경우 값을 넣지 않음",
-    examples: {
-      "여러 태그를 or로 검색": {
-        value: "react,hooks",
-      },
-      "하나의 태그만 검색": {
-        value: "nestjs",
-      },
-    },
     type: String,
   })
   @ApiQuery({
     required: false,
     name: "writer",
     description: "검색할 작성자. 검색이 필요 없는 경우 값을 넣지 않음",
-    example: "testNickname",
   })
   @ApiOkResponse({
     description: "게시글 목록 조회 성공",
@@ -306,7 +297,7 @@ export class PostsController {
   })
   @HttpCode(HttpStatus.OK)
   @Get(":boardType/:postId/like/:nickname")
-  async isUserScrapedPost(
+  async isUserScrappedPost(
     @Param()
     { postId, boardType, nickname }: PostIdentifierWithNicknameParamDto,
   ) {

@@ -2,8 +2,8 @@ import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { PostReadCountIncreasedEvent } from "../post-read-count-increased.event";
 import { PostLikedEvent } from "../post-liked.event";
 import { PostUnlikedEvent } from "../post-unliked.event";
-import { PostScrapedEvent } from "../post-scraped.event";
-import { PostUnscrapedEvent } from "../post-unscraped.event";
+import { PostScrappedEvent } from "../post-scrapped.event";
+import { PostUnscrappedEvent } from "../post-unscrapped.event";
 import { CommentAddedEvent } from "../../../comments/events/comment-added.event";
 import { CommentDeletedEvent } from "../../../comments/events/comment-deleted.event";
 import { PostRankingService } from "../../services/post-ranking.service";
@@ -13,8 +13,8 @@ const events = [
   PostReadCountIncreasedEvent,
   PostLikedEvent,
   PostUnlikedEvent,
-  PostScrapedEvent,
-  PostUnscrapedEvent,
+  PostScrappedEvent,
+  PostUnscrappedEvent,
   CommentAddedEvent,
   CommentDeletedEvent,
 ] as const;
@@ -36,10 +36,10 @@ export class SyncPostAggregateInfoHandler
     } else if (event instanceof PostUnlikedEvent) {
       if (isSameDate(currentDate, event.unlikeDate))
         return this.postRankingService.decreaseDailyLikeCount(postIdentifier);
-    } else if (event instanceof PostScrapedEvent) {
+    } else if (event instanceof PostScrappedEvent) {
       if (isSameDate(currentDate, event.scrapDate))
         return this.postRankingService.increaseDailyScrapCount(postIdentifier);
-    } else if (event instanceof PostUnscrapedEvent) {
+    } else if (event instanceof PostUnscrappedEvent) {
       if (isSameDate(currentDate, event.scrapDate))
         return this.postRankingService.decreaseDailyScrapCount(postIdentifier);
     } else if (event instanceof CommentAddedEvent) {

@@ -11,10 +11,10 @@ export class CheckUserScrapPostHandler
 
   async execute(query: CheckUserScrapPostQuery): Promise<any> {
     const { postIdentifier, nickname } = query;
-    const isUserScraped = await this.postScrapService.isUserScrapPost(
+    const isUserScrapped = await this.postScrapService.isUserScrapPost(
       postIdentifier,
       nickname,
     );
-    return new UserScrapPostInfoDto(postIdentifier, nickname, isUserScraped);
+    return new UserScrapPostInfoDto(postIdentifier, nickname, isUserScrapped);
   }
 }
