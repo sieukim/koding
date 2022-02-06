@@ -48,7 +48,7 @@ export class PostScrapService {
       })
       .exec();
     if (deletedScrapPost) {
-      await this.postsRepository.increaseScrapCount(postIdentifier);
+      await this.postsRepository.decreaseScrapCount(postIdentifier);
       this.eventBus.publish(
         new PostUnscrappedEvent(
           postIdentifier,
