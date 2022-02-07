@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import TagPresenter from './TagPresenter';
+import SearchByTag from '../utils/SearchByTag';
 import * as api from '../../../modules/api';
-import { Editor } from '../../../utils/Editor';
+import { Editor } from '../utils/editor/Editor';
 
 const StyledEdit = styled.form`
   display: flex;
@@ -101,7 +101,7 @@ const EditPostPresenter = ({
             onChange={onChangeInput}
             value={title}
           />
-          <TagPresenter
+          <SearchByTag
             onChangeTag={onChangeTag}
             tags={tagList}
             defaultValue={readPostState.success.data.post.tags}

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import SignupPresenter from '../../presenters/auth/SignupPresenter';
+import EmailSignupPresenter from '../../presenters/auth/EmailSignupPresenter';
 import { Navigate } from 'react-router-dom';
 import * as api from '../../../modules/api';
 import { useDispatch } from 'react-redux';
 import { setLogin } from '../../../modules/auth';
 import useAsync from '../../../hooks/useAsync';
 
-const SignupContainer = () => {
+const EmailSignupContainer = () => {
   /* 중복 검사 */
 
   // 중복 검사 api 호출 결과로 중복이면 true 값을 갖는다.
@@ -82,7 +82,7 @@ const SignupContainer = () => {
   return (
     <>
       {loginState.success && <Navigate to="/" />}
-      <SignupPresenter
+      <EmailSignupPresenter
         signup={signup}
         signupState={signupState}
         duplicated={duplicated}
@@ -93,4 +93,4 @@ const SignupContainer = () => {
   );
 };
 
-export default SignupContainer;
+export default EmailSignupContainer;

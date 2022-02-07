@@ -1,24 +1,20 @@
-import { Tabs } from 'antd';
-import { CommentOutlined, FormOutlined } from '@ant-design/icons';
 import { useCallback, useEffect, useState } from 'react';
 import * as api from '../../../modules/api';
 import TabPresenter from '../../presenters/profile/TabPresenter';
-
-const { TabPane } = Tabs;
 
 const TabContainer = ({ profileUser }) => {
   // 게시글
   const [posts, setPosts] = useState({
     common: [],
     question: [],
-    career: [],
+    [`study-group`]: [],
     column: [],
   });
 
   const [nextPostCursor, setNextPostCursor] = useState({
     common: null,
     question: null,
-    career: null,
+    [`study-group`]: null,
     column: null,
   });
 
@@ -44,7 +40,7 @@ const TabContainer = ({ profileUser }) => {
   useEffect(() => {
     getUserPosts('common');
     getUserPosts('question');
-    getUserPosts('career');
+    getUserPosts('study-group');
     getUserPosts('column');
   }, []);
 
@@ -52,14 +48,14 @@ const TabContainer = ({ profileUser }) => {
   const [comments, setComments] = useState({
     common: [],
     question: [],
-    career: [],
+    [`study-group`]: [],
     column: [],
   });
 
   const [nextCommentCursor, setNextCommentCursor] = useState({
     common: null,
     question: null,
-    career: null,
+    [`study-group`]: null,
     column: null,
   });
 
@@ -85,48 +81,19 @@ const TabContainer = ({ profileUser }) => {
   useEffect(() => {
     getUserComments('common');
     getUserComments('question');
-    getUserComments('career');
+    getUserComments(`study-group`);
     getUserComments('column');
   }, []);
+
   return (
-    <Tabs defaultActiveKey="post" centered size="large">
-      <TabPane
-        key="post"
-        tab={
-          <span>
-            <FormOutlined />
-            게시글
-          </span>
-        }
-      >
-        <TabPresenter
-          type="post"
-          items={posts}
-          setItems={setPosts}
-          getItems={getUserPosts}
-          nextCursor={nextPostCursor}
-          setNextCursor={setNextPostCursor}
-        />
-      </TabPane>
-      <TabPane
-        key="comment"
-        tab={
-          <span>
-            <CommentOutlined />
-            댓글
-          </span>
-        }
-      >
-        <TabPresenter
-          type="comment"
-          items={comments}
-          setItems={setComments}
-          nextCursor={nextCommentCursor}
-          setNextCursor={setNextCommentCursor}
-          getItems={getUserComments}
-        />
-      </TabPane>
-    </Tabs>
+    <TabPresenter
+      posts={posts}
+      getPosts={getUserPosts}
+      nextPostCursor={nextPostCursor}
+      comments={comments}
+      getComments={getUserComments}
+      nextCommentCursor={nextCommentCursor}
+    />
   );
 };
 

@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import SearchBar from '../../../utils/SearchBar';
+import SearchBar from '../utils/SearchBar';
 
 import React from 'react';
-import SearchResult from '../../../utils/SearchResult';
+import SearchResult from '../utils/SearchResult';
 
 const StyledPage = styled.div`
   display: flex;

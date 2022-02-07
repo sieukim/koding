@@ -27,7 +27,7 @@ const StyledSignup = styled.div`
   }
 `;
 
-const SignupPresenter = ({
+const EmailSignupPresenter = ({
   signup,
   signupState,
   duplicated,
@@ -299,4 +299,4 @@ const SignupPresenter = ({
   );
 };
 
-export default SignupPresenter;
+export default EmailSignupPresenter;

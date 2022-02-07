@@ -1,166 +1,233 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
-import { GetDate } from '../../../utils/GetDate';
-import { ProfileLink } from '../../../utils/ProfileLink';
-import { Chip } from '@material-ui/core';
-import { Viewer } from '../../../utils/Viewer';
-import { PostLink } from '../../../utils/PostLink';
+import { Viewer } from '../utils/editor/Viewer';
+import { Button, List, Spin } from 'antd';
+import { Tags } from '../utils/post/Tags';
+import { metadata } from '../utils/post/metadata';
+import { LeftCircleOutlined, RightCircleOutlined } from '@ant-design/icons';
 
-const StyledReadPost = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+const StyledPost = styled.div`
+  border: 1px solid rgb(217, 217, 217);
+  border-radius: 8px;
+  margin-top: 50px;
+  padding: 32px;
+  width: 900px;
 
-  .post-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    background: lightgray;
-    padding: 10px;
-    margin: auto 0;
-  }
-
-  .post-info {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .post-title {
-    font-weight: bold;
-    margin-right: 5px;
-  }
-
-  .post-createdAt {
-    color: gray;
-  }
-
-  .buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
-
-    button {
-      margin: 0 5px;
-    }
-  }
-
-  button {
-    margin: 5px 0;
-  }
-
-  .nav-buttons {
+  .spinner {
+    width: 100%;
     text-align: center;
   }
 
-  .nav-button {
-    margin: 5px;
+  .ant-list-item-meta-title {
+    font-size: 2em;
   }
 
-  .disabled {
-    pointer-events: none;
-    cursor: default;
-    color: gray;
+  a:hover {
+    color: #1890ff !important;
+
+    * {
+      color: #1890ff !important;
+    }
+  }
+
+  .item-black {
+    * {
+      color: black;
+    }
+  }
+
+  .item-red {
+    * {
+      color: #cf1322;
+    }
+  }
+
+  .item-blue {
+    * {
+      color: #096dd9;
+    }
+  }
+
+  .item-yellow {
+    * {
+      color: #faad14;
+    }
   }
 `;
 
+const StyledNav = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border: 1px solid rgb(217, 217, 217);
+  border-radius: 8px;
+  margin: 50px 0;
+  width: 900px;
+  height: 100px;
+
+  .prev-button,
+  .next-button,
+  .board-button {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 32px;
+  }
+
+  .prev-button,
+  .next-button {
+    width: 40%;
+  }
+
+  .prev-button {
+    justify-content: left;
+
+    .title-container {
+      margin-left: 20px;
+      text-align: left;
+
+      .button-title {
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+
+      .post-title {
+        font-weight: 100;
+      }
+    }
+  }
+
+  .next-button {
+    justify-content: right;
+
+    .title-container {
+      margin-right: 20px;
+      text-align: right;
+
+      .button-title {
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+
+      .post-title {
+        font-weight: 100;
+      }
+    }
+  }
+
+  .board-button {
+    width: 20%;
+    justify-content: center;
+  }
+`;
+
+const NavButton = ({ prev, next, onClickPrev, onClickNext, onClickBoard }) => {
+  return (
+    <StyledNav>
+      <Button type="text" onClick={prev && onClickPrev} className="prev-button">
+        <LeftCircleOutlined
+          style={{
+            color: 'grey',
+            fontSize: 'large',
+            fontWeight: 'lighter',
+          }}
+        />
+        <div className="title-container">
+          <div className="button-title">이전 글</div>
+          <div className="post-title">
+            {prev?.title ?? '이전 글이 없습니다. '}
+          </div>
+        </div>
+      </Button>
+      <Button type="text" onClick={onClickBoard} className="board-button">
+        목록
+      </Button>
+      <Button type="text" onClick={next && onClickNext} className="next-button">
+        <div className="title-container">
+          <div className="button-title">다음 글</div>
+          <div className="post-title">
+            {next?.title ?? '다음 글이 없습니다.'}
+          </div>
+        </div>
+        <RightCircleOutlined
+          style={{
+            color: 'grey',
+            fontSize: 'large',
+            fontWeight: 'lighter',
+          }}
+        />
+      </Button>
+    </StyledNav>
+  );
+};
+
 const PostPresenter = ({
-  readPostState,
-  removePostState,
-  onClickRemove,
+  user,
+  loading,
+  post,
+  prev,
+  next,
+  onClickLike,
+  onClickUnlike,
+  onClickScrap,
+  onClickUnscrap,
   onClickEdit,
-  onClickList,
-  onClickTag,
-  post = {},
-  prevPostInfo = {},
-  nextPostInfo = {},
+  onClickRemove,
+  onClickPrev,
+  onClickNext,
+  onClickBoard,
 }) => {
-  // 로그인 유저 정보
-  const user = useSelector((state) => state.auth.user);
-
-  // 게시글 정보: writer, markdownContent, title, createdAt
-  const {
-    writerNickname = '',
-    markdownContent = '',
-    title = '',
-    createdAt = '',
-    readCount = 0,
-    tags = [],
-  } = post;
-
-  // 이전 글 정보
-  const { boardType: prevBoardType = '', postId: prevPostId = '' } =
-    prevPostInfo;
-
-  // 다음 글 정보
-  const { boardType: nextBoardType = '', postId: nextPostId = '' } =
-    nextPostInfo;
-
-  /* Viewer */
-
+  // 게시글 내용 viewer
   const viewerRef = useRef();
 
   useEffect(() => {
-    viewerRef.current &&
-      viewerRef.current.getInstance().setMarkdown(markdownContent);
-  }, [viewerRef, markdownContent]);
+    if (viewerRef.current) {
+      viewerRef.current.getInstance().setMarkdown(post.markdownContent);
+    }
+  }, [viewerRef, post.markdownContent]);
 
   return (
-    <StyledReadPost>
-      <div className="post-header">
-        <div className="post-info">
-          <div className="post-title">{title}</div>
-          <ProfileLink nickname={writerNickname} str={writerNickname} />
-        </div>
-        <GetDate date={createdAt} className="post-createdAt" />
-      </div>
-      <Viewer
-        innerRef={viewerRef}
-        markdownContent={markdownContent}
-        className="post-content"
+    <>
+      <StyledPost>
+        {loading ? (
+          <div className="spinner">
+            <Spin />
+          </div>
+        ) : (
+          <List
+            dataSource={[post]}
+            renderItem={(post) => (
+              <List.Item
+                key={post.postId}
+                actions={metadata(
+                  user,
+                  post,
+                  onClickLike,
+                  onClickUnlike,
+                  onClickScrap,
+                  onClickUnscrap,
+                  onClickEdit,
+                  onClickRemove,
+                )}
+              >
+                <List.Item.Meta title={post.title} />
+                <Viewer innerRef={viewerRef} />
+                <Tags post={post} tags={post.tags ?? []} />
+              </List.Item>
+            )}
+            itemLayout="vertical"
+          />
+        )}
+      </StyledPost>
+      <NavButton
+        prev={prev}
+        next={next}
+        onClickPrev={onClickPrev}
+        onClickNext={onClickNext}
+        onClickBoard={onClickBoard}
       />
-      <div className="tag-container">
-        {tags.map((tag) => {
-          return (
-            <Chip
-              variant="outlined"
-              label={tag}
-              key={tag}
-              size="small"
-              onClick={onClickTag}
-              data-tag={tag}
-            />
-          );
-        })}
-      </div>
-      {user && user.nickname === writerNickname && (
-        <div className="buttons">
-          <button onClick={onClickEdit}>수정</button>
-          <button onClick={onClickRemove}>삭제</button>
-        </div>
-      )}
-      <div className="nav-buttons">
-        <button className="nav-button" disabled={!prevPostId}>
-          <PostLink
-            boardType={prevBoardType}
-            postId={prevPostId}
-            postTitle="이전 글"
-            className={prevPostId || 'disabled'}
-          />
-        </button>
-        <button className="nav-button" onClick={onClickList}>
-          목록
-        </button>
-        <button className="nav-button" disabled={!nextPostId}>
-          <PostLink
-            boardType={nextBoardType}
-            postId={nextPostId}
-            postTitle="다음 글"
-            className={nextPostId || 'disabled'}
-          />
-        </button>
-      </div>
-    </StyledReadPost>
+    </>
   );
 };
 

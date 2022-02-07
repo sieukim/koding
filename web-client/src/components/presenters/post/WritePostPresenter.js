@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { useCallback, useRef, useState } from 'react';
-import TagPresenter from './TagPresenter';
+import SearchByTag from '../utils/SearchByTag';
 import * as api from '../../../modules/api';
-import { Editor } from '../../../utils/Editor';
+import { Editor } from '../utils/editor/Editor';
 
 const StyledWritePost = styled.form`
   display: flex;
@@ -71,7 +71,7 @@ const WritePostPresenter = ({ writePost, writePostState, tagList = [] }) => {
         required
         onChange={onChangeInput}
       />
-      <TagPresenter onChangeTag={onChangeTag} tags={tagList} />
+      <SearchByTag onChangeTag={onChangeTag} tags={tagList} />
       <Editor
         innerRef={editorRef}
         hooks={{

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { ProfileLink } from '../../../utils/ProfileLink';
+import { NicknameLink } from '../utils/link/NicknameLink';
 import { Button, List, Tabs } from 'antd';
 import { UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
 import { useCallback, useEffect, useState } from 'react';
@@ -51,7 +51,7 @@ const ListPresenter = ({
       dataSource={list}
       renderItem={(user) => (
         <List.Item>
-          <ProfileLink nickname={user} />
+          <NicknameLink nickname={user} />
           {loginUser &&
             loginUser !== user &&
             (loginUserFollowingState.includes(user) ? (

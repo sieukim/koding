@@ -1,12 +1,12 @@
-import BoardContainer from '../../components/containers/board/BoardContainer';
+import BoardContainer from '../../components/containers/post/BoardContainer';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-const StyledBoard = styled.div`
+const StyledPage = styled.div`
   display: flex;
   justify-content: center;
   margin: 0 auto;
-  width: 60%;
+  width: 100%;
 `;
 
 const BoardPage = () => {
@@ -15,13 +15,12 @@ const BoardPage = () => {
 
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
-  const cursor = searchParams.get('cursor');
-  const tags = searchParams.get('tags');
+  const tags = searchParams.get('tags')?.split(',') ?? [];
 
   return (
-    <StyledBoard>
-      <BoardContainer boardType={boardType} cursor={cursor} tags={tags} />
-    </StyledBoard>
+    <StyledPage>
+      <BoardContainer boardType={boardType} tagsParams={tags} />
+    </StyledPage>
   );
 };
 
