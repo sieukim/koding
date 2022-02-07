@@ -14,7 +14,7 @@ import {
 } from '@ant-design/icons';
 import { NicknameLink } from '../link/NicknameLink';
 import React from 'react';
-import { getRelativeCreatedAt } from '../function/getCreatedAt';
+import { getCreatedAt } from '../function/getCreatedAt';
 
 const StyledPostList = styled.div`
   .spinner {
@@ -120,7 +120,7 @@ export const PostList = ({ loading, posts, next, hasMore }) => {
                   <IconText
                     key="createdAt"
                     icon={<FieldTimeOutlined />}
-                    text={getRelativeCreatedAt(post.createdAt)}
+                    text={getCreatedAt(post.createdAt)}
                     className="item-createdAt"
                   />,
                 ]}

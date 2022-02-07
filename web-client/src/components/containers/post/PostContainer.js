@@ -6,14 +6,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMessage } from '../../../hooks/useMessage';
 
-const PostContainer = ({ boardType, postId }) => {
+const PostContainer = ({ boardType, postId, post, setPost }) => {
   // 로그인 유저
   const user = useSelector((state) => state.auth.user);
 
   const navigate = useNavigate();
 
   // 게시글 상태
-  const [post, setPost] = useState({});
   const [prev, setPrev] = useState({});
   const [next, setNext] = useState({});
 

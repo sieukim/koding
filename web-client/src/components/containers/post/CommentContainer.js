@@ -1,153 +1,89 @@
-import CommentPresenter from '../../presenters/post/CommentPresenter';
 import * as api from '../../../modules/api';
-import useAsync from '../../../hooks/useAsync';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import CommentPresenter from '../../presenters/post/CommentPresenter';
+import useAsync from '../../../hooks/useAsync';
+import { useMessage } from '../../../hooks/useMessage';
 
-const CommentContainer = ({
-  boardType,
-  postId,
-  setCommentSuccess,
-  success,
-  cursor,
-}) => {
-  /* 게시글 댓글 가져오기 */
+const CommentContainer = ({ boardType, postId, setPost }) => {
+  // 로그인 유저
+  const user = useSelector((state) => state.auth.user);
 
+  const [loading, setLoading] = useState(false);
+
+  // 댓글 상태
   const [comments, setComments] = useState([]);
 
-  const [readCommentState, readCommentFetch] = useAsync(
-    () => {
-      setCommentSuccess(false);
-      return api.readComment(boardType, postId, cursor);
-    },
-    [boardType, postId, cursor],
-    false,
-  );
+  const [nextPageCursor, setNextPageCursor] = useState(null);
 
-  const navigate = useNavigate();
-
-  // 이전 댓글 목록
-  const prevPageCursor = readCommentState.success?.data?.prevPageCursor;
-
-  // 이전 댓글 목록으로 이동 이벤트 리스너
-  const onClickPrevCursor = useCallback(() => {
-    const query = new URLSearchParams();
-    if (prevPageCursor) query.set('cursor', prevPageCursor);
-    navigate(`/board/${boardType}/post/${postId}?${query}`);
-  }, [navigate, boardType, postId, prevPageCursor]);
-
-  // 다음 댓글 목록
-  const nextPageCursor = readCommentState.success?.data?.nextPageCursor;
-
-  // 다음 댓글 목록으로 이동 이벤트 리스너
-  const onClickNextCursor = useCallback(() => {
-    const query = new URLSearchParams();
-    if (nextPageCursor) query.set('cursor', nextPageCursor);
-    navigate(`/board/${boardType}/post/${postId}?${query}`);
-  }, [navigate, boardType, postId, nextPageCursor]);
+  // 댓글 가져오기
+  const getComments = useCallback(async () => {
+    if (!nextPageCursor) setLoading(true);
+    const response = await api.readComment(boardType, postId, nextPageCursor);
+    setComments((comments) => [...comments, ...response.data.comments]);
+    setNextPageCursor(response.data.nextPageCursor);
+    setLoading(false);
+  }, [boardType, postId, nextPageCursor]);
 
   useEffect(() => {
-    if (readCommentState.success) {
-      setComments(readCommentState.success.data.comments);
-      setCommentSuccess(true);
-    }
-  }, [readCommentState.success]);
+    getComments();
 
-  /* 댓글 작성 api */
+    return () => {
+      setLoading(false);
+      setComments([]);
+      setNextPageCursor(null);
+    };
+  }, [boardType, postId]);
 
+  // 댓글 작성
   const [writeCommentState, writeCommentFetch] = useAsync(
     (comment) => api.writeComment(boardType, postId, comment),
     [boardType, postId],
     true,
   );
 
-  useEffect(() => {
-    if (writeCommentState.success) {
-      setComments((comments) => {
-        if (comments.length < 10) {
-          const newComments = [...comments];
-          newComments.push(writeCommentState.success.data);
-          return newComments;
-        } else {
-          return comments;
-        }
-      });
-    }
-  }, [writeCommentState.success]);
-
-  const writeComment = useCallback(
+  const onClickWrite = useCallback(
     async (comment) => {
       const response = await writeCommentFetch(comment);
-      await readCommentFetch();
-
-      return response;
+      setComments((comments) => [...comments, response.data]);
+      setPost((post) => ({ ...post, commentCount: post.commentCount + 1 }));
     },
-    [writeCommentFetch, readCommentFetch],
+    [writeCommentFetch],
   );
 
-  /* 댓글 수정 api */
+  useMessage(writeCommentState, '댓글을 작성했습니다! 📝');
 
-  const [editCommentState, editCommentFetch] = useAsync(
-    (commentId, comment) =>
-      api.editComment(boardType, postId, commentId, comment),
-    [boardType, postId],
-    true,
-  );
-
-  const editComment = useCallback(
-    async (commentId, comment) => await editCommentFetch(commentId, comment),
-    [editCommentFetch],
-  );
-
-  /* 댓글 삭제 api */
-
+  // 댓글 삭제
   const [removeCommentState, removeCommentFetch] = useAsync(
     (commentId) => api.removeComment(boardType, postId, commentId),
     [boardType, postId],
     true,
   );
 
-  const removeComment = useCallback(
+  const onClickRemove = useCallback(
     async (commentId) => {
-      const response = await removeCommentFetch(commentId);
-      await readCommentFetch();
-
-      setComments((comments) => {
-        return comments.filter((comment) => comment.commentId !== commentId);
-      });
-
-      return response;
+      await removeCommentFetch(commentId);
+      setComments((comments) =>
+        comments.filter((comment) => comment.commentId !== commentId),
+      );
+      setPost((post) => ({ ...post, commentCount: post.commentCount - 1 }));
     },
-    [removeCommentFetch, removeCommentFetch],
+    [removeCommentFetch],
   );
 
-  useEffect(() => {
-    if (comments.length === 0 && prevPageCursor) {
-      const query = new URLSearchParams();
-      query.set('cursor', prevPageCursor);
-      navigate(`/board/${boardType}/post/${postId}?${query}`);
-    }
-  }, [comments, prevPageCursor, navigate, boardType, postId]);
+  useMessage(removeCommentState, '댓글을 삭제했습니다! 🤧');
 
   return (
-    <>
-      {success && (
-        <CommentPresenter
-          comments={comments}
-          writeCommentState={writeCommentState}
-          writeComment={writeComment}
-          editCommentState={editCommentState}
-          editComment={editComment}
-          removeCommentState={removeCommentState}
-          removeComment={removeComment}
-          hasPrevPage={prevPageCursor}
-          hasNextPage={nextPageCursor}
-          onClickPrevCursor={onClickPrevCursor}
-          onClickNextCursor={onClickNextCursor}
-        />
-      )}
-    </>
+    <CommentPresenter
+      user={user}
+      loading={loading}
+      comments={comments}
+      getComments={getComments}
+      nextPageCursor={nextPageCursor}
+      onClickWrite={onClickWrite}
+      onClickRemove={onClickRemove}
+      writeLoading={writeCommentState.loading}
+    />
   );
 };
-
 export default CommentContainer;

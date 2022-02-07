@@ -62,7 +62,7 @@ const StyledNav = styled.div`
 
   border: 1px solid rgb(217, 217, 217);
   border-radius: 8px;
-  margin: 50px 0;
+  margin: 20px 0;
   width: 900px;
   height: 100px;
 

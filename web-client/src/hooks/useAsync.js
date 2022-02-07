@@ -42,6 +42,7 @@ function useAsync(callback, deps = [], skip = false) {
       try {
         const data = await callback(...params);
         dispatch({ type: 'SUCCESS', data });
+        return data;
       } catch (e) {
         dispatch({ type: 'ERROR', error: e });
       }

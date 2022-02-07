@@ -15,7 +15,7 @@ import {
 import { NicknameLink } from '../link/NicknameLink';
 import { Button } from 'antd';
 import React from 'react';
-import { getAbsoluteCreatedAt } from '../function/getCreatedAt';
+import { getCreatedAt } from '../function/getCreatedAt';
 
 export const metadata = (
   user,
@@ -79,7 +79,7 @@ export const metadata = (
     <IconText
       key="createdAt"
       icon={<FieldTimeOutlined />}
-      text={getAbsoluteCreatedAt(post.createdAt ?? '')}
+      text={getCreatedAt(post.createdAt ?? '')}
       className="item-black"
     />,
   ];
