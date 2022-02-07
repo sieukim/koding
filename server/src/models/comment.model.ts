@@ -69,6 +69,9 @@ export class Comment {
   createdAt: Date;
 
   @Expose()
+  @ApiProperty({
+    description: "댓글에서 멘션하는 유저들의 닉네임",
+  })
   mentionedNicknames: string[];
 
   @Expose()
