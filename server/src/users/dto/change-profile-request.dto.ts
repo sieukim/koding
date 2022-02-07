@@ -5,8 +5,9 @@ import {
   PickType,
 } from "@nestjs/swagger";
 import { User } from "../../models/user.model";
-import { IsBoolean, IsOptional } from "class-validator";
+import { IsOptional } from "class-validator";
 import { Exclude } from "class-transformer";
+import { BooleanTransform } from "../../common/decorator/boolean-transform.decorator";
 
 const keys = [
   "blogUrl",
@@ -20,16 +21,16 @@ const keys = [
 export class ChangeProfileRequestDto extends PartialType<
   Pick<User, typeof keys[number]>
 >(PickType(User, keys)) {
+  @BooleanTransform()
   @IsOptional()
-  @IsBoolean()
   isBlogUrlPublic?: boolean;
 
+  @BooleanTransform()
   @IsOptional()
-  @IsBoolean()
   isGithubUrlPublic?: boolean;
 
+  @BooleanTransform()
   @IsOptional()
-  @IsBoolean()
   isPortfolioUrlPublic?: boolean;
 
   @ApiProperty({

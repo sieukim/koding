@@ -189,7 +189,7 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
   })
-  @ApiNoContentResponse({
+  @ApiOkResponse({
     description: "사용자 프로필 정보 변경 성공",
     type: MyUserInfoDto,
   })
@@ -204,6 +204,7 @@ export class UsersController {
     @UploadedFile() avatarFile?: Express.MulterS3.File,
   ) {
     body.avatarUrl = avatarFile?.location;
+    this.logger.log(`사용자 프로필 변경; body: ${JSON.stringify(body)}`);
     const result = (await this.commandBus.execute(
       new ChangeProfileCommand(loginUser.nickname, nickname, body),
     )) as Awaited<ReturnType<ChangeProfileHandler["execute"]>>;
