@@ -13,8 +13,9 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
 
   // 댓글 상태
   const [comments, setComments] = useState([]);
-
   const [nextPageCursor, setNextPageCursor] = useState(null);
+  // 댓글 내 작성자 배열
+  const [writers, setWriters] = useState([]);
 
   // 댓글 가져오기
   const getComments = useCallback(async () => {
@@ -22,6 +23,21 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
     const response = await api.readComment(boardType, postId, nextPageCursor);
     setComments((comments) => [...comments, ...response.data.comments]);
     setNextPageCursor(response.data.nextPageCursor);
+
+    // 중복 제거 전 닉네임 배열
+    const writerNicknames = [
+      ...response.data.comments.map((comment) => comment.writerNickname),
+    ];
+
+    setWriters((writers) => [
+      ...writers,
+      // 중복 제거 후 설정
+      ...writerNicknames.filter(
+        (writerNickname, index) =>
+          writerNicknames.indexOf(writerNickname) === index,
+      ),
+    ]);
+
     setLoading(false);
   }, [boardType, postId, nextPageCursor]);
 
@@ -32,6 +48,7 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
       setLoading(false);
       setComments([]);
       setNextPageCursor(null);
+      setWriters([]);
     };
   }, [boardType, postId]);
 
@@ -79,6 +96,7 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
       loading={loading}
       comments={comments}
       getComments={getComments}
+      writers={writers}
       nextPageCursor={nextPageCursor}
       onClickWrite={onClickWrite}
       onClickRemove={onClickRemove}

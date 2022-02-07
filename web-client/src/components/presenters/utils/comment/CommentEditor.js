@@ -1,6 +1,5 @@
 import { Avatar, Button, Form, Mentions } from 'antd';
-import { useCallback } from 'react';
-import { getMentionedList } from '../function/getMentionedList';
+import { useCallback, useState } from 'react';
 import { UserOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 
@@ -26,18 +25,29 @@ const StyledCommentEditor = styled.div`
   }
 `;
 
-export const CommentEditor = ({ user, loading, onClick }) => {
+export const CommentEditor = ({ user, loading, writers, onClick }) => {
   const [form] = Form.useForm();
+
+  const [mentionedNicknames, setMentionedNicknames] = useState([]);
+
+  // 멘션 onSelect 핸들러
+  const onSelect = useCallback((option) => {
+    const value = option.value;
+    setMentionedNicknames((mentionedNicknames) =>
+      mentionedNicknames.includes(value)
+        ? mentionedNicknames
+        : [...mentionedNicknames, value],
+    );
+  }, []);
 
   // 댓글 등록 onFinish(onSubmit) 핸들러
   const onFinish = useCallback(() => {
     const content = form.getFieldValue('content');
-    const mentionedList = getMentionedList(content);
 
-    onClick({ content: content, mentionedList: mentionedList });
+    onClick({ content: content, mentionedNicknames: mentionedNicknames });
 
     form.resetFields(['content']);
-  }, [form, onClick]);
+  }, [form, onClick, mentionedNicknames]);
 
   return (
     <StyledCommentEditor>
@@ -64,7 +74,17 @@ export const CommentEditor = ({ user, loading, onClick }) => {
           rules={[{ required: true, message: '⚠️ 댓글 내용이 없습니다. ⚠️' }]}
           className="editor-content"
         >
-          <Mentions autoSize={{ minRows: 4 }} />
+          <Mentions
+            autoSize={{ minRows: 4 }}
+            onSelect={onSelect}
+            placeholder="등록 후에는 수정이 불가하니 신중히 작성해주세요! 타인에게 불쾌감을 주는 언행, 욕설, 상업적 광고 정치 이야기등은 삭제될 수 있습니다. "
+          >
+            {writers.map((writer) => (
+              <Mentions.Option key={writer} value={writer}>
+                {writer}
+              </Mentions.Option>
+            ))}
+          </Mentions>
         </Form.Item>
       </Form>
     </StyledCommentEditor>

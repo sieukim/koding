@@ -20,6 +20,7 @@ const CommentPresenter = ({
   loading,
   comments,
   getComments,
+  writers,
   nextPageCursor,
   onClickWrite,
   onClickRemove,
@@ -30,6 +31,7 @@ const CommentPresenter = ({
       <CommentEditor
         user={user}
         loading={writeLoading}
+        writers={writers}
         onClick={onClickWrite}
       />
       <CommentList

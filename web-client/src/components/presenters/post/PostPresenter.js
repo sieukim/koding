@@ -30,6 +30,10 @@ const StyledPost = styled.div`
     }
   }
 
+  .toastui-editor-contents {
+    margin: 27px 0;
+  }
+
   .item-black {
     * {
       color: black;

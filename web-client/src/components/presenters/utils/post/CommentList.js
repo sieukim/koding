@@ -12,10 +12,8 @@ const StyledCommentList = styled.div`
   }
 
   .ant-comment-actions {
-    li:first-child {
-      button {
-        padding-left: 0;
-      }
+    button {
+      padding-left: 0;
     }
 
     .item-red {
