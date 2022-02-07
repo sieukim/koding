@@ -1,30 +1,22 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { SavePostImageCommand } from "../save-post-image.command";
-import { InjectModel } from "@nestjs/mongoose";
-import { S3Image } from "src/schemas/s3-image.schema";
-import { Model } from "mongoose";
 import { PostImageUploadResultDto } from "../../dto/post-image-upload-result.dto";
+import { UploadService } from "../../upload.service";
 
 @CommandHandler(SavePostImageCommand)
 export class SavePostImageHandler
   implements ICommandHandler<SavePostImageCommand>
 {
-  constructor(
-    @InjectModel(S3Image.name)
-    private readonly fileModel: Model<S3Image>,
-  ) {}
+  constructor(private readonly uploadService: UploadService) {}
 
   async execute(
     command: SavePostImageCommand,
   ): Promise<PostImageUploadResultDto> {
-    const { s3FileKey, s3FileUrl, uploaderNickname } = command;
-    const file = new this.fileModel({
+    const { file, uploaderNickname } = command;
+    const s3FileUrl = await this.uploadService.saveTemporaryPostImageFile(
+      file,
       uploaderNickname,
-      s3FileUrl,
-      s3FileKey,
-      postId: null,
-    });
-    await file.save();
-    return new PostImageUploadResultDto(file.s3FileUrl);
+    );
+    return new PostImageUploadResultDto(s3FileUrl);
   }
 }

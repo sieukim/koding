@@ -55,4 +55,31 @@ export class S3Service {
       }
     });
   }
+
+  async deleteProfileAvatarFiles(fileKeys: string[]) {
+    return new Promise<string[]>((res, rej) => {
+      if (fileKeys.length <= 0) res([]);
+      else {
+        const deleteParams = {
+          Bucket: this.bucketName,
+          Delete: {
+            Quiet: false,
+            Objects: fileKeys.map((fileKey) => ({
+              Key: `${this.profileAvatarKeyPrefix}/${fileKey}`,
+            })),
+          },
+        };
+        this.s3.deleteObjects(deleteParams, (err, data) => {
+          if (data)
+            this.logger.log(
+              `${
+                data.Deleted.length
+              } Avatar deleted from AWS S3, ${JSON.stringify(data.Deleted)}`,
+            );
+          if (err) rej(err);
+          else res(data.Deleted.map(({ Key }) => Key));
+        });
+      }
+    });
+  }
 }

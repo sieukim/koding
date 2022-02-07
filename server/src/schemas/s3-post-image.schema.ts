@@ -15,7 +15,7 @@ import { PostDocument } from "./post.schema";
   },
   autoIndex: true,
 })
-export class S3Image extends Document {
+export class S3PostImageDocument extends Document {
   static readonly EXPIRE_HOUR = 2;
 
   _id: Types.ObjectId;
@@ -42,13 +42,21 @@ export class S3Image extends Document {
   createdAt: Date;
 }
 
-export const S3ImageSchema = SchemaFactory.createForClass(S3Image);
-S3ImageSchema.index({ s3FileUrl: 1, postId: 1 });
-S3ImageSchema.virtual("uploader", {
+export const S3PostImageSchema =
+  SchemaFactory.createForClass(S3PostImageDocument);
+S3PostImageSchema.index({ s3FileUrl: 1 });
+S3PostImageSchema.index({ createdAt: 1, postId: 1 });
+S3PostImageSchema.virtual("uploader", {
   ref: UserDocument.name,
   foreignField: "nickname",
   localField: "uploaderNickname",
   justOne: true,
 });
-S3ImageSchema.set("toJSON", { virtuals: true });
-S3ImageSchema.set("toObject", { virtuals: true });
+S3PostImageSchema.virtual("post", {
+  ref: PostDocument.name,
+  foreignField: "_id",
+  localField: "postId",
+  justOne: true,
+});
+S3PostImageSchema.set("toJSON", { virtuals: true });
+S3PostImageSchema.set("toObject", { virtuals: true });

@@ -45,7 +45,7 @@ export class UploadController {
   ) {
     console.log(file);
     return this.commandBus.execute(
-      new SavePostImageCommand(user.nickname, file.location, file.key),
+      new SavePostImageCommand(user.nickname, file),
     ) as ReturnType<SavePostImageHandler["execute"]>;
   }
 }

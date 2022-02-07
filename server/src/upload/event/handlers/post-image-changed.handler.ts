@@ -1,19 +1,12 @@
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { PostImageChangedEvent } from "../post-image-changed.event";
-import { S3Image } from "../../../schemas/s3-image.schema";
-import { Model } from "mongoose";
-import { InjectModel } from "@nestjs/mongoose";
-import { S3Service } from "../../s3.service";
+import { UploadService } from "../../upload.service";
 
 @EventsHandler(PostImageChangedEvent)
 export class PostImageChangedHandler
   implements IEventHandler<PostImageChangedEvent>
 {
-  constructor(
-    @InjectModel(S3Image.name)
-    private readonly imageModel: Model<S3Image>,
-    private readonly s3Service: S3Service,
-  ) {}
+  constructor(private readonly uploadService: UploadService) {}
 
   async handle(event: PostImageChangedEvent): Promise<any> {
     const { postId, changedImageUrls = [], prevImageUrls = [] } = event;
@@ -26,21 +19,8 @@ export class PostImageChangedHandler
       (url) => !changedImageSet.has(url),
     );
     await Promise.all([
-      this.imageModel.updateMany(
-        {
-          s3FileUrl: { $in: removedImages },
-        },
-        { $set: { postId: null } },
-      ),
-      this.imageModel.updateMany(
-        {
-          s3FileUrl: { $in: addedImages },
-        },
-        {
-          $set: { postId },
-        },
-      ),
-      // this.s3Service.deleteS3PostImageFiles(removedImages),
+      this.uploadService.setOwnerPostOfImages(postId, addedImages),
+      this.uploadService.removeOwnerPostOfImages(removedImages),
     ]);
   }
 }
