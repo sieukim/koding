@@ -4,14 +4,14 @@ import { Post } from "../../../models/post.model";
 import { PostsRepository } from "../../posts.repository";
 import { UsersRepository } from "../../../users/users.repository";
 import { NotFoundException } from "@nestjs/common";
-import { UploadService } from "../../../upload/upload.service";
+import { PostImageUploadService } from "../../../upload/services/post-image-upload.service";
 
 @CommandHandler(ModifyPostCommand)
 export class ModifyPostHandler implements ICommandHandler<ModifyPostCommand> {
   constructor(
     private readonly postRepository: PostsRepository,
     private readonly userRepository: UsersRepository,
-    private readonly uploadService: UploadService,
+    private readonly uploadService: PostImageUploadService,
     private readonly publisher: EventPublisher,
   ) {}
 

@@ -1,6 +1,12 @@
-import { PartialType, PickType } from "@nestjs/swagger";
+import {
+  ApiHideProperty,
+  ApiProperty,
+  PartialType,
+  PickType,
+} from "@nestjs/swagger";
 import { User } from "../../models/user.model";
 import { IsBoolean, IsOptional } from "class-validator";
+import { Exclude } from "class-transformer";
 
 const keys = [
   "blogUrl",
@@ -25,4 +31,14 @@ export class ChangeProfileRequestDto extends PartialType<
   @IsOptional()
   @IsBoolean()
   isPortfolioUrlPublic?: boolean;
+
+  @ApiProperty({
+    type: String,
+    format: "binary",
+  })
+  avatar?: any;
+
+  @Exclude()
+  @ApiHideProperty()
+  avatarUrl?: string;
 }

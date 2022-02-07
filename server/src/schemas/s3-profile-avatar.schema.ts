@@ -15,13 +15,12 @@ import { UserDocument } from "./user.schema";
   },
 })
 export class S3ProfileAvatarDocument extends Document {
+  public static readonly EXPIRE_HOUR = 1;
+
   _id: Types.ObjectId;
 
   @Prop({ type: String })
   s3FileUrl: string;
-
-  @Prop({ type: String })
-  s3BucketName: string;
 
   @Prop({ type: String })
   s3FileKey: string;

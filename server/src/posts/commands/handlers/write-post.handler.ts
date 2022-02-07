@@ -4,13 +4,13 @@ import { Post } from "../../../models/post.model";
 import { PostsRepository } from "../../posts.repository";
 import { TagChangedEvent } from "../../../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../../../upload/event/post-image-changed.event";
-import { UploadService } from "../../../upload/upload.service";
+import { PostImageUploadService } from "../../../upload/services/post-image-upload.service";
 
 @CommandHandler(WritePostCommand)
 export class WritePostHandler implements ICommandHandler<WritePostCommand> {
   constructor(
     private readonly postRepository: PostsRepository,
-    private readonly uploadService: UploadService,
+    private readonly uploadService: PostImageUploadService,
     private readonly eventBus: EventBus,
   ) {}
 

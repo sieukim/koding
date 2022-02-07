@@ -29,7 +29,7 @@ export class S3Service {
     );
   }
 
-  async deleteS3PostImageFiles(fileKeys: string[]) {
+  async deletePostImageFiles(fileKeys: string[]) {
     return new Promise<string[]>((res, rej) => {
       if (fileKeys.length <= 0) res([]);
       else {

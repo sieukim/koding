@@ -24,21 +24,23 @@ export class ReadCommentsHandler
     let nextPageCursor: string | undefined;
     let prevPageCursor: string | undefined;
     if (!cursorCommentId) {
-      comments = await this.commentsRepository.findAll(
+      comments = await this.commentsRepository.findAllWith(
         {
           postId: { eq: postIdentifier.postId },
         },
+        ["writer"],
         {
           commentId: SortType.ASC,
         },
         pageSize + 1,
       );
     } else {
-      comments = await this.commentsRepository.findAll(
+      comments = await this.commentsRepository.findAllWith(
         {
           postId: { eq: postIdentifier.postId },
           commentId: { gte: cursorCommentId },
         },
+        ["writer"],
         {
           commentId: SortType.ASC,
         },

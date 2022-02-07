@@ -7,39 +7,46 @@ import { ConflictException, Logger } from "@nestjs/common";
 @CommandHandler(SignupLocalCommand)
 export class SignupLocalHandler implements ICommandHandler<SignupLocalCommand> {
   private readonly logger = new Logger(SignupLocalHandler.name);
+  private readonly EmailUser: typeof User;
 
   constructor(
     private readonly userRepository: UsersRepository,
     private readonly publisher: EventPublisher,
-  ) {}
+  ) {
+    this.EmailUser = this.publisher.mergeClassContext(User);
+  }
 
   async execute(command: SignupLocalCommand): Promise<User> {
     const { signupLocalRequest } = command;
-    const { email, nickname, password, blogUrl, githubUrl, portfolioUrl } =
-      signupLocalRequest;
+    const {
+      email,
+      nickname,
+      password,
+      blogUrl,
+      githubUrl,
+      portfolioUrl,
+      avatarUrl,
+    } = signupLocalRequest;
     const users = await Promise.all([
       this.userRepository.findByNickname(nickname),
       this.userRepository.findByEmail(email),
     ]);
     if (users.find((user) => user !== null))
       throw new ConflictException("이미 존재하는 사용자입니다");
-    const user = this.publisher.mergeObjectContext(
-      new User({
-        email,
-        nickname,
-        password,
-        blogUrl,
-        githubUrl,
-        portfolioUrl,
-        isEmailUser: true,
-      }),
-    );
+    const user = new this.EmailUser({
+      email,
+      nickname,
+      password,
+      blogUrl,
+      githubUrl,
+      portfolioUrl,
+      avatarUrl,
+      isEmailUser: true,
+    });
     await user.hashPassword();
     await this.userRepository.persist(user);
-    user.sendVerificationEmail();
     user.commit();
     this.logger.log(user);
-    await this.userRepository.update(user);
     return user;
   }
 }

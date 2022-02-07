@@ -22,6 +22,7 @@ import {
 import { ChangeProfileRequestDto } from "../users/dto/change-profile-request.dto";
 import { Expose, Transform, Type } from "class-transformer";
 import { Role } from "./role.enum";
+import { ProfileAvatarChangedEvent } from "../upload/event/profile-avatar-changed.event";
 
 export class User extends AggregateRoot {
   private static readonly ROUND = 10;
@@ -240,6 +241,14 @@ export class User extends AggregateRoot {
   })
   accountSuspendedUntil: Date;
 
+  @Expose()
+  @IsOptional()
+  @IsUrl()
+  @ApiPropertyOptional({
+    description: "프로필 사진 URL",
+  })
+  avatarUrl?: string;
+
   constructor();
   constructor(param: {
     email: string;
@@ -248,12 +257,13 @@ export class User extends AggregateRoot {
     blogUrl?: string;
     githubUrl?: string;
     portfolioUrl?: string;
-    isEmailUser: boolean;
+    isEmailUser: true;
+    avatarUrl?: string;
   });
 
   constructor(param: {
     email: string;
-    isGithubUser: boolean;
+    isGithubUser: true;
     githubUserIdentifier?: number;
     githubUserInfo?: GithubUserInfo;
   });
@@ -269,6 +279,7 @@ export class User extends AggregateRoot {
     isGithubUser?: boolean;
     githubUserIdentifier?: number;
     githubUserInfo?: GithubUserInfo;
+    avatarUrl?: string;
   }) {
     super();
     if (param) {
@@ -289,8 +300,20 @@ export class User extends AggregateRoot {
       this.githubSignupVerified = false;
       this.followingNicknames = [];
       this.followerNicknames = [];
+      this.avatarUrl = param.avatarUrl;
       this.createdAt = getCurrentTime();
       this.roles = [Role.User];
+      if (this.isEmailUser) {
+        if (this.avatarUrl)
+          this.apply(
+            new ProfileAvatarChangedEvent(
+              this.nickname,
+              undefined,
+              this.avatarUrl,
+            ),
+          );
+        this.sendVerificationEmail();
+      }
     }
   }
 
@@ -342,6 +365,7 @@ export class User extends AggregateRoot {
       blogUrl,
       isPortfolioUrlPublic,
       portfolioUrl,
+      avatarUrl,
     } = request;
     this.githubUrl = githubUrl ?? this.githubUrl;
     this.blogUrl = blogUrl ?? this.blogUrl;
@@ -350,6 +374,11 @@ export class User extends AggregateRoot {
     this.isBlogUrlPublic = isBlogUrlPublic ?? this.isBlogUrlPublic;
     this.isPortfolioUrlPublic =
       isPortfolioUrlPublic ?? this.isPortfolioUrlPublic;
+    if (avatarUrl)
+      this.apply(
+        new ProfileAvatarChangedEvent(this.nickname, this.avatarUrl, avatarUrl),
+      );
+    this.avatarUrl = avatarUrl ?? this.avatarUrl;
   }
 
   verifySameUser(nickname: string);
@@ -406,7 +435,7 @@ export class User extends AggregateRoot {
     await this.hashPassword();
   }
 
-  sendVerificationEmail() {
+  private sendVerificationEmail() {
     this.setNewEmailSignupVerifyToken();
     this.apply(
       new EmailUserSignedUpEvent(

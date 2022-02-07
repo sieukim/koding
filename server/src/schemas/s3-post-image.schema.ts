@@ -29,9 +29,6 @@ export class S3PostImageDocument extends Document {
   s3FileUrl: string;
 
   @Prop({ type: String })
-  s3BucketName: string;
-
-  @Prop({ type: String })
   s3FileKey: string;
 
   @Prop({ type: String })

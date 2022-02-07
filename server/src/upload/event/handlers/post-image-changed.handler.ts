@@ -1,12 +1,12 @@
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { PostImageChangedEvent } from "../post-image-changed.event";
-import { UploadService } from "../../upload.service";
+import { PostImageUploadService } from "../../services/post-image-upload.service";
 
 @EventsHandler(PostImageChangedEvent)
 export class PostImageChangedHandler
   implements IEventHandler<PostImageChangedEvent>
 {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(private readonly uploadService: PostImageUploadService) {}
 
   async handle(event: PostImageChangedEvent): Promise<any> {
     const { postId, changedImageUrls = [], prevImageUrls = [] } = event;
@@ -20,7 +20,7 @@ export class PostImageChangedHandler
     );
     await Promise.all([
       this.uploadService.setOwnerPostOfImages(postId, addedImages),
-      this.uploadService.removeOwnerPostOfImages(removedImages),
+      this.uploadService.removePostImages(removedImages),
     ]);
   }
 }

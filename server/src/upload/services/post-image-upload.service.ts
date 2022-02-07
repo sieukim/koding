@@ -5,15 +5,15 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { S3PostImageDocument } from "../schemas/s3-post-image.schema";
+import { S3PostImageDocument } from "../../schemas/s3-post-image.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { getCurrentTime } from "../common/utils/time.util";
+import { getCurrentTime } from "../../common/utils/time.util";
 import { S3Service } from "./s3.service";
 
 @Injectable()
-export class UploadService {
-  private readonly logger = new Logger(UploadService.name);
+export class PostImageUploadService {
+  private readonly logger = new Logger(PostImageUploadService.name);
 
   constructor(
     private readonly s3Service: S3Service,
@@ -21,11 +21,12 @@ export class UploadService {
     private readonly postImageModel: Model<S3PostImageDocument>,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  // @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_HOUR)
   async deleteUnusedTemporaryFile() {
     const deadline = getCurrentTime();
-    // deadline.setHours(deadline.getHours() - S3PostImageDocument.EXPIRE_HOUR);
-    deadline.setSeconds(deadline.getSeconds() - 20);
+    deadline.setHours(deadline.getHours() - S3PostImageDocument.EXPIRE_HOUR);
+    // deadline.setSeconds(deadline.getSeconds() - 10);
     const files = await this.postImageModel
       .find({
         createdAt: { $gte: deadline },
@@ -33,7 +34,7 @@ export class UploadService {
       })
       .exec();
     await this.s3Service
-      .deleteS3PostImageFiles(files.map((file) => file.s3FileKey))
+      .deletePostImageFiles(files.map((file) => file.s3FileKey))
       .catch((err) =>
         this.logger.error(
           `error while removing s3 images : ${err.toString?.() ?? err}`,
@@ -74,13 +75,13 @@ export class UploadService {
     return;
   }
 
-  async removeOwnerPostOfImages(fileUrls: string[]) {
+  async removePostImages(fileUrls: string[]) {
     const files = await this.postImageModel
       .find({
         s3FileUrl: { $in: fileUrls },
       })
       .exec();
-    await this.s3Service.deleteS3PostImageFiles(
+    await this.s3Service.deletePostImageFiles(
       files.map((file) => file.s3FileKey),
     );
     await this.postImageModel
