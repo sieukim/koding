@@ -1,0 +1,53 @@
+{
+  "settings": {
+    "max_ngram_diff": 9,
+    "refresh_interval": "1s",
+    "analysis": {
+      "analyzer": {
+        "user_nickname_analyzer": {
+          "type": "custom",
+          "tokenizer": "user_nickname_ngram_tokenizer",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "user_nickname_search_analyzer": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      },
+      "tokenizer": {
+        "user_nickname_ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 1,
+          "max_gram": 10,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "nickname": {
+        "type": "text",
+        "analyzer": "user_nickname_analyzer",
+        "search_analyzer": "user_nickname_search_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "avatarUrl": {
+        "type": "text",
+        "index": false
+      }
+    }
+  }
+}

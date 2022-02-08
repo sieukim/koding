@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { ConfigService } from "@nestjs/config";
-import { PostMetadataInfoDto } from "../posts/dto/post-metadata-info.dto";
-import { SortType } from "../common/repository/sort-option";
-import { PostBoardType } from "../models/post.model";
-import { PostListWithCursorDto } from "../posts/dto/post-list-with-cursor.dto";
+import { PostMetadataInfoDto } from "../../posts/dto/post-metadata-info.dto";
+import { SortType } from "../../common/repository/sort-option";
+import { PostBoardType } from "../../models/post.model";
+import { PostListWithCursorDto } from "../../posts/dto/post-list-with-cursor.dto";
 
 export const PostSearchTypes = ["query", "tags"] as const;
 export type PostSearchType = typeof PostSearchTypes[number];

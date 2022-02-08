@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { UnifiedSearchPostQuery } from "../unified-search-post.query";
-import { PostSearchService } from "../../post.search.service";
+import { PostSearchService } from "../../services/post-search.service";
 import { PostBoardTypes } from "../../../models/post.model";
 import { UnifiedSearchPostsResultDto } from "../../dto/unified-search-posts-result.dto";
 
