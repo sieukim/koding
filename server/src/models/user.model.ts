@@ -23,6 +23,7 @@ import { ChangeProfileRequestDto } from "../users/dto/change-profile-request.dto
 import { Expose, Transform, Type } from "class-transformer";
 import { Role } from "./role.enum";
 import { ProfileAvatarChangedEvent } from "../upload/event/profile-avatar-changed.event";
+import { UserDocumentToUserTransformDecorator } from "../common/decorator/user-document-to-user-transform.decorator";
 
 export class User extends AggregateRoot {
   private static readonly ROUND = 10;
@@ -216,6 +217,7 @@ export class User extends AggregateRoot {
   followingNicknames: string[];
 
   @Type(() => User)
+  @UserDocumentToUserTransformDecorator()
   @Expose()
   followings?: User[];
 
@@ -224,6 +226,7 @@ export class User extends AggregateRoot {
   followerNicknames: string[];
 
   @Type(() => User)
+  @UserDocumentToUserTransformDecorator()
   @Expose()
   followers?: User[];
 

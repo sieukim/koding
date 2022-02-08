@@ -19,4 +19,10 @@ export class CommentWithWriterInfoDto extends CommentInfoDto {
       excludeExtraneousValues: true,
     });
   }
+
+  static fromJson(json: Readonly<CommentWithWriterInfoDto>) {
+    return plainToClass(CommentWithWriterInfoDto, json, {
+      excludeExtraneousValues: true,
+    });
+  }
 }

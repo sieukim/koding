@@ -1,12 +1,21 @@
 import { User } from "./user.model";
 import { getCurrentTime } from "../common/utils/time.util";
-import { IsDate, IsEnum, IsNotEmpty, IsString } from "class-validator";
+import {
+  IsDate,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Post, PostBoardType } from "./post.model";
 import { Types } from "mongoose";
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { ModifyCommentRequestDto } from "../comments/dto/modify-comment-request.dto";
-import { Expose } from "class-transformer";
+import { Expose, Type } from "class-transformer";
+import { UserDocumentToUserTransformDecorator } from "../common/decorator/user-document-to-user-transform.decorator";
+import { PostDocumentToPostTransform } from "../common/decorator/post-document-to-post.transform";
 
 export class Comment {
   @Expose()
@@ -40,16 +49,21 @@ export class Comment {
   })
   postTitle: string;
 
+  @Type(() => Post)
+  @PostDocumentToPostTransform()
   @Expose()
   post?: Post;
 
   @Expose()
+  @IsOptional()
   @ApiProperty({
-    description: "댓글 글쓴이 닉네임",
+    description: "댓글 글쓴이 닉네임. 탈퇴한 사용자인 경우 값 없음",
     type: String,
   })
-  writerNickname: string;
+  writerNickname?: string;
 
+  @Type(() => User)
+  @UserDocumentToUserTransformDecorator()
   @Expose()
   writer?: User;
 
@@ -69,11 +83,20 @@ export class Comment {
   createdAt: Date;
 
   @Expose()
+  @IsNumber()
+  @ApiProperty({
+    description: "댓글 좋아요 수",
+  })
+  likeCount: number;
+
+  @Expose()
   @ApiProperty({
     description: "댓글에서 멘션하는 유저들의 닉네임",
   })
   mentionedNicknames: string[];
 
+  @UserDocumentToUserTransformDecorator()
+  @Type(() => User)
   @Expose()
   mentionedUsers?: User[];
 
@@ -97,6 +120,7 @@ export class Comment {
       this.postTitle = param.post.title;
       this.writerNickname = param.writerNickname;
       this.content = param.content;
+      this.likeCount = 0;
       this.mentionedNicknames = param.mentionedNicknames ?? [];
       this.createdAt = getCurrentTime();
     }

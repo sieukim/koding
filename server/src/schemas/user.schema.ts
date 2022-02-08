@@ -202,7 +202,6 @@ export class UserDocument extends Document {
   static toModel(userDocument: UserDocument): User {
     return plainToClass(User, userDocument, {
       excludeExtraneousValues: true,
-      enableImplicitConversion: true,
     });
   }
 

@@ -72,6 +72,9 @@ export class CommentDocument extends Document {
   })
   createdAt: Date;
 
+  @Prop({ type: Number, default: 0 })
+  likeCount: number;
+
   @Prop({
     type: [String],
   })

@@ -34,7 +34,7 @@ export class SyncPostAggregateInfoHandler
       if (isSameDate(currentDate, event.likeDate))
         return this.postRankingService.increaseDailyLikeCount(postIdentifier);
     } else if (event instanceof PostUnlikedEvent) {
-      if (isSameDate(currentDate, event.unlikeDate))
+      if (isSameDate(currentDate, event.likeDate))
         return this.postRankingService.decreaseDailyLikeCount(postIdentifier);
     } else if (event instanceof PostScrappedEvent) {
       if (isSameDate(currentDate, event.scrapDate))

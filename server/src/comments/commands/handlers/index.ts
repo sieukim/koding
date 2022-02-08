@@ -4,6 +4,10 @@ import { DeleteCommentHandler } from "./delete-comment.handler";
 import { RenameCommentWriterToNullHandler } from "./rename-comment-writer-to-null.handler";
 import { SyncPostTitleOfCommentHandler } from "./sync-post-title-of-comment.handler";
 import { DeleteOrphanCommentsHandler } from "./delete-orphan-comments.handler";
+import { LikeCommentHandler } from "./like-comment.handler";
+import { UnlikeCommentHandler } from "./unlike-comment.handler";
+import { DeleteCommentLikeOfDeletedPostHandler } from "./delete-comment-like-of-deleted-post.command";
+import { DeleteOrphanCommentLikesHandler } from "./delete-orphan-comment-likes.handler";
 
 export const CommentCommandHandlers = [
   AddCommentHandler,
@@ -12,4 +16,8 @@ export const CommentCommandHandlers = [
   RenameCommentWriterToNullHandler,
   SyncPostTitleOfCommentHandler,
   DeleteOrphanCommentsHandler,
+  LikeCommentHandler,
+  UnlikeCommentHandler,
+  DeleteOrphanCommentLikesHandler,
+  DeleteCommentLikeOfDeletedPostHandler,
 ];

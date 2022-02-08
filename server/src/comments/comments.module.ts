@@ -4,12 +4,16 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { CommentDocument, CommentSchema } from "../schemas/comment.schema";
 import { CommentsRepository } from "./comments.repository";
 import { CommentsController } from "./comments.controller";
-import { CommentsService } from "./comments.service";
 import { CommentCommandHandlers } from "./commands/handlers";
 import { CommentQueryHandlers } from "./queries/handler";
 import { UsersModule } from "../users/users.module";
 import { PostsModule } from "../posts/posts.module";
 import { CommentsSaga } from "./sagas/comments.saga";
+import {
+  CommentLikeDocument,
+  CommentLikeSchema,
+} from "../schemas/comment-like.schema";
+import { CommentServices } from "./services";
 
 @Module({
   imports: [
@@ -19,6 +23,10 @@ import { CommentsSaga } from "./sagas/comments.saga";
         name: CommentDocument.name,
         schema: CommentSchema,
       },
+      {
+        name: CommentLikeDocument.name,
+        schema: CommentLikeSchema,
+      },
     ]),
     forwardRef(() => UsersModule),
     PostsModule,
@@ -26,8 +34,8 @@ import { CommentsSaga } from "./sagas/comments.saga";
   controllers: [CommentsController],
   providers: [
     CommentsRepository,
-    CommentsService,
     CommentsSaga,
+    ...CommentServices,
     ...CommentCommandHandlers,
     ...CommentQueryHandlers,
   ],

@@ -1,16 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { PostMetadataInfoDto } from "./post-metadata-info.dto";
 import { Post } from "../../models/post.model";
 import { Expose, plainToClass } from "class-transformer";
 import { IsNumber, Min } from "class-validator";
+import { PostWithWriterInfoDto } from "./post-with-writer-info.dto";
 
 export class PostListDto {
   @Expose()
   @ApiProperty({
     description: "게시글 리스트",
-    type: [PostMetadataInfoDto],
+    type: [PostWithWriterInfoDto],
   })
-  posts: PostMetadataInfoDto[];
+  posts: PostWithWriterInfoDto[];
 
   @Expose()
   @Min(0)
@@ -23,7 +23,7 @@ export class PostListDto {
   static fromModel(models: Post[], totalCount: number) {
     return plainToClass(
       PostListDto,
-      { posts: models.map(PostMetadataInfoDto.fromModel), totalCount },
+      { posts: models.map(PostWithWriterInfoDto.fromModel), totalCount },
       { excludeExtraneousValues: true },
     );
   }

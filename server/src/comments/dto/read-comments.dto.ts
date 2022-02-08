@@ -29,12 +29,12 @@ export class ReadCommentsDto {
   prevPageCursor?: string;
 
   constructor(
-    comments: Comment[],
+    comments: (Comment & { liked: boolean })[],
     prevPageCursor?: string,
     nextPageCursor?: string,
   ) {
     this.prevPageCursor = prevPageCursor;
     this.nextPageCursor = nextPageCursor;
-    this.comments = comments.map(CommentWithWriterInfoDto.fromModel);
+    this.comments = comments.map(CommentWithWriterInfoDto.fromJson);
   }
 }
