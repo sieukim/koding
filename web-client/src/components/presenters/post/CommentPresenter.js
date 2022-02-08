@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { CommentList } from '../utils/post/CommentList';
+import { CommentList } from '../utils/comment/CommentList';
 import { CommentEditor } from '../utils/comment/CommentEditor';
 
 const StyledComment = styled.div`
@@ -28,12 +28,14 @@ const CommentPresenter = ({
 }) => {
   return (
     <StyledComment>
-      <CommentEditor
-        user={user}
-        loading={writeLoading}
-        writers={writers}
-        onClick={onClickWrite}
-      />
+      {user && (
+        <CommentEditor
+          user={user}
+          loading={writeLoading}
+          writers={writers}
+          onClick={onClickWrite}
+        />
+      )}
       <CommentList
         user={user}
         loading={loading}

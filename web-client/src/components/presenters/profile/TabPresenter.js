@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { Collapse, Tabs } from 'antd';
 import { CommentOutlined, FormOutlined } from '@ant-design/icons';
 import { PostList } from '../utils/post/PostList';
-import { CommentList } from '../utils/post/CommentList';
+import { CommentList } from '../utils/comment/CommentList';
 
 const { Panel } = Collapse;
 

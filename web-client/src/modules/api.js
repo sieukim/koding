@@ -13,7 +13,27 @@ export const duplicateCheck = (key, value) => {
 
 // 이메일 회원가입 api 호출
 export const signup = (user) => {
-  return axios.post('/api/users', user);
+  const formData = new FormData();
+
+  formData.set('email', user.email);
+  formData.set('nickname', user.nickname);
+  formData.set('password', user.password);
+  if (user.blogUrl) {
+    formData.set('blogUrl', user.blogUrl);
+  }
+  if (user.githubUrl) {
+    formData.set('githubUrl', user.githubUrl);
+  }
+  if (user.portfolioUrl) {
+    formData.set('portfolioUrl', user.portfolioUrl);
+  }
+  if (user.avatar) {
+    formData.set('avatar', user.avatar);
+  }
+
+  return axios.post('/api/users', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 };
 
 // 이메일 로그인 api 호출
@@ -233,8 +253,33 @@ export const getUser = (nickname) => {
 };
 
 // 유저 정보 변경 api 호출
-export const changeUserInfo = (nickname, userInfo) => {
-  return axios.patch(`/api/users/${nickname}`, userInfo);
+export const changeUserInfo = (nickname, user) => {
+  const formData = new FormData();
+
+  if (user.isBlogUrlPublic !== undefined) {
+    formData.set('isBlogUrlPublic', user.isBlogUrlPublic);
+  }
+  if (user.blogUrl) {
+    formData.set('blogUrl', user.blogUrl);
+  }
+  if (user.isGithubUrlPublic !== undefined) {
+    formData.set('isGithubUrlPublic', user.isGithubUrlPublic);
+  }
+  if (user.githubUrl) {
+    formData.set('githubUrl', user.githubUrl);
+  }
+  if (user.isPortfolioUrlPublic !== undefined) {
+    formData.set('isPortfolioUrlPublic', user.isPortfolioUrlPublic);
+  }
+  if (user.portfolioUrl) {
+    formData.set('portfolioUrl', user.portfolioUrl);
+  }
+  if (user.avatar) {
+    formData.set('avatar', user.avatar);
+  }
+  return axios.patch(`/api/users/${nickname}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 };
 
 // 이미지 업로드 api 호출

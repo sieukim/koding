@@ -13,7 +13,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { NicknameLink } from '../link/NicknameLink';
-import { Button } from 'antd';
+import { Avatar, Button } from 'antd';
 import React from 'react';
 import { getCreatedAt } from '../function/getCreatedAt';
 
@@ -30,9 +30,15 @@ export const metadata = (
   const defaultMetadata = [
     <IconText
       key="nickname"
-      icon={<UserOutlined />}
+      icon={
+        post?.writer?.avatarUrl ? (
+          <Avatar src={post.writer.avatarUrl} />
+        ) : (
+          <Avatar icon={<UserOutlined />} />
+        )
+      }
       text={<NicknameLink nickname={post.writerNickname} />}
-      className="item-black"
+      className="item-nickname"
     />,
     <Button
       type="text"

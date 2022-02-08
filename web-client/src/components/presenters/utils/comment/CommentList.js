@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { getCreatedAt } from '../function/getCreatedAt';
 import { UserOutlined } from '@ant-design/icons';
 import { NicknameLink } from '../link/NicknameLink';
-import { metadata } from '../comment/metadata';
+import { metadata } from './metadata';
 
 const StyledCommentList = styled.div`
   a:hover {
@@ -58,8 +58,8 @@ export const CommentList = ({
                 <Comment
                   author={<NicknameLink nickname={comment.writerNickname} />}
                   avatar={
-                    comment.avatarUrl ? (
-                      <Avatar src={comment.avatarUrl} />
+                    comment?.writer?.avatarUrl ? (
+                      <Avatar src={comment.writer.avatarUrl} />
                     ) : (
                       <Avatar icon={<UserOutlined />} />
                     )

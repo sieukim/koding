@@ -1,4 +1,4 @@
-import { List, Spin } from 'antd';
+import { Avatar, List, Spin } from 'antd';
 import { PostLink } from '../link/PostLink';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import styled from 'styled-components';
@@ -30,27 +30,35 @@ const StyledPostList = styled.div`
     }
   }
 
-  .item-nickname,
-  .item-read,
-  .item-createdAt {
+  .item-nickname {
+    a {
+      color: black !important;
+    }
+
+    a:hover {
+      color: #1890ff !important;
+    }
+  }
+
+  .item-black {
     * {
       color: black !important;
     }
   }
 
-  .item-like {
+  .item-red {
     * {
       color: #cf1322 !important;
     }
   }
 
-  .item-scrap {
+  .item-yellow {
     * {
       color: #faad14 !important;
     }
   }
 
-  .item-comment {
+  .item-blue {
     * {
       color: #096dd9 !important;
     }
@@ -89,7 +97,13 @@ export const PostList = ({ loading, posts, next, hasMore }) => {
                 actions={[
                   <IconText
                     key="nickname"
-                    icon={<UserOutlined />}
+                    icon={
+                      post?.writer?.avatarUrl ? (
+                        <Avatar src={post.writer.avatarUrl} />
+                      ) : (
+                        <Avatar icon={<UserOutlined />} />
+                      )
+                    }
                     text={<NicknameLink nickname={post.writerNickname} />}
                     className="item-nickname"
                   />,
@@ -97,31 +111,31 @@ export const PostList = ({ loading, posts, next, hasMore }) => {
                     key="likeCount"
                     icon={<LikeOutlined />}
                     text={post.likeCount ?? 0}
-                    className="item-like"
+                    className="item-red"
                   />,
                   <IconText
                     key="commentCount"
                     icon={<MessageOutlined />}
                     text={post.commentCount ?? 0}
-                    className="item-comment"
+                    className="item-blue"
                   />,
                   <IconText
                     key="scrapCount"
                     icon={<StarOutlined />}
                     text={post.scrapCount ?? 0}
-                    className="item-scrap"
+                    className="item-yellow"
                   />,
                   <IconText
                     key="readCount"
                     icon={<EyeOutlined />}
                     text={post.readCount ?? 0}
-                    className="item-read"
+                    className="item-black"
                   />,
                   <IconText
                     key="createdAt"
                     icon={<FieldTimeOutlined />}
                     text={getCreatedAt(post.createdAt)}
-                    className="item-createdAt"
+                    className="item-black"
                   />,
                 ]}
                 extra={

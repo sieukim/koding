@@ -8,6 +8,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useMessage } from '../../../hooks/useMessage';
+import { AvatarForm } from '../utils/profile/AvatarForm';
 
 const StyledSignup = styled.div`
   .title-text {
@@ -37,15 +38,18 @@ const EmailSignupPresenter = ({
   const [form] = Form.useForm();
   const [validated, setValidated] = useState({ email: false, nickname: false });
 
+  // 프로필 사진
+  const [avatarFile, setAvatarFile] = useState(null);
+
   // 회원가입 Form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
     (values) => {
-      signup({ ...values });
+      signup({ ...values, avatar: avatarFile });
     },
-    [signup],
+    [signup, avatarFile],
   );
 
-  // 이메일 onChange 리스너
+  // 이메일 onChange 핸들러
   const onChangeEmail = useCallback(
     (e) => {
       duplicateCheck('email', e.target.value);
@@ -106,7 +110,7 @@ const EmailSignupPresenter = ({
     return Promise.resolve();
   }, []);
 
-  // 닉네임 onChange 리스너
+  // 닉네임 onChange 핸들러
   const onChangeNickname = useCallback(
     (e) => {
       duplicateCheck('nickname', e.target.value);
@@ -163,6 +167,8 @@ const EmailSignupPresenter = ({
   return (
     <StyledSignup>
       <div className="title-text">회원가입</div>
+
+      <AvatarForm setAvatarFile={setAvatarFile} />
 
       <Form
         name="signup-form"

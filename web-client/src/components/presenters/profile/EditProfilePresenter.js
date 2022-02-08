@@ -1,11 +1,12 @@
 import styled from 'styled-components';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogout } from '../../../modules/auth';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { LinkOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { useMessage } from '../../../hooks/useMessage';
+import { AvatarForm } from '../utils/profile/AvatarForm';
 
 const StyledEditProfile = styled.div`
   .title-text {
@@ -65,12 +66,15 @@ const EditProfilePresenter = ({
     });
   }, [user, profileForm]);
 
+  // 프로필 사진
+  const [avatarFile, setAvatarFile] = useState(null);
+
   // 프로필 편집 버튼 onFinish(onSubmit) 핸들러
   const onFinishEditProfile = useCallback(
     (values) => {
-      changeUserInfoFetch({ ...values });
+      changeUserInfoFetch({ ...values, avatar: avatarFile });
     },
-    [changeUserInfoFetch],
+    [changeUserInfoFetch, avatarFile],
   );
 
   // 탈퇴
@@ -99,6 +103,12 @@ const EditProfilePresenter = ({
   return (
     <StyledEditProfile>
       <div className="title-text">프로필</div>
+
+      <AvatarForm
+        defaultAvatarUrl={user.avatarUrl}
+        setAvatarFile={setAvatarFile}
+      />
+
       <Form
         className="nothing"
         initialValues={{
