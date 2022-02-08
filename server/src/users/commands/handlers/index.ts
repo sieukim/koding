@@ -12,6 +12,7 @@ import { ChangePasswordHandler } from "./change-password.handler";
 import { DeleteAccountHandler } from "./delete-account.handler";
 import { ScrapPostHandler } from "./scrap-post.handler";
 import { UnscrapPostHandler } from "./unscrap-post.handler";
+import { DeleteAvatarHandler } from "./delete-avatar.handler";
 
 export const UserCommandHandlers = [
   SignupLocalHandler,
@@ -28,4 +29,5 @@ export const UserCommandHandlers = [
   DeleteAccountHandler,
   ScrapPostHandler,
   UnscrapPostHandler,
+  DeleteAvatarHandler,
 ];

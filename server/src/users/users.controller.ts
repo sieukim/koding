@@ -81,6 +81,7 @@ import { GetScrapPostsHandler } from "./queries/handlers/get-scrap-posts.handler
 import { GetLikePostsQuery } from "./queries/get-like-posts.query";
 import { GetLikePostsHandler } from "./queries/handlers/get-like-posts.handler";
 import { ProfileAvatarUploadInterceptor } from "../upload/interceptors/profile-avatar-upload.interceptor";
+import { DeleteAvatarCommand } from "./commands/delete-avatar.command";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -504,5 +505,17 @@ export class UsersController {
     return this.queryBus.execute(new GetLikePostsQuery(nickname)) as ReturnType<
       GetLikePostsHandler["execute"]
     >;
+  }
+
+  /*
+   * 프로필 사진 삭제
+   */
+  @ApiNoContentResponse({ description: "프로필 사진 삭제 성공" })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":nickname/avatarUrl")
+  async removeAvatar(@Param() { nickname }: NicknameParamDto) {
+    await this.commandBus.execute(new DeleteAvatarCommand(nickname));
+    return;
   }
 }

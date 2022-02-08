@@ -507,4 +507,11 @@ export class User extends AggregateRoot {
   private setNewEmailSignupVerifyToken() {
     this.emailSignupVerifyToken = v1();
   }
+
+  deleteAvatar() {
+    this.apply(
+      new ProfileAvatarChangedEvent(this.nickname, this.avatarUrl, undefined),
+    );
+    this.avatarUrl = undefined;
+  }
 }
