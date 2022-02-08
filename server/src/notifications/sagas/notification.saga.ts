@@ -110,27 +110,31 @@ export class NotificationSaga {
   commentDeletedNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(CommentDeletedByAdminEvent),
-      map(
-        ({
+      mergeMap(
+        async ({
           comment: {
             writerNickname: commentWriterNickname,
             commentId,
-            postTitle,
             postId,
             boardType,
             content,
           },
-        }) =>
-          new AddNotificationCommand(
+        }) => {
+          const post = await this.postsRepository.findByPostId({
+            postId,
+            boardType,
+          });
+          return new AddNotificationCommand(
             commentWriterNickname,
             new CommentDeletedNotificationData({
               postId,
               boardType,
               commentId,
-              postTitle,
+              postTitle: post.title,
               content,
             }),
-          ),
+          );
+        },
       ),
     );
 }

@@ -5,8 +5,6 @@ import { UserDeletedEvent } from "../../users/events/user-deleted.event";
 import { RenameCommentWriterToNullCommand } from "../commands/rename-comment-writer-to-null.command";
 import { PostDeletedEvent } from "../../posts/events/post-deleted.event";
 import { DeleteOrphanCommentsCommand } from "../commands/delete-orphan-comments.command";
-import { PostModifiedEvent } from "../../posts/events/post-modified.event";
-import { SyncPostTitleOfCommentCommand } from "../commands/sync-post-title-of-comment.command";
 import { DeleteCommentLikeOfDeletedPostCommand } from "../commands/delete-comment-like-of-deleted-post.command";
 import { CommentDeletedEvent } from "../events/comment-deleted.event";
 import { DeleteOrphanCommentLikesCommand } from "../commands/delete-orphan-comment-likes.command";
@@ -37,16 +35,6 @@ export class CommentsSaga {
       map(
         ({ commentId, postIdentifier }) =>
           new DeleteOrphanCommentLikesCommand(postIdentifier, commentId),
-      ),
-    );
-
-  @Saga()
-  syncPostTitle = ($events: Observable<any>) =>
-    $events.pipe(
-      ofType(PostModifiedEvent),
-      map(
-        ({ postIdentifier }) =>
-          new SyncPostTitleOfCommentCommand(postIdentifier),
       ),
     );
 }

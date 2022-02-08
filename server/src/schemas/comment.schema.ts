@@ -31,9 +31,6 @@ export class CommentDocument extends Document {
   })
   postId: Types.ObjectId;
 
-  @Prop()
-  postTitle: string;
-
   @Type(() => PostDocument)
   @Transform(
     ({ value }) =>

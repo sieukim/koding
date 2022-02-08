@@ -10,7 +10,6 @@ export class CommentInfoDto extends PickType(Comment, [
   "writerNickname",
   "createdAt",
   "mentionedNicknames",
-  "postTitle",
   "likeCount",
 ] as const) {
   /*

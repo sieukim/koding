@@ -42,13 +42,6 @@ export class Comment {
   })
   boardType: PostBoardType;
 
-  @Expose()
-  @IsString()
-  @ApiProperty({
-    description: "댓글의 부모 게시글의 제목",
-  })
-  postTitle: string;
-
   @Type(() => Post)
   @PostDocumentToPostTransform()
   @Expose()
@@ -117,7 +110,6 @@ export class Comment {
       this.commentId = new Types.ObjectId().toString();
       this.postId = param.post.postId;
       this.boardType = param.post.boardType;
-      this.postTitle = param.post.title;
       this.writerNickname = param.writerNickname;
       this.content = param.content;
       this.likeCount = 0;
