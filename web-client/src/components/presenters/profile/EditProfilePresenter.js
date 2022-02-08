@@ -111,17 +111,7 @@ const EditProfilePresenter = ({
         removeAvatarUrl={removeAvatarUrl}
       />
 
-      <Form
-        className="nothing"
-        initialValues={{
-          blogUrl: user.blogUrl,
-          githubUrl: user.githubUrl,
-          portfolioUrl: user.portfolioUrl,
-          isBlogUrlPublic: user.isBlogUrlPublic,
-          isGithubUrlPublic: user.isGithubUrlPublic,
-          isPortfolioUrlPublic: user.isPortfolioUrlPublic,
-        }}
-      >
+      <Form className="nothing">
         <Form.Item>
           <span className="ant-input-affix-wrapper">
             <UserOutlined className="site-form-item-icon ant-input-prefix" />
@@ -136,6 +126,7 @@ const EditProfilePresenter = ({
           </span>
         </Form.Item>
       </Form>
+
       <Form
         name="edit-profile-form"
         form={profileForm}

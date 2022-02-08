@@ -22,7 +22,7 @@ export const PostLink = (props) => {
         <Typography.Paragraph ellipsis={{ rows: 3 }}>
           <Viewer
             markdownContent={markdownToTxt(markdownContent).replace(
-              /alt_text/g,
+              /alt\\_text/g,
               '',
             )}
           />

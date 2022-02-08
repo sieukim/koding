@@ -10,14 +10,29 @@ import 'prismjs/themes/prism.css';
 import '@toast-ui/editor-plugin-code-syntax-highlight/dist/toastui-editor-plugin-code-syntax-highlight.css';
 import 'tui-color-picker/dist/tui-color-picker.css';
 import '@toast-ui/editor-plugin-color-syntax/dist/toastui-editor-plugin-color-syntax.css';
+import '@toast-ui/editor/dist/i18n/ko-kr';
+import { useCallback } from 'react';
+import * as api from '../../../../modules/api';
 
 export const Editor = (props) => {
-  const { innerRef, ...rest } = props;
+  const { innerRef, setImageUrls, ...rest } = props;
+
+  const addImageBlobHook = useCallback(async (blob, callback) => {
+    const response = await api.uploadImage(blob);
+    const imageUrl = response.data.imageUrl;
+
+    setImageUrls((imageUrls) => [...imageUrls, imageUrl]);
+    callback(imageUrl, 'alt_text');
+  }, []);
+
   return (
     <ToastEditor
       ref={innerRef}
-      initialEditType="markdown"
+      height="auto"
+      minHeight="700px"
       previewStyle="vertical"
+      initialEditType="wysiwyg"
+      language="ko-KR"
       useCommandShortcut={true}
       plugins={[
         [codeSyntaxHighlight, { highlighter: Prism }],
@@ -27,6 +42,7 @@ export const Editor = (props) => {
         chart,
       ]}
       placeholder="내용을 입력하세요."
+      hooks={{ addImageBlobHook: addImageBlobHook }}
       {...rest}
     />
   );

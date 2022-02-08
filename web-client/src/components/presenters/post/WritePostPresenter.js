@@ -1,84 +1,85 @@
 import styled from 'styled-components';
 import { useCallback, useRef, useState } from 'react';
-import SearchByTag from '../utils/SearchByTag';
-import * as api from '../../../modules/api';
 import { Editor } from '../utils/editor/Editor';
+import { Tags } from '../utils/editor/Tags';
+import { Button, Form, Input } from 'antd';
 
-const StyledWritePost = styled.form`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+const StyledWritePost = styled.div`
+  border: 1px solid rgb(217, 217, 217);
+  border-radius: 8px;
+  margin: 50px 0;
+  padding: 32px 32px 8px 32px;
+  width: 900px;
+
+  input {
+    border: none;
+    border-left: 1px solid rgb(217, 217, 217);
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
 `;
 
-const WritePostPresenter = ({ writePost, writePostState, tagList = [] }) => {
+const WritePostPresenter = ({ loading, boardType, onClickWrite, tagsList }) => {
   const editorRef = useRef();
 
-  /* 태그 입력 */
-
+  // 입력 태그 배열
   const [tags, setTags] = useState([]);
 
-  const onChangeTag = useCallback((e, value) => {
-    e.preventDefault();
-    setTags(value);
-  }, []);
-
-  /* 게시글 제목 */
-
-  const [title, setTitle] = useState('');
-
-  const onChangeInput = useCallback((e) => {
-    setTitle(e.target.value);
-  }, []);
-
-  /* 이미지 업로드 */
-
+  // 이미지 Url
   const [imageUrls, setImageUrls] = useState([]);
 
-  const uploadImage = useCallback(async (blob, callback) => {
-    const response = await api.uploadImage(blob);
-    const url = response.data.imageUrl;
-
-    setImageUrls((imageUrl) => [...imageUrl, url]);
-
-    callback(url, 'alt_text');
-  }, []);
-
-  /* 게시글 등록 */
-  const onSubmitButton = useCallback(
-    (e) => {
-      e.preventDefault();
+  // 게시글 등록
+  const onFinish = useCallback(
+    (values) => {
       if (editorRef.current) {
         const markdownContent = editorRef.current.getInstance().getMarkdown();
         const htmlContent = editorRef.current.getInstance().getHTML();
 
-        writePost({
-          title: title,
-          markdownContent: markdownContent,
-          htmlContent: htmlContent,
-          tags: tags,
-          imageUrls: imageUrls,
+        onClickWrite({
+          ...values,
+          markdownContent,
+          htmlContent,
+          tags,
+          imageUrls,
         });
       }
     },
-    [editorRef, writePost, title, tags, imageUrls],
+    [editorRef, onClickWrite, tags, imageUrls],
   );
 
   return (
-    <StyledWritePost onSubmit={onSubmitButton}>
-      <input
-        name="title"
-        placeholder="제목을 입력하세요."
-        required
-        onChange={onChangeInput}
-      />
-      <SearchByTag onChangeTag={onChangeTag} tags={tagList} />
-      <Editor
-        innerRef={editorRef}
-        hooks={{
-          addImageBlobHook: uploadImage,
-        }}
-      />
-      <button>등록</button>
+    <StyledWritePost>
+      <Form onFinish={onFinish}>
+        <Form.Item
+          name="title"
+          rules={[{ required: true, message: '제목을 입력하세요.' }]}
+        >
+          <Input placeholder="제목을 입력하세요." />
+        </Form.Item>
+        <Form.Item
+          name="content"
+          rules={[{ required: true, message: '내용을 입력하세요.' }]}
+        >
+          <Editor innerRef={editorRef} setImageUrls={setImageUrls} />
+        </Form.Item>
+        <div className="form-footer">
+          <Form.Item name="tags">
+            <Tags
+              boardType={boardType}
+              tags={tags}
+              setTags={setTags}
+              tagsList={tagsList}
+            />
+          </Form.Item>
+          <Button htmlType="submit" loading={loading}>
+            등록
+          </Button>
+        </div>
+      </Form>
     </StyledWritePost>
   );
 };

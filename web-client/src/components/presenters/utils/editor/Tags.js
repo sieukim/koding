@@ -2,10 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AutoComplete, Input, message, Tag } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
 import { getTagColor } from '../function/getTagColor';
 
-const StyledSearch = styled.div`
+const StyledTags = styled.div`
   height: 30px;
 
   .ant-tag {
@@ -34,9 +33,7 @@ const StyledSearch = styled.div`
   }
 `;
 
-export const SearchByTag = ({ boardType, tagsParams, tagsList }) => {
-  const navigate = useNavigate();
-
+export const Tags = ({ boardType, tags, setTags, tagsList }) => {
   // 입력창 여부
   const [inputVisible, setInputVisible] = useState(false);
 
@@ -62,18 +59,17 @@ export const SearchByTag = ({ boardType, tagsParams, tagsList }) => {
 
   // 입력창 onBlur 핸들러
   const onBlur = useCallback(() => {
-    if (inputTag && tagsParams.length === 10) {
-      message.error('태그 검색은 10개까지 허용됩니다.');
+    if (inputTag && tags.length === 5) {
+      message.error('태그 삽입은 5개까지 허용됩니다.');
       return;
     }
 
-    if (inputTag && tagsParams.indexOf(inputTag) === -1) {
-      const newTags = [...tagsParams, inputTag].join(',');
-      navigate(`/board/${boardType}?tags=${newTags}`);
+    if (inputTag && tags.indexOf(inputTag) === -1) {
+      setTags((tags) => [...tags, inputTag]);
     }
     setInputVisible(false);
     setInputTag('');
-  }, [navigate, inputTag, tagsParams, boardType]);
+  }, [inputTag, tags, boardType]);
 
   // 입력창 엔터 버튼 onPress 핸들러 (-> 입력 태그 추가)
   const onPressEnter = useCallback(() => {
@@ -83,18 +79,13 @@ export const SearchByTag = ({ boardType, tagsParams, tagsList }) => {
   // 태그 onClose 핸들러
   const onCloseTag = useCallback(
     (closedTag) => {
-      const newTags = tagsParams.filter((tag) => tag !== closedTag).join(',');
-
-      if (newTags.length === 0) navigate(`/board/${boardType}`);
-      else navigate(`/board/${boardType}?tags=${newTags}`);
+      setTags((tags) => tags.filter((tag) => tag !== closedTag));
     },
-    [navigate, tagsParams, boardType],
+    [boardType],
   );
 
   // 전체 태그 삭제 onClick 핸들러
-  const onClickRemoveAll = useCallback(() => {
-    navigate(`/board/${boardType}`);
-  }, [navigate, boardType]);
+  const onClickRemoveAll = useCallback(() => setTags([]), [boardType]);
 
   // autoComplete filterOption
   const filterOption = useCallback(
@@ -106,19 +97,18 @@ export const SearchByTag = ({ boardType, tagsParams, tagsList }) => {
   // autoComplete onSelect 핸들러
   const onSelectTag = useCallback(
     (value) => {
-      if (value && tagsParams.indexOf(value) === -1) {
-        const newTags = [...tagsParams, value].join(',');
-        navigate(`/board/${boardType}?tags=${newTags}`);
+      if (value && tags.indexOf(value) === -1) {
+        setTags((tags) => [...tags, value]);
       }
       setInputVisible(false);
       setInputTag('');
     },
-    [navigate, tagsParams, boardType],
+    [tags, boardType],
   );
 
   return (
-    <StyledSearch>
-      {tagsParams.map((tag) => (
+    <StyledTags>
+      {tags.map((tag) => (
         <Tag
           key={tag}
           closable
@@ -147,12 +137,12 @@ export const SearchByTag = ({ boardType, tagsParams, tagsList }) => {
       </AutoComplete>
       {!inputVisible && (
         <Tag className="custom-tag" onClick={onClickInput}>
-          <PlusOutlined /> 태그 검색
+          <PlusOutlined /> 태그 삽입
         </Tag>
       )}
       <Tag className="custom-tag" onClick={onClickRemoveAll}>
         <MinusOutlined /> 전체 삭제
       </Tag>
-    </StyledSearch>
+    </StyledTags>
   );
 };

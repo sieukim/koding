@@ -1,121 +1,113 @@
 import styled from 'styled-components';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import SearchByTag from '../utils/SearchByTag';
-import * as api from '../../../modules/api';
 import { Editor } from '../utils/editor/Editor';
+import { Button, Form, Input } from 'antd';
+import { Tags } from '../utils/editor/Tags';
 
-const StyledEdit = styled.form`
-  display: flex;
-  flex-direction: column;
-  width: 50%;
+const StyledEditPost = styled.div`
+  border: 1px solid rgb(217, 217, 217);
+  border-radius: 8px;
+  margin: 50px 0;
+  padding: 32px 32px 8px 32px;
+  width: 900px;
+
+  input {
+    border: none;
+    border-left: 1px solid rgb(217, 217, 217);
+  }
+
+  .form-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
 `;
 
 const EditPostPresenter = ({
-  readPostState,
-  post = {},
-  editPost,
-  editPostState,
-  tagList = [],
+  loading,
+  boardType,
+  post,
+  onClickEdit,
+  tagsList,
 }) => {
   const editorRef = useRef();
 
-  // 게시글 정보 가져오기: postTitle, markdownContent
-  const { title: postTitle = '', markdownContent = '' } = post;
+  const [form] = Form.useForm();
 
-  // title 설정
-  const [title, setTitle] = useState('');
-
+  // 제목
   useEffect(() => {
-    if (postTitle) setTitle(postTitle);
-  }, [postTitle]);
+    form.setFieldsValue({ title: post.title });
+  }, [form, post]);
 
-  const onChangeInput = useCallback((e) => {
-    setTitle(e.target.value);
-  }, []);
-
-  // markdownContent 설정
+  // 내용
   useEffect(() => {
-    editorRef.current &&
-      editorRef.current.getInstance().setMarkdown(markdownContent);
-  }, [editorRef, markdownContent]);
+    if (editorRef.current) {
+      editorRef.current.getInstance().setMarkdown(post.markdownContent);
+    }
+  }, [editorRef, post]);
 
-  /* 태그 입력 */
-
+  // 입력 태그 배열
   const [tags, setTags] = useState([]);
 
-  const onChangeTag = useCallback((e, value) => {
-    e.preventDefault();
-    setTags(value);
-  }, []);
-
-  /* 이미지 업로드 */
-
+  // 이미지 Url
   const [imageUrls, setImageUrls] = useState([]);
 
   useEffect(() => {
-    if (readPostState.success) {
-      setImageUrls(readPostState.success.data.post.imageUrls);
-    }
-  }, [readPostState.success]);
+    setTags(post.tags ?? []);
+    setImageUrls(post.imageUrls ?? []);
+  }, [post]);
 
-  const uploadImage = useCallback(async (blob, callback) => {
-    const response = await api.uploadImage(blob);
-    const url = response.data.imageUrl;
+  // 게시글 수정
+  const onFinish = useCallback(
+    (values) => {
+      if (editorRef.current) {
+        const markdownContent = editorRef.current.getInstance().getMarkdown();
+        const htmlContent = editorRef.current.getInstance().getHTML();
 
-    setImageUrls((imageUrl) => [...imageUrl, url]);
-
-    callback(url, 'alt_text');
-  }, []);
-
-  /* 게시글 수정 */
-
-  const onSubmitButton = useCallback(
-    (e) => {
-      e.preventDefault();
-
-      const editorRefInstance = editorRef.current.getInstance();
-      const markdownContent = editorRefInstance.getMarkdown();
-      const htmlContent = editorRefInstance.getHTML();
-
-      editPost({
-        title: title,
-        markdownContent: markdownContent,
-        htmlContent: htmlContent,
-        tags: tags,
-        imageUrls: imageUrls.filter((imageUrl) =>
-          markdownContent.includes(imageUrl),
-        ),
-      });
+        onClickEdit({
+          ...values,
+          markdownContent,
+          htmlContent,
+          tags,
+          imageUrls: imageUrls.filter((imageUrl) =>
+            markdownContent.includes(imageUrl),
+          ),
+        });
+      }
     },
-    [editorRef, editPost, title, tags, imageUrls],
+    [editorRef, onClickEdit, tags, imageUrls],
   );
 
   return (
-    <>
-      {readPostState.success && (
-        <StyledEdit onSubmit={onSubmitButton}>
-          <input
-            name="title"
-            placeholder="제목을 입력하세요."
-            required
-            onChange={onChangeInput}
-            value={title}
-          />
-          <SearchByTag
-            onChangeTag={onChangeTag}
-            tags={tagList}
-            defaultValue={readPostState.success.data.post.tags}
-          />
-          <Editor
-            innerRef={editorRef}
-            hooks={{
-              addImageBlobHook: uploadImage,
-            }}
-          />
-          <button>수정</button>
-        </StyledEdit>
-      )}
-    </>
+    <StyledEditPost>
+      <Form form={form} onFinish={onFinish}>
+        <Form.Item
+          name="title"
+          rules={[{ required: true, message: '제목을 입력하세요.' }]}
+        >
+          <Input placeholder="제목을 입력하세요." />
+        </Form.Item>
+        <Form.Item
+          name="content"
+          rules={[{ required: true, message: '내용을 입력하세요.' }]}
+        >
+          <Editor innerRef={editorRef} setImageUrls={setImageUrls} />
+        </Form.Item>
+        <div className="form-footer">
+          <Form.Item name="tags">
+            <Tags
+              boardType={boardType}
+              tags={tags}
+              setTags={setTags}
+              tagsList={tagsList}
+            />
+          </Form.Item>
+          <Button htmlType="submit" loading={loading}>
+            등록
+          </Button>
+        </div>
+      </Form>
+    </StyledEditPost>
   );
 };
 

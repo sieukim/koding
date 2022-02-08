@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { PostList } from '../utils/post/PostList';
 import { Button, Divider, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-import { SearchByTag } from '../utils/search/SearchByTag';
+import { Tags } from '../utils/search/Tags';
 
 const StyledBoard = styled.div`
   border: 1px solid rgb(217, 217, 217);
@@ -135,11 +135,7 @@ const BoardPresenter = ({
           </Button>
         )}
       </div>
-      <SearchByTag
-        boardType={boardType}
-        tagsParams={tagsParams}
-        tagsList={tagsList}
-      />
+      <Tags boardType={boardType} tagsParams={tagsParams} tagsList={tagsList} />
       <Divider />
       <PostList
         loading={loading}

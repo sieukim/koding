@@ -2,46 +2,46 @@ import { useCallback } from 'react';
 import * as api from '../../../modules/api';
 import useAsync from '../../../hooks/useAsync';
 import WritePostPresenter from '../../presenters/post/WritePostPresenter';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useMessage } from '../../../hooks/useMessage';
 
 const WritePostContainer = ({ boardType }) => {
-  /* 게시글 등록 */
+  const navigate = useNavigate();
 
-  // write post state
+  // 게시글 등록
   const [writePostState, writePostFetch] = useAsync(
     (post) => api.writePost(boardType, post),
     [],
     true,
   );
 
-  // write post api 호출
-  const writePost = useCallback(
+  const onClickWrite = useCallback(
     async (post) => {
-      await writePostFetch(post);
+      const response = await writePostFetch(post);
+      navigate(`/board/${boardType}/${response.data.postId}`);
     },
-    [writePostFetch],
+    [writePostFetch, navigate, boardType],
   );
 
-  /* 태그 목록 조회 */
-  const [getTagListState] = useAsync(
-    () => api.getTagList(boardType),
+  useMessage(writePostState, '게시물이 등록되었습니다 📝');
+
+  // 게시판 내 존재하는 태그 배열 조회
+  const [getTagsListState] = useAsync(
+    async () => {
+      const response = await api.getTagList(boardType);
+      return response.data.map((value) => ({ label: value, value: value }));
+    },
     [boardType],
     false,
   );
 
   return (
-    <>
-      {writePostState.success && (
-        <Navigate
-          to={`/board/${boardType}/post/${writePostState.success.data.postId}`}
-        />
-      )}
-      <WritePostPresenter
-        writePost={writePost}
-        writePostState={writePostState}
-        tagList={getTagListState.success?.data}
-      />
-    </>
+    <WritePostPresenter
+      loading={writePostState.loading}
+      boardType={boardType}
+      onClickWrite={onClickWrite}
+      tagsList={getTagsListState.success ?? []}
+    />
   );
 };
 
