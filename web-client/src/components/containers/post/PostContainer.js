@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useMessage } from '../../../hooks/useMessage';
+import { message } from 'antd';
 
 const PostContainer = ({ boardType, postId, post, setPost }) => {
   // 로그인 유저
@@ -39,6 +40,10 @@ const PostContainer = ({ boardType, postId, post, setPost }) => {
   );
 
   const onClickLike = useCallback(async () => {
+    if (post.writerNickname === user.nickname) {
+      message.error('본인 게시글은 좋아할 수 없습니다.');
+      return;
+    }
     await likePostFetch();
     setPost((post) => ({
       ...post,
@@ -78,6 +83,10 @@ const PostContainer = ({ boardType, postId, post, setPost }) => {
   );
 
   const onClickScrap = useCallback(async () => {
+    if (post.writerNickname === user.nickname) {
+      message.error('본인 게시글은 스크랩할 수 없습니다.');
+      return;
+    }
     await scrapPostFetch();
     setPost((post) => ({
       ...post,

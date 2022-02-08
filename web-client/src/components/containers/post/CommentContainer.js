@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import CommentPresenter from '../../presenters/post/CommentPresenter';
 import useAsync from '../../../hooks/useAsync';
 import { useMessage } from '../../../hooks/useMessage';
+import { message } from 'antd';
 
 const CommentContainer = ({ boardType, postId, setPost }) => {
   // 로그인 유저
@@ -62,10 +63,13 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
   const onClickWrite = useCallback(
     async (comment) => {
       const response = await writeCommentFetch(comment);
-      setComments((comments) => [...comments, response.data]);
+      setComments((comments) => [
+        ...comments,
+        { ...response.data, writer: user },
+      ]);
       setPost((post) => ({ ...post, commentCount: post.commentCount + 1 }));
     },
-    [writeCommentFetch],
+    [writeCommentFetch, user],
   );
 
   useMessage(writeCommentState, '댓글을 작성했습니다! 📝');
@@ -98,7 +102,12 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
   );
 
   const onClickLike = useCallback(
-    async (commentId) => {
+    async (comment, commentId) => {
+      if (comment.writer.nickname === user.nickname) {
+        message.error('본인 댓글은 추천할 수 없습니다.');
+        return;
+      }
+
       await likeCommentFetch(commentId);
       setComments((comments) =>
         comments.map((comment) => {
@@ -114,7 +123,7 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
         }),
       );
     },
-    [likeCommentFetch],
+    [user, likeCommentFetch],
   );
 
   useMessage(likeCommentState, '🪄 댓글을 추천했습니다.');

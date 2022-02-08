@@ -21,7 +21,7 @@ export const metadata = (
       onClick={() =>
         comment.liked
           ? onClickUnlike(comment.commentId)
-          : onClickLike(comment.commentId)
+          : onClickLike(comment, comment.commentId)
       }
     >
       <IconText
