@@ -117,24 +117,36 @@ const Notification = ({ loginUser }) => {
 
 const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
   const navigate = useNavigate();
+  const [visible, setVisible] = useState(false);
+
+  // dropdown onClick 핸들러
+  const onClickDropdown = useCallback((e) => {
+    setVisible((visible) => !visible);
+  }, []);
 
   // menu item onClick 핸들러
-  const onClick = ({ key }) => {
-    if (key === 'profile') navigate(`/user/${loginUser}/profile`);
-    if (key === 'edit-profile') navigate(`/user/${loginUser}/profile/edit`);
-    if (key === 'logout') logout();
-  };
+  const onClickMenu = useCallback(
+    ({ key }) => {
+      if (key === 'profile') navigate(`/user/${loginUser}/profile`);
+      if (key === 'edit-profile') navigate(`/user/${loginUser}/profile/edit`);
+      if (key === 'logout') logout();
+      setVisible((visible) => !visible);
+    },
+    [navigate, loginUser, logout],
+  );
 
   return (
     <Dropdown
       overlay={
-        <Menu onClick={onClick}>
+        <Menu onClick={onClickMenu}>
           <Menu.Item key="profile">내 프로필</Menu.Item>
           <Menu.Item key="edit-profile">프로필 편집</Menu.Item>
           <Menu.Item key="logout">로그아웃</Menu.Item>
         </Menu>
       }
       placement="bottomRight"
+      visible={visible}
+      onClick={onClickDropdown}
     >
       {avatarUrl ? (
         <Avatar src={avatarUrl} />
