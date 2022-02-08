@@ -51,6 +51,7 @@ const EditProfilePresenter = ({
   changeUserInfoFetch,
   revokeState,
   revokeFetch,
+  removeAvatarUrl,
 }) => {
   // profile 변경 form
   const [profileForm] = Form.useForm();
@@ -107,6 +108,7 @@ const EditProfilePresenter = ({
       <AvatarForm
         defaultAvatarUrl={user.avatarUrl}
         setAvatarFile={setAvatarFile}
+        removeAvatarUrl={removeAvatarUrl}
       />
 
       <Form

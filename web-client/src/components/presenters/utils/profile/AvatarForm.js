@@ -71,7 +71,11 @@ const StyledAvatarForm = styled.div`
   }
 `;
 
-export const AvatarForm = ({ defaultAvatarUrl, setAvatarFile }) => {
+export const AvatarForm = ({
+  defaultAvatarUrl,
+  setAvatarFile,
+  removeAvatarUrl,
+}) => {
   const [avatarUrl, setAvatarUrl] = useState(defaultAvatarUrl);
 
   // 아바타 beforeUpload 핸들러
@@ -100,9 +104,9 @@ export const AvatarForm = ({ defaultAvatarUrl, setAvatarFile }) => {
     setAvatarUrl(null);
 
     if (defaultAvatarUrl) {
-      // 삭제 api 호출 예정
+      removeAvatarUrl();
     }
-  }, [defaultAvatarUrl]);
+  }, [defaultAvatarUrl, removeAvatarUrl]);
 
   return (
     <StyledAvatarForm>

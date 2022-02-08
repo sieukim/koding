@@ -3,6 +3,7 @@ import * as api from '../../../modules/api';
 import useAsync from '../../../hooks/useAsync';
 import { useDispatch, useSelector } from 'react-redux';
 import { editProfile } from '../../../modules/auth';
+import { useCallback } from 'react';
 
 const EditProfileContainer = ({ profileNickname }) => {
   const user = useSelector((state) => state.auth.user);
@@ -26,6 +27,12 @@ const EditProfileContainer = ({ profileNickname }) => {
     true,
   );
 
+  // 프로필 사진 삭제
+  const removeAvatarUrl = useCallback(
+    () => api.removeAvatarUrl(user.nickname),
+    [user],
+  );
+
   return (
     <EditProfilePresenter
       user={user ?? {}}
@@ -33,6 +40,7 @@ const EditProfileContainer = ({ profileNickname }) => {
       changeUserInfoFetch={changeUserInfoFetch}
       revokeState={revokeState}
       revokeFetch={revokeFetch}
+      removeAvatarUrl={removeAvatarUrl}
     />
   );
 };
