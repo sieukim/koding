@@ -18,7 +18,11 @@ export const metadata = (
   const defaultMetadata = [
     <Button
       type="text"
-      onClick={() => (comment.liked ? onClickUnlike() : onClickLike())}
+      onClick={() =>
+        comment.liked
+          ? onClickUnlike(comment.commentId)
+          : onClickLike(comment.commentId)
+      }
     >
       <IconText
         key="likeCount"

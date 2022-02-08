@@ -90,17 +90,78 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
 
   useMessage(removeCommentState, '댓글을 삭제했습니다! 🤧');
 
+  // 댓글 좋아요
+  const [likeCommentState, likeCommentFetch] = useAsync(
+    (commentId) => api.likeComment(boardType, postId, commentId, user.nickname),
+    [boardType, postId, user],
+    true,
+  );
+
+  const onClickLike = useCallback(
+    async (commentId) => {
+      await likeCommentFetch(commentId);
+      setComments((comments) =>
+        comments.map((comment) => {
+          if (comment.commentId === commentId) {
+            return {
+              ...comment,
+              likeCount: comment.likeCount + 1,
+              liked: true,
+            };
+          } else {
+            return { ...comment };
+          }
+        }),
+      );
+    },
+    [likeCommentFetch],
+  );
+
+  useMessage(likeCommentState, '🪄 댓글을 추천했습니다.');
+
+  // 댓글 좋아요 취소
+  const [unlikeCommentState, unlikeCommentFetch] = useAsync(
+    (commentId) =>
+      api.unlikeComment(boardType, postId, commentId, user.nickname),
+    [boardType, postId, user],
+    true,
+  );
+
+  const onClickUnlike = useCallback(
+    async (commentId) => {
+      await unlikeCommentFetch(commentId);
+      setComments((comments) =>
+        comments.map((comment) => {
+          if (comment.commentId === commentId) {
+            return {
+              ...comment,
+              likeCount: comment.likeCount - 1,
+              liked: false,
+            };
+          } else {
+            return { ...comment };
+          }
+        }),
+      );
+    },
+    [unlikeCommentFetch],
+  );
+
+  useMessage(unlikeCommentState, '🪄 댓글 추천을 취소했습니다.');
+
   return (
     <CommentPresenter
       user={user}
       loading={loading}
+      writeLoading={writeCommentState.loading}
       comments={comments}
       getComments={getComments}
       writers={writers}
       nextPageCursor={nextPageCursor}
       onClickWrite={onClickWrite}
       onClickRemove={onClickRemove}
-      writeLoading={writeCommentState.loading}
+      onClickLike={onClickLike}
+      onClickUnlike={onClickUnlike}
     />
   );
 };

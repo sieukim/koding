@@ -202,6 +202,20 @@ export const removeComment = (boardType, postId, commentId) => {
   );
 };
 
+// 댓글 좋아요 api 호출
+export const likeComment = (boardType, postId, commentId, nickname) => {
+  return axios.post(
+    `/api/posts/${boardType}/${postId}/comments/${commentId}/like/${nickname}`,
+  );
+};
+
+// 댓글 좋아요 취소 api 호출
+export const unlikeComment = (boardType, postId, commentId, nickname) => {
+  return axios.delete(
+    `/api/posts/${boardType}/${postId}/comments/${commentId}/like/${nickname}`,
+  );
+};
+
 // 태그 목록 조회 api 호출
 export const getTagList = (boardType) => {
   return axios.get(`/api/tags/${boardType}`);

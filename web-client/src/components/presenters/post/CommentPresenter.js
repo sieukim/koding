@@ -18,13 +18,15 @@ const StyledComment = styled.div`
 const CommentPresenter = ({
   user,
   loading,
+  writeLoading,
   comments,
   getComments,
   writers,
   nextPageCursor,
   onClickWrite,
   onClickRemove,
-  writeLoading,
+  onClickLike,
+  onClickUnlike,
 }) => {
   return (
     <StyledComment>
@@ -42,8 +44,8 @@ const CommentPresenter = ({
         comments={comments}
         next={getComments}
         hasMore={nextPageCursor}
-        onClickLike={() => console.log('like')}
-        onClickUnlike={() => console.log('unlike')}
+        onClickLike={onClickLike}
+        onClickUnlike={onClickUnlike}
         onClickRemove={onClickRemove}
       />
     </StyledComment>
