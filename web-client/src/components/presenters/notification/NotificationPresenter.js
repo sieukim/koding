@@ -8,10 +8,10 @@ import {
   WarningOutlined,
 } from '@ant-design/icons';
 import { NicknameLink } from '../utils/link/NicknameLink';
-import moment from 'moment';
 import { PostLink } from '../utils/link/PostLink';
 import { useCallback } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { getCreatedAt } from '../utils/function/getCreatedAt';
 
 const StyledNotification = styled.div`
   width: 600px;
@@ -319,7 +319,7 @@ const NotificationPresenter = ({
               <Notification notification={notification} />
               <>
                 <div className="createdAt">
-                  {moment(notification.createdAt).format('MM/DD HH:MM')}
+                  {getCreatedAt(notification.createdAt)}
                 </div>
                 <Tooltip placement="bottom" title="읽기">
                   <Button
