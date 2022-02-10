@@ -66,6 +66,7 @@ var newdoc = {
     writerNickname: doc.writerNickname,
     tags: doc.tags,
     htmlContent: doc.htmlContent,
+    markdownContent: doc.markdownContent,
     imageUrls: doc.imageUrls,
     createdAt: doc.createdAt,
     readCount: doc.readCount,
