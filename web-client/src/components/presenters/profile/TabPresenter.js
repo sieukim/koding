@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { Collapse, Tabs } from 'antd';
 import { CommentOutlined, FormOutlined } from '@ant-design/icons';
-import { PostList } from '../utils/post/PostList';
+import { InfiniteScrollPostList } from '../utils/post/InfiniteScrollPostList';
 import { CommentList } from '../utils/comment/CommentList';
 
 const { Panel } = Collapse;
@@ -15,21 +15,21 @@ const PostTab = ({ posts, next, hasMore }) => {
     <StyledPostList>
       <Collapse accordion className="collapse" ghost>
         <Panel header="커뮤니티" key="common">
-          <PostList
+          <InfiniteScrollPostList
             posts={posts.common}
             next={next.common}
             hasMore={hasMore.common}
           />
         </Panel>
         <Panel header="Q&A" key="question">
-          <PostList
+          <InfiniteScrollPostList
             posts={posts.question}
             next={next.question}
             hasMore={hasMore.question}
           />
         </Panel>
         <Panel header="스터디 모집" key="study-group">
-          <PostList
+          <InfiniteScrollPostList
             posts={posts[`study-group`]}
             next={next[`study-group`]}
             hasMore={hasMore[`study-group`]}

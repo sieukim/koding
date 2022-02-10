@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { PostList } from '../utils/post/PostList';
+import { InfiniteScrollPostList } from '../utils/post/InfiniteScrollPostList';
 import { Button, Divider, Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { Tags } from '../utils/search/Tags';
@@ -137,7 +137,7 @@ const BoardPresenter = ({
       </div>
       <Tags boardType={boardType} tagsParams={tagsParams} tagsList={tagsList} />
       <Divider />
-      <PostList
+      <InfiniteScrollPostList
         loading={loading}
         posts={posts}
         next={getPosts}

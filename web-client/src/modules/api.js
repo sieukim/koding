@@ -340,15 +340,15 @@ export const getUserComments = (nickname, boardType, cursor) => {
  */
 
 // 게시글 검색(통합)
-export const integratedSearch = (query) => {
+export const search = (query) => {
   return axios.get(`/api/search/posts?query=${query}`);
 };
 
-// 게시글 검색(게시판)
-export const search = (boardType, cursor, query) => {
-  const queries = new URLSearchParams();
-  if (cursor) queries.set('cursor', cursor);
-  queries.set('query', query);
+// 닉네임 검색
+export const searchUser = (cursor, nickname) => {
+  const query = new URLSearchParams();
+  if (cursor) query.set('cursor', cursor);
+  if (nickname) query.set('nickname', nickname);
 
-  return axios.get(`/api/search/${boardType}?${queries.toString()}`);
+  return axios.get(`/api/search/users?${query.toString()}`);
 };

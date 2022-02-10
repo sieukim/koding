@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Avatar, Badge, Dropdown, Menu, message } from 'antd';
 import { setLogout } from '../modules/auth';
 import useAsync from '../hooks/useAsync';
-import { BellFilled, UserOutlined } from '@ant-design/icons';
+import { BellFilled, SearchOutlined, UserOutlined } from '@ant-design/icons';
 
 const StyledHeader = styled.nav`
   display: flex;
@@ -39,19 +39,30 @@ const StyledHeader = styled.nav`
     font-size: 1rem;
   }
 
-  .icon-group {
+  .icon-groups {
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: right;
+    width: 176px;
+    height: 32px;
 
     a {
       display: flex;
       align-items: center;
-      margin: 0 16px;
+      margin-left: 32px;
 
-      .anticon-bell {
+      font-weight: bold;
+      font-size: 1rem;
+
+      .anticon-bell,
+      .anticon-search {
         color: grey;
       }
+    }
+
+    .ant-dropdown-trigger {
+      margin-left: 32px;
     }
   }
 `;
@@ -174,31 +185,29 @@ const Header = () => {
     }
   }, []);
 
-  // 검색
-  const match = useMatch('/search');
-
   return (
     <StyledHeader>
       <NavLink className="web-title" to="/">
         Koding
       </NavLink>
-      {/*{!match && <SearchBar className="header" />}*/}
       <NavigationBar />
-      {!user && (
-        <NavLink to="/login" className="login">
-          로그인
+      <div className="icon-groups">
+        <NavLink to="/search">
+          <SearchOutlined style={{ fontSize: '24px' }} />
         </NavLink>
-      )}
-      {user && (
-        <div className="icon-group">
-          <Notification loginUser={user.nickname} />
-          <UserDropdown
-            loginUser={user.nickname}
-            avatarUrl={user.avatarUrl}
-            logout={logout}
-          />
-        </div>
-      )}
+        {user ? (
+          <>
+            <Notification loginUser={user.nickname} />
+            <UserDropdown
+              loginUser={user.nickname}
+              avatarUrl={user.avatarUrl}
+              logout={logout}
+            />
+          </>
+        ) : (
+          <NavLink to="/login">로그인</NavLink>
+        )}
+      </div>
     </StyledHeader>
   );
 };

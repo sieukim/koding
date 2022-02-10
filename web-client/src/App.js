@@ -16,7 +16,6 @@ import ProfilePage from './pages/profile/ProfilePage';
 import FollowListPage from './pages/profile/FollowListPage';
 import EditProfilePage from './pages/profile/EditProfilePage';
 import NotificationPage from './pages/notification/NotificationPage';
-import IntegratedSearchPage from './pages/search/IntegratedSearchPage';
 import SearchPage from './pages/search/SearchPage';
 import styled from 'styled-components';
 
@@ -60,8 +59,7 @@ function App() {
             path="/user/:nickname/notification"
             element={<NotificationPage />}
           />
-          <Route path="/search" element={<IntegratedSearchPage />} />
-          <Route path="/search/:boardType" element={<SearchPage />} />
+          <Route path="/search" element={<SearchPage />} />
         </Routes>
       </div>
       <Footer />

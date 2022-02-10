@@ -1,8 +1,4 @@
 import { Avatar, List, Spin } from 'antd';
-import { PostLink } from '../link/PostLink';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import styled from 'styled-components';
-import { Tags } from './Tags';
 import { IconText } from './IconText';
 import {
   EyeOutlined,
@@ -13,8 +9,11 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { NicknameLink } from '../link/NicknameLink';
-import React from 'react';
 import { getCreatedAt } from '../function/getCreatedAt';
+import { PostLink } from '../link/PostLink';
+import { Tags } from './Tags';
+import React from 'react';
+import styled from 'styled-components';
 
 const StyledPostList = styled.div`
   .spinner {
@@ -80,92 +79,88 @@ const StyledPostList = styled.div`
   }
 `;
 
-export const PostList = ({ loading, posts, next, hasMore }) => {
+export const PostList = ({ loading, posts }) => {
   return (
     <StyledPostList>
       {loading ? (
-        <div className="spinner">
-          <Spin />
-        </div>
+        <Spin className="spinner" />
       ) : (
-        <InfiniteScroll next={next} hasMore={hasMore} dataLength={posts.length}>
-          <List
-            dataSource={posts}
-            renderItem={(post) => (
-              <List.Item
-                key={post.postId}
-                actions={[
-                  <IconText
-                    key="nickname"
-                    icon={
-                      post?.writer?.avatarUrl ? (
-                        <Avatar src={post.writer.avatarUrl} />
-                      ) : (
-                        <Avatar icon={<UserOutlined />} />
-                      )
-                    }
-                    text={<NicknameLink nickname={post.writerNickname} />}
-                    className="item-nickname"
-                  />,
-                  <IconText
-                    key="likeCount"
-                    icon={<LikeOutlined />}
-                    text={post.likeCount ?? 0}
-                    className="item-red"
-                  />,
-                  <IconText
-                    key="commentCount"
-                    icon={<MessageOutlined />}
-                    text={post.commentCount ?? 0}
-                    className="item-blue"
-                  />,
-                  <IconText
-                    key="scrapCount"
-                    icon={<StarOutlined />}
-                    text={post.scrapCount ?? 0}
-                    className="item-yellow"
-                  />,
-                  <IconText
-                    key="readCount"
-                    icon={<EyeOutlined />}
-                    text={post.readCount ?? 0}
-                    className="item-black"
-                  />,
-                  <IconText
-                    key="createdAt"
-                    icon={<FieldTimeOutlined />}
-                    text={getCreatedAt(post.createdAt)}
-                    className="item-black"
-                  />,
-                ]}
-                extra={
-                  <PostLink
-                    boardType={post.boardType}
-                    postId={post.postId}
-                    imageUrls={post.imageUrls}
-                  />
-                }
-              >
-                <List.Item.Meta
-                  title={
-                    <PostLink
-                      boardType={post.boardType}
-                      postId={post.postId}
-                      postTitle={post.title}
-                    />
+        <List
+          dataSource={posts}
+          renderItem={(post) => (
+            <List.Item
+              key={post.postId}
+              actions={[
+                <IconText
+                  key="nickname"
+                  icon={
+                    post?.writer?.avatarUrl ? (
+                      <Avatar src={post.writer.avatarUrl} />
+                    ) : (
+                      <Avatar icon={<UserOutlined />} />
+                    )
                   }
-                />
+                  text={<NicknameLink nickname={post.writerNickname} />}
+                  className="item-nickname"
+                />,
+                <IconText
+                  key="likeCount"
+                  icon={<LikeOutlined />}
+                  text={post.likeCount ?? 0}
+                  className="item-red"
+                />,
+                <IconText
+                  key="commentCount"
+                  icon={<MessageOutlined />}
+                  text={post.commentCount ?? 0}
+                  className="item-blue"
+                />,
+                <IconText
+                  key="scrapCount"
+                  icon={<StarOutlined />}
+                  text={post.scrapCount ?? 0}
+                  className="item-yellow"
+                />,
+                <IconText
+                  key="readCount"
+                  icon={<EyeOutlined />}
+                  text={post.readCount ?? 0}
+                  className="item-black"
+                />,
+                <IconText
+                  key="createdAt"
+                  icon={<FieldTimeOutlined />}
+                  text={getCreatedAt(post.createdAt)}
+                  className="item-black"
+                />,
+              ]}
+              extra={
                 <PostLink
                   boardType={post.boardType}
                   postId={post.postId}
-                  markdownContent={post.markdownContent}
+                  imageUrls={post.imageUrls}
                 />
-                <Tags post={post} tags={post.tags} />
-              </List.Item>
-            )}
-            itemLayout="vertical"
-          />
-        </InfiniteScroll>
+              }
+            >
+              <List.Item.Meta
+                title={
+                  <PostLink
+                    boardType={post.boardType}
+                    postId={post.postId}
+                    postTitle={post.title}
+                  />
+                }
+              />
+              <PostLink
+                boardType={post.boardType}
+                postId={post.postId}
+                markdownContent={post.markdownContent}
+              />
+              <Tags post={post} tags={post.tags} />
+            </List.Item>
+          )}
+          itemLayout="vertical"
+        />
       )}
     </StyledPostList>
   );

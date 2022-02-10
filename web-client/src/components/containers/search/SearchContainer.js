@@ -1,49 +1,62 @@
 import SearchPresenter from '../../presenters/search/SearchPresenter';
-import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
-import { useCallback } from 'react';
+import useAsync from '../../../hooks/useAsync';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SearchContainer = ({ boardType, cursor, query }) => {
-  // 검색 api 호출
-  const [searchState] = useAsync(
-    () => api.search(boardType, cursor, query),
-    [boardType, cursor, query],
-    false,
-  );
-
+const SearchContainer = ({ query }) => {
   const navigate = useNavigate();
 
-  // 이전 검색 목록
-  const prevPageCursor = searchState.success?.data?.prevPageCursor;
+  // 통합 검색
+  const [posts, setPosts] = useState({});
+  const [searchState] = useAsync(() => api.search(query), [query], false);
 
-  // 이전 검색 목록 이동 이벤트 리스너
-  const onClickPrevCursor = useCallback(() => {
-    const queries = new URLSearchParams();
-    if (prevPageCursor) queries.set('cursor', prevPageCursor);
-    queries.set('query', query);
-    navigate(`/search/${boardType}?${queries}`);
-  }, [prevPageCursor, query, boardType]);
+  useEffect(() => {
+    if (searchState.success) {
+      setPosts(searchState.success.data);
+    }
+  }, [searchState]);
 
-  // 다음 검색 목록
-  const nextPageCursor = searchState.success?.data?.nextPageCursor;
+  // 유저 검색
+  const [users, setUsers] = useState([]);
+  const [nextPageCursor, setNextPageCursor] = useState(null);
 
-  // 다음 검색 목록 이동 이벤트 리스너
-  const onClickNextCursor = useCallback(() => {
-    const queries = new URLSearchParams();
-    if (nextPageCursor) queries.set('cursor', nextPageCursor);
-    queries.set('query', query);
-    navigate(`/search/${boardType}?${queries}`);
-  }, [nextPageCursor, query, boardType]);
+  const getUsers = useCallback(async () => {
+    const response = await api.searchUser(nextPageCursor, query);
+    setUsers((users) => [...users, ...response.data.users]);
+    setNextPageCursor(response.data.nextPageCursor);
+  }, [nextPageCursor, query]);
+
+  useEffect(() => {
+    getUsers();
+
+    return () => {
+      setUsers([]);
+      setNextPageCursor(null);
+    };
+  }, [query]);
+
+  const onClickSearch = useCallback(
+    (query) => {
+      if (query) {
+        navigate(`/search?query=${query}`);
+      }
+    },
+    [navigate],
+  );
 
   return (
     <SearchPresenter
-      boardType={boardType}
-      searchResults={searchState.success?.data ?? { posts: [] }}
-      hasPrevPage={prevPageCursor || prevPageCursor === ''}
-      hasNextPage={nextPageCursor}
-      onClickPrevCursor={onClickPrevCursor}
-      onClickNextCursor={onClickNextCursor}
+      query={query}
+      onClickSearch={onClickSearch}
+      column={posts.column}
+      common={posts.common}
+      question={posts.question}
+      recruit={posts.recruit}
+      studyGroup={posts[`study-group`]}
+      users={users}
+      getUsers={getUsers}
+      nextPageCursor={nextPageCursor}
     />
   );
 };
