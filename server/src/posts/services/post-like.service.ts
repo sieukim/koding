@@ -65,7 +65,11 @@ export class PostLikeService {
           boardType,
         });
       this.eventBus.publish(
-        new PostUnlikedEvent(postIdentifier, nickname, getCurrentTime()),
+        new PostUnlikedEvent(
+          postIdentifier,
+          nickname,
+          deletedPostLike.createdAt,
+        ),
       );
     }
   }

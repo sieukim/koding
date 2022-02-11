@@ -33,17 +33,17 @@ export abstract class MongooseBaseRepository<
 
   async findAllWith(
     findOption: FindOption<DomainModel>,
-    populate: (keyof DomainModel)[],
+    populate?: (keyof DomainModel)[],
     sortOption?: SortOption<DomainModel>,
     fetchSize?: number,
   ): Promise<DomainModel[]> {
     const findQuery: FilterQuery<ModelDocument> =
       this.parseFindOption(findOption);
     const sortQuery = this.parseSortOption(sortOption);
-    let query = this.mongooseModel.find(findQuery);
-    if (populate) query = query.populate(populate);
-    if (sortOption) query = query.sort(sortQuery);
-    if (fetchSize != undefined) query = query.limit(fetchSize);
+    const query = this.mongooseModel.find(findQuery);
+    if (populate) populate.forEach((path) => query.populate(path));
+    if (sortOption) query.sort(sortQuery);
+    if (fetchSize != undefined) query.limit(fetchSize);
     const documents = (await query.exec()) ?? ([] as ModelDocument[]);
     return documents.map(this.toModel);
   }
@@ -86,7 +86,7 @@ export abstract class MongooseBaseRepository<
       this.parseFindOption(findOption);
     const sortQuery = this.parseSortOption(sortOption);
     const query = this.mongooseModel.findOne(findQuery);
-    if (populate) query.populate(populate);
+    if (populate) populate.forEach((path) => query.populate(path));
     if (sortOption) query.sort(sortQuery);
     const document: ModelDocument | null = await query.exec();
     if (document) return this.toModel(document);

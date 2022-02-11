@@ -7,7 +7,8 @@ RUN apt-get upgrade -y
 RUN apt-get install curl -y
 
 COPY docker-entrypoint.sh /
-COPY elastic-config.json /
+COPY elastic-config-user.json /
+COPY elastic-config-post.json /
 RUN chmod +x /docker-entrypoint.sh
 
 ENTRYPOINT ["/docker-entrypoint.sh"]

@@ -21,6 +21,9 @@ import { SearchPostQuery } from "./queries/search-post.query";
 import { SearchPostQueryDto } from "./dto/query/search-post-query.dto";
 import { BoardTypeParamDto } from "../posts/dto/param/board-type-param.dto";
 import { PostListWithCursorDto } from "../posts/dto/post-list-with-cursor.dto";
+import { NicknameSearchResultDto } from "./dto/nickname-search-result.dto";
+import { SearchNicknameQueryDto } from "./dto/query/search-nickname-query.dto";
+import { SearchNicknameQuery } from "./queries/search-nickname.query";
 
 @ApiTags("SEARCH")
 @Controller("api/search")
@@ -52,22 +55,33 @@ export class SearchController {
   @ApiOperation({
     summary: "게시글 검색",
   })
-  @ApiQuery({
-    name: "query",
-    description: "검색할 검색어",
-    type: String,
-  })
   @ApiOkResponse({
     description: "게시글 검색 성공",
     type: PostListWithCursorDto,
   })
-  @Get(":boardType")
+  @Get("posts/:boardType")
   async searchPosts(
     @Param() { boardType }: BoardTypeParamDto,
     @Query() { cursor, query, pageSize }: SearchPostQueryDto,
   ) {
     return this.queryBus.execute(
       new SearchPostQuery(query, boardType, pageSize, cursor),
+    );
+  }
+
+  @ApiOperation({
+    summary: "사용자 닉네임 검색",
+  })
+  @ApiOkResponse({
+    description: "닉네임 검색 성공",
+    type: NicknameSearchResultDto,
+  })
+  @Get("users")
+  async searchNicknames(
+    @Query() { cursor, nickname, pageSize }: SearchNicknameQueryDto,
+  ) {
+    return this.queryBus.execute(
+      new SearchNicknameQuery(nickname, pageSize, cursor),
     );
   }
 }

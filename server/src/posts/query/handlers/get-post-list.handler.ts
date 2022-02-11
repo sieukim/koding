@@ -4,7 +4,7 @@ import { PostsRepository } from "../../posts.repository";
 import { Post } from "../../../models/post.model";
 import { SortType } from "../../../common/repository/sort-option";
 import { PostListWithCursorDto } from "../../dto/post-list-with-cursor.dto";
-import { PostMetadataInfoDto } from "../../dto/post-metadata-info.dto";
+import { PostWithWriterInfoDto } from "../../dto/post-with-writer-info.dto";
 
 @QueryHandler(GetPostListQuery)
 export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
@@ -32,11 +32,12 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
     if (!cursor) {
       // 첫페이지인 경우
       [posts, totalCount] = await Promise.all([
-        this.postRepository.findAll(
+        this.postRepository.findAllWith(
           {
             boardType: { eq: boardType },
             ...searchOption,
           },
+          ["writer"],
           {
             postId: SortType.DESC,
           },
@@ -47,12 +48,13 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
     } else {
       let prevPosts;
       [posts, prevPosts, totalCount] = await Promise.all([
-        this.postRepository.findAll(
+        this.postRepository.findAllWith(
           {
             boardType: { eq: boardType },
             postId: { lte: cursor },
             ...searchOption,
           },
+          ["writer"],
           {
             postId: SortType.DESC,
           },
@@ -79,7 +81,7 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
       nextPageCursor = nextCursorPost.postId;
     }
     return new PostListWithCursorDto({
-      posts: posts.map(PostMetadataInfoDto.fromModel),
+      posts: posts.map(PostWithWriterInfoDto.fromModel),
       prevPageCursor,
       nextPageCursor,
       totalCount,

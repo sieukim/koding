@@ -5,6 +5,6 @@ export class PostUnlikedEvent implements IEvent {
   constructor(
     public readonly postIdentifier: PostIdentifier,
     public readonly nickname: string,
-    public readonly unlikeDate: Date,
+    public readonly likeDate: Date,
   ) {}
 }

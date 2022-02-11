@@ -1,14 +1,14 @@
-import { CommentInfoDto } from "./comment-info.dto";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Comment } from "../../models/comment.model";
 import { IsOptional, IsString } from "class-validator";
+import { CommentWithWriterInfoDto } from "./comment-with-writer-info.dto";
 
 export class ReadCommentsDto {
   @ApiProperty({
     description: "게시글의 댓글들",
-    type: [CommentInfoDto],
+    type: [CommentWithWriterInfoDto],
   })
-  comments: CommentInfoDto[];
+  comments: CommentWithWriterInfoDto[];
 
   @IsOptional()
   @IsString()
@@ -29,12 +29,12 @@ export class ReadCommentsDto {
   prevPageCursor?: string;
 
   constructor(
-    comments: Comment[],
+    comments: (Comment & { liked: boolean })[],
     prevPageCursor?: string,
     nextPageCursor?: string,
   ) {
     this.prevPageCursor = prevPageCursor;
     this.nextPageCursor = nextPageCursor;
-    this.comments = comments.map(CommentInfoDto.fromModel);
+    this.comments = comments.map(CommentWithWriterInfoDto.fromJson);
   }
 }

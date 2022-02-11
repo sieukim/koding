@@ -12,6 +12,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { EmailSagas } from "./sagas/email.sagas";
 import { PostsModule } from "../posts/posts.module";
 import { CommentsModule } from "../comments/comments.module";
+import { UploadModule } from "../upload/upload.module";
 
 @Global()
 @Module({
@@ -23,6 +24,7 @@ import { CommentsModule } from "../comments/comments.module";
     CqrsModule,
     forwardRef(() => PostsModule),
     forwardRef(() => CommentsModule),
+    UploadModule,
   ],
   controllers: [UsersController],
   providers: [

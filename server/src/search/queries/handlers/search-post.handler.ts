@@ -1,6 +1,6 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { SearchPostQuery } from "../search-post.query";
-import { PostSearchService } from "../../post.search.service";
+import { PostSearchService } from "../../services/post-search.service";
 import { PostListWithCursorDto } from "../../../posts/dto/post-list-with-cursor.dto";
 
 @QueryHandler(SearchPostQuery)

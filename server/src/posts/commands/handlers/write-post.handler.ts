@@ -3,15 +3,14 @@ import { WritePostCommand } from "../write-post.command";
 import { Post } from "../../../models/post.model";
 import { PostsRepository } from "../../posts.repository";
 import { TagChangedEvent } from "../../../tags/events/tag-changed.event";
-import { UploadRepository } from "../../../upload/upload.repository";
-import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { PostImageChangedEvent } from "../../../upload/event/post-image-changed.event";
+import { PostImageUploadService } from "../../../upload/services/post-image-upload.service";
 
 @CommandHandler(WritePostCommand)
 export class WritePostHandler implements ICommandHandler<WritePostCommand> {
   constructor(
     private readonly postRepository: PostsRepository,
-    public readonly uploadRepository: UploadRepository,
+    private readonly uploadService: PostImageUploadService,
     private readonly eventBus: EventBus,
   ) {}
 
@@ -27,15 +26,7 @@ export class WritePostHandler implements ICommandHandler<WritePostCommand> {
         htmlContent,
       },
     } = command;
-    const images = await this.uploadRepository.getTemporaryImages(imageUrls);
-    images.forEach(({ uploaderNickname }) => {
-      if (uploaderNickname !== writerNickname)
-        throw new ForbiddenException(
-          "이미지 업로더와 게시글 작성자가 다릅니다",
-        );
-    });
-    if (images.length !== imageUrls.length)
-      throw new BadRequestException("만료되거나 잘못된 이미지 URL이 있습니다.");
+    await this.uploadService.validateImageUrls(imageUrls, writerNickname);
     const post = new Post({
       writerNickname,
       boardType,

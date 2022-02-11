@@ -1,6 +1,6 @@
 import { Equals, IsBoolean } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
+import { BooleanTransform } from "../../../common/decorator/boolean-transform.decorator";
 
 export class CheckUnreadNotificationQueryDto {
   @Equals(false)
@@ -10,17 +10,6 @@ export class CheckUnreadNotificationQueryDto {
     enum: [false],
     type: Boolean,
   })
-  @Transform(({ value }) => {
-    switch (value) {
-      case true:
-      case "true":
-        return true;
-      case false:
-      case "false":
-        return false;
-      default:
-        return value;
-    }
-  })
+  @BooleanTransform(true)
   read: boolean;
 }

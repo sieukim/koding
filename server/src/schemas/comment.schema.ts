@@ -31,9 +31,6 @@ export class CommentDocument extends Document {
   })
   postId: Types.ObjectId;
 
-  @Prop()
-  postTitle: string;
-
   @Type(() => PostDocument)
   @Transform(
     ({ value }) =>
@@ -71,6 +68,9 @@ export class CommentDocument extends Document {
     description: "댓글 생성 시간",
   })
   createdAt: Date;
+
+  @Prop({ type: Number, default: 0 })
+  likeCount: number;
 
   @Prop({
     type: [String],

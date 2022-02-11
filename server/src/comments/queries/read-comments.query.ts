@@ -6,5 +6,6 @@ export class ReadCommentsQuery implements IQuery {
     public readonly postIdentifier: PostIdentifier,
     public readonly pageSize: number,
     public readonly cursorCommentId?: string,
+    public readonly readerNickname?: string,
   ) {}
 }

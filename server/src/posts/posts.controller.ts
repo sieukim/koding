@@ -52,6 +52,7 @@ import { CheckUserLikePostQuery } from "./query/check-user-like-post.query";
 import { ScrapPostCommand } from "../users/commands/scrap-post.command";
 import { UnscrapPostCommand } from "../users/commands/unscrap-post.command";
 import { CheckUserScrapPostQuery } from "./query/check-user-scrap-post.query";
+import { UserScrapPostInfoDto } from "./dto/user-scrap-post-info.dto";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -190,7 +191,7 @@ export class PostsController {
   }
 
   /*
-   * 좋아요 요청
+   * 게시글 좋아요 요청
    * @description 이미 좋아요를 눌렀던 경우에도 API 는 정상적으로 204 NO CONTENT 를 반환
    */
   @ApiNoContentResponse({
@@ -210,7 +211,7 @@ export class PostsController {
   }
 
   /*
-   * 좋아요 취소 요청
+   * 게시글 좋아요 취소 요청
    * @description 이미 좋아요를 하지 않았던 경우에도 API 는 정상적으로 204 NO CONTENT 를 반환
    */
   @ApiNoContentResponse({
@@ -293,7 +294,7 @@ export class PostsController {
    */
   @ApiOkResponse({
     description: "게시글에 대한 사용자의 스크랩 여부 조회 성공",
-    type: UserLikePostInfoDto,
+    type: UserScrapPostInfoDto,
   })
   @HttpCode(HttpStatus.OK)
   @Get(":boardType/:postId/like/:nickname")

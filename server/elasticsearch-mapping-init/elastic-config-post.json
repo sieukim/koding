@@ -62,6 +62,10 @@
         "type": "text",
         "analyzer": "post_content_analyzer"
       },
+      "markdownContent": {
+        "type": "text",
+        "index": false
+      },
       "tags": {
         "type": "keyword",
         "boost": 2,

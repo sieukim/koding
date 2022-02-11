@@ -27,14 +27,22 @@ import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.gua
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { User } from "../models/user.model";
 import { ModifyCommentRequestDto } from "./dto/modify-comment-request.dto";
-import { CommentsService } from "./comments.service";
 import { ReadCommentsDto } from "./dto/read-comments.dto";
-import { QueryBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ReadCommentsQuery } from "./queries/read-comments.query";
 import { ReadCommentsHandler } from "./queries/handler/read-comments.handler";
 import { PostIdentifierParamDto } from "../posts/dto/param/post-identifier-param.dto";
 import { CommentIdentifierParamDto } from "./dto/param/comment-identifier-param.dto";
 import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dto";
+import { AddCommentCommand } from "./commands/add-comment.command";
+import { AddCommentHandler } from "./commands/handlers/add-comment.handler";
+import { ModifyCommentCommand } from "./commands/modify-comment.command";
+import { ModifyCommentHandler } from "./commands/handlers/modify-comment.handler";
+import { DeleteCommentCommand } from "./commands/delete-comment.command";
+import { ParamNicknameSameUserGuard } from "../auth/guard/authorization/param-nickname-same-user.guard";
+import { CommentIdentifierWithNicknameParamDto } from "./dto/param/comment-identifier-with-nickname-param.dto";
+import { LikeCommentCommand } from "./commands/like-comment.command";
+import { UnlikeCommentCommand } from "./commands/unlike-comment.command";
 
 @ApiTags("POST/COMMENT")
 @ApiBadRequestResponse({
@@ -46,7 +54,7 @@ import { CursorPagingQueryDto } from "../common/dto/query/cursor-paging-query.dt
 @Controller("api/posts/:boardType/:postId/comments")
 export class CommentsController {
   constructor(
-    private readonly commentsService: CommentsService,
+    private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
 
@@ -65,6 +73,7 @@ export class CommentsController {
   readComments(
     @Param() { boardType, postId }: PostIdentifierParamDto,
     @Query() { cursor, pageSize }: CursorPagingQueryDto,
+    @LoginUser() loginUser?: User,
   ) {
     return this.queryBus.execute(
       new ReadCommentsQuery(
@@ -74,6 +83,7 @@ export class CommentsController {
         },
         pageSize,
         cursor,
+        loginUser?.nickname,
       ),
     ) as ReturnType<ReadCommentsHandler["execute"]>;
   }
@@ -99,11 +109,9 @@ export class CommentsController {
     @LoginUser() user: User,
     @Body() body: AddCommentRequestDto,
   ) {
-    const newComment = await this.commentsService.addComment(
-      user,
-      { boardType, postId },
-      body,
-    );
+    const newComment = (await this.commandBus.execute(
+      new AddCommentCommand(user.nickname, { boardType, postId }, body),
+    )) as Awaited<ReturnType<AddCommentHandler["execute"]>>;
     return CommentInfoDto.fromModel(newComment);
   }
 
@@ -128,12 +136,14 @@ export class CommentsController {
     @Body() body: ModifyCommentRequestDto,
     @LoginUser() user: User,
   ) {
-    const comment = await this.commentsService.modifyComment(
-      user,
-      { boardType, postId },
-      commentId,
-      body,
-    );
+    const comment = (await this.commandBus.execute(
+      new ModifyCommentCommand(
+        user.nickname,
+        { boardType, postId },
+        commentId,
+        body,
+      ),
+    )) as Awaited<ReturnType<ModifyCommentHandler["execute"]>>;
     return CommentInfoDto.fromModel(comment);
   }
 
@@ -153,10 +163,56 @@ export class CommentsController {
     @Param() { boardType, postId, commentId }: CommentIdentifierParamDto,
     @LoginUser() user: User,
   ) {
-    await this.commentsService.deleteComment(
-      user,
-      { boardType, postId },
-      commentId,
+    await this.commandBus.execute(
+      new DeleteCommentCommand(user.nickname, { boardType, postId }, commentId),
     );
+  }
+
+  /*
+   * 댓글 좋아요 요청
+   */
+  @ApiNoContentResponse({
+    description: "좋아요 요청 성공(이미 좋아요를 누른 경우도 포함)",
+  })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post(":commentId/like/:nickname")
+  async likeComment(
+    @Param()
+    {
+      commentId,
+      postId,
+      boardType,
+      nickname,
+    }: CommentIdentifierWithNicknameParamDto,
+  ) {
+    await this.commandBus.execute(
+      new LikeCommentCommand({ postId, boardType }, commentId, nickname),
+    );
+    return;
+  }
+
+  /*
+   * 댓글 좋아요 취소 요청
+   */
+  @ApiNoContentResponse({
+    description: "좋아요 취소 성공(이미 좋아요를 하지 않았던 경우도 포함)",
+  })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":commentId/like/:nickname")
+  async unlikeComment(
+    @Param()
+    {
+      commentId,
+      postId,
+      boardType,
+      nickname,
+    }: CommentIdentifierWithNicknameParamDto,
+  ) {
+    await this.commandBus.execute(
+      new UnlikeCommentCommand({ postId, boardType }, commentId, nickname),
+    );
+    return;
   }
 }

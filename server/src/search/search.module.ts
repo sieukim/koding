@@ -2,9 +2,9 @@ import { Module } from "@nestjs/common";
 import { SearchController } from "./search.controller";
 import { ElasticsearchModule } from "@nestjs/elasticsearch";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { PostSearchService } from "./post.search.service";
 import { CqrsModule } from "@nestjs/cqrs";
 import { SearchQueryHandlers } from "./queries/handlers";
+import { SearchServices } from "./services";
 
 @Module({
   imports: [
@@ -22,6 +22,6 @@ import { SearchQueryHandlers } from "./queries/handlers";
     CqrsModule,
   ],
   controllers: [SearchController],
-  providers: [PostSearchService, ...SearchQueryHandlers],
+  providers: [...SearchServices, ...SearchQueryHandlers],
 })
 export class SearchModule {}

@@ -2,33 +2,35 @@ import { Module } from "@nestjs/common";
 import { MulterModule } from "@nestjs/platform-express";
 import { UploadController } from "./upload.controller";
 import { CqrsModule } from "@nestjs/cqrs";
-import { UploadCommandHandlers } from "./commands/handlers";
 import { MongooseModule } from "@nestjs/mongoose";
-import { S3Image, S3ImageSchema } from "../schemas/s3-image.schema";
-import { UploadService } from "./upload.service";
-import { S3Service } from "./s3.service";
+import {
+  S3PostImageDocument,
+  S3PostImageSchema,
+} from "../schemas/s3-post-image.schema";
 import { UploadEventHandlers } from "./event/handlers";
-import { UploadRepository } from "./upload.repository";
+import {
+  S3ProfileAvatarDocument,
+  S3ProfileAvatarSchema,
+} from "../schemas/s3-profile-avatar.schema";
+import { UploadServices } from "./services";
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       {
-        name: S3Image.name,
-        schema: S3ImageSchema,
+        name: S3PostImageDocument.name,
+        schema: S3PostImageSchema,
+      },
+      {
+        name: S3ProfileAvatarDocument.name,
+        schema: S3ProfileAvatarSchema,
       },
     ]),
     MulterModule.register(),
     CqrsModule,
   ],
-  providers: [
-    UploadRepository,
-    S3Service,
-    UploadService,
-    ...UploadCommandHandlers,
-    ...UploadEventHandlers,
-  ],
+  providers: [...UploadServices, ...UploadEventHandlers],
   controllers: [UploadController],
-  exports: [UploadRepository],
+  exports: [...UploadServices],
 })
 export class UploadModule {}

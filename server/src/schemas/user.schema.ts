@@ -162,6 +162,12 @@ export class UserDocument extends Document {
   createdAt: Date;
 
   @Prop({
+    type: String,
+    required: false,
+  })
+  avatarUrl?: string;
+
+  @Prop({
     type: [
       {
         type: String,
@@ -196,7 +202,6 @@ export class UserDocument extends Document {
   static toModel(userDocument: UserDocument): User {
     return plainToClass(User, userDocument, {
       excludeExtraneousValues: true,
-      enableImplicitConversion: true,
     });
   }
 

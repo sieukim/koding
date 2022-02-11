@@ -15,8 +15,9 @@ import { PostReadCountIncreasedEvent } from "../posts/events/post-read-count-inc
 import { Types } from "mongoose";
 import { TagChangedEvent } from "../tags/events/tag-changed.event";
 import { PostImageChangedEvent } from "../upload/event/post-image-changed.event";
-import { Expose } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 import { PostModifiedEvent } from "../posts/events/post-modified.event";
+import { UserDocumentToUserTransformDecorator } from "../common/decorator/user-document-to-user-transform.decorator";
 
 export enum PostBoardType {
   Common = "common",
@@ -56,11 +57,13 @@ export class Post extends AggregateRoot {
   @Expose()
   @IsString()
   @ApiProperty({
-    description: "게시글 작성자 닉네임. 탈퇴한 회원인 경우 값 없음",
+    description: "게시글 작성자 닉네임. 탈퇴한 사용자인 경우 값 없음",
   })
   writerNickname?: string;
 
+  @Type(() => User)
   @Expose()
+  @UserDocumentToUserTransformDecorator()
   writer?: User;
 
   @Expose()

@@ -18,6 +18,8 @@ export class MyUserInfoDto extends PickType(User, [
   "followingsCount",
   "isGithubUser",
   "isEmailUser",
+  "avatarUrl",
+  "roles",
 ] as const) {
   @Expose()
   followersCount: number;

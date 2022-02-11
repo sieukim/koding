@@ -16,7 +16,9 @@ import {
   Query,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
 import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
 import { UsersService } from "./users.service";
@@ -24,6 +26,7 @@ import {
   ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
@@ -77,6 +80,8 @@ import { PostListDto } from "../posts/dto/post-list.dto";
 import { GetScrapPostsHandler } from "./queries/handlers/get-scrap-posts.handler";
 import { GetLikePostsQuery } from "./queries/get-like-posts.query";
 import { GetLikePostsHandler } from "./queries/handlers/get-like-posts.handler";
+import { ProfileAvatarUploadInterceptor } from "../upload/interceptors/profile-avatar-upload.interceptor";
+import { DeleteAvatarCommand } from "./commands/delete-avatar.command";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -97,6 +102,8 @@ export class UsersController {
   ) {}
 
   @ApiOperation({ summary: "회원가입" })
+  @ApiConsumes("multipart/form-data")
+  @ApiBody({ type: SignupLocalRequestDto })
   @ApiCreatedResponse({
     description: "회원가입 성공, 확인 이메일 발송",
     type: MyUserInfoDto,
@@ -104,9 +111,15 @@ export class UsersController {
   @ApiConflictResponse({
     description: "회원가입 실패. 중복 있음",
   })
+  @UseInterceptors(ProfileAvatarUploadInterceptor)
   @Post()
-  async joinUser(@Body() signupUserDto: SignupLocalRequestDto) {
-    const user = await this.usersService.signupLocal(signupUserDto);
+  async joinUser(
+    @Body() body: SignupLocalRequestDto,
+    @UploadedFile() avatarFile?: Express.MulterS3.File,
+  ) {
+    console.log("avatar : ", avatarFile);
+    body.avatarUrl = avatarFile?.location;
+    const user = await this.usersService.signupLocal(body);
     return MyUserInfoDto.fromModel(user);
   }
 
@@ -167,6 +180,7 @@ export class UsersController {
   @ApiOperation({
     summary: "사용자 프로필 정보 변경",
   })
+  @ApiConsumes("multipart/form-data")
   @ApiBody({
     type: ChangeProfileRequestDto,
   })
@@ -176,18 +190,22 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: "API Body 형식이 잘못되었거나, 확인 비밀번호가 다름",
   })
-  @ApiNoContentResponse({
+  @ApiOkResponse({
     description: "사용자 프로필 정보 변경 성공",
     type: MyUserInfoDto,
   })
   @UseGuards(ParamNicknameSameUserGuard)
+  @UseInterceptors(ProfileAvatarUploadInterceptor)
   @HttpCode(HttpStatus.OK)
   @Patch(":nickname")
   async changeProfile(
     @Param() { nickname }: NicknameParamDto,
     @Body() body: ChangeProfileRequestDto,
     @LoginUser() loginUser: User,
+    @UploadedFile() avatarFile?: Express.MulterS3.File,
   ) {
+    body.avatarUrl = avatarFile?.location;
+    this.logger.log(`사용자 프로필 변경; body: ${JSON.stringify(body)}`);
     const result = (await this.commandBus.execute(
       new ChangeProfileCommand(loginUser.nickname, nickname, body),
     )) as Awaited<ReturnType<ChangeProfileHandler["execute"]>>;
@@ -487,5 +505,17 @@ export class UsersController {
     return this.queryBus.execute(new GetLikePostsQuery(nickname)) as ReturnType<
       GetLikePostsHandler["execute"]
     >;
+  }
+
+  /*
+   * 프로필 사진 삭제
+   */
+  @ApiNoContentResponse({ description: "프로필 사진 삭제 성공" })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(":nickname/avatarUrl")
+  async removeAvatar(@Param() { nickname }: NicknameParamDto) {
+    await this.commandBus.execute(new DeleteAvatarCommand(nickname));
+    return;
   }
 }

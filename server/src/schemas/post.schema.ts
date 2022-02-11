@@ -3,9 +3,8 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { UserDocument } from "./user.schema";
 import { getCurrentTime } from "../common/utils/time.util";
 import { Post, PostBoardType, PostBoardTypes } from "../models/post.model";
-import { Expose, plainToClass, Transform, Type } from "class-transformer";
+import { plainToClass, Type } from "class-transformer";
 
-@Expose({ toClassOnly: true })
 @Schema({
   id: false,
   _id: true,
@@ -36,11 +35,6 @@ export class PostDocument extends Document {
   writerNickname?: string;
 
   @Type(() => UserDocument)
-  @Transform(
-    ({ value }) =>
-      value instanceof UserDocument ? UserDocument.toModel(value) : value,
-    { toClassOnly: true },
-  )
   writer?: UserDocument;
 
   @Type(() => String)

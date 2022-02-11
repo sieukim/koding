@@ -2,6 +2,7 @@ import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { DeleteAccountCommand } from "../delete-account.command";
 import { UsersRepository } from "../../users.repository";
 import { UserDeletedEvent } from "../../events/user-deleted.event";
+import { ProfileAvatarChangedEvent } from "../../../upload/event/profile-avatar-changed.event";
 
 @CommandHandler(DeleteAccountCommand)
 export class DeleteAccountHandler
@@ -20,6 +21,9 @@ export class DeleteAccountHandler
     ]);
     user.verifySameUser(requestUser);
     await this.usersRepository.remove(user);
-    this.eventBus.publish(new UserDeletedEvent(nickname));
+    this.eventBus.publishAll([
+      new UserDeletedEvent(nickname),
+      new ProfileAvatarChangedEvent(user.nickname, user.avatarUrl, undefined),
+    ]);
   }
 }
