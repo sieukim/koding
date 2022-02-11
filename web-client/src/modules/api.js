@@ -221,6 +221,14 @@ export const getTagList = (boardType) => {
   return axios.get(`/api/tags/${boardType}`);
 };
 
+// 일일 랭킹 조회
+export const getRanking = (boardType, pageSize = 5) => {
+  const query = new URLSearchParams();
+  if (pageSize) query.set('pageSize', pageSize);
+
+  return axios.get(`/api/post-ranking/daily/${boardType}?pageSize=${pageSize}`);
+};
+
 /*
  **********************************
  *********** profile api **********

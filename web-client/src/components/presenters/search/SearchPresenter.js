@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-
 import { useCallback } from 'react';
 import { PostList } from '../utils/post/PostList';
 import { Button, Card, Form, Input, List, Spin } from 'antd';
