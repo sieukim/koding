@@ -28,7 +28,9 @@ const SearchContainer = ({ query }) => {
   }, [nextPageCursor, query]);
 
   useEffect(() => {
-    getUsers();
+    if (query) {
+      getUsers();
+    }
 
     return () => {
       setUsers([]);
