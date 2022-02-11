@@ -53,7 +53,6 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
       ),
     ]);
     post.commit();
-    console.log("post.writer:", post.writer);
     return new PostWithAroundInfoDto(post, liked, scrapped, prevPost, nextPost);
   }
 }

@@ -75,11 +75,12 @@ export class PostScrapService {
     { postId, boardType }: PostIdentifier,
     nickname: string,
   ): Promise<boolean> {
-    return this.postScrapModel.exists({
+    const exists = await this.postScrapModel.exists({
       nickname,
       postId: new Types.ObjectId(postId),
       boardType,
     });
+    return exists ?? false;
   }
 
   removeOrphanPostScraps({ postId, boardType }: PostIdentifier) {

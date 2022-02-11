@@ -78,11 +78,12 @@ export class PostLikeService {
     { postId, boardType }: PostIdentifier,
     nickname: string,
   ): Promise<boolean> {
-    return this.postLikeModel.exists({
+    const exists = await this.postLikeModel.exists({
       postId: new Types.ObjectId(postId),
       nickname,
       boardType,
     });
+    return exists ?? false;
   }
 
   async getLikePosts(nickname: string) {
