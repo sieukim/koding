@@ -1,13 +1,20 @@
 import { useCallback, useEffect, useState } from 'react';
 import EmailSignupPresenter from '../../presenters/auth/EmailSignupPresenter';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as api from '../../../modules/api';
 import { useDispatch } from 'react-redux';
 import { setLogin } from '../../../modules/auth';
 import useAsync from '../../../hooks/useAsync';
+import { useMessage } from '../../../hooks/useMessage';
 
 const EmailSignupContainer = () => {
-  /* 중복 검사 */
+  // navigate
+  const navigate = useNavigate();
+
+  // 로그인 전역상태
+  const dispatch = useDispatch();
+  // eslint-disable-next-line
+  const onSetLogin = useCallback((user) => dispatch(setLogin(user)), []);
 
   // 중복 검사 api 호출 결과로 중복이면 true 값을 갖는다.
   const [duplicated, setDuplicated] = useState({
@@ -20,8 +27,8 @@ const EmailSignupContainer = () => {
     nickname: false,
   });
 
-  // 중복 검사 api 호출 함수
-  const duplicateCheck = useCallback(async (key, value) => {
+  // 중복검사
+  const onDuplicateCheck = useCallback(async (key, value) => {
     try {
       await api.duplicateCheck(key, value);
       setDuplicated((duplicated) => ({
@@ -41,24 +48,22 @@ const EmailSignupContainer = () => {
     }
   }, []);
 
-  /* 회원가입 */
-
-  // signup state
+  // 회원가입
   const [signupState, signupFetch] = useAsync(
     (user) => api.signup(user),
     [],
     true,
   );
 
-  // login state
+  // 로그인
   const [loginState, loginFetch] = useAsync(
     (user) => api.login(user),
     [],
     true,
   );
 
-  // signup api & login api 호출
-  const signup = useCallback(
+  // 회원가입 핸들러
+  const onSignup = useCallback(
     async (user) => {
       await signupFetch(user);
       await loginFetch(user);
@@ -66,30 +71,26 @@ const EmailSignupContainer = () => {
     [signupFetch, loginFetch],
   );
 
-  /* 로그인 */
-
-  const dispatch = useDispatch();
-  const onSetLogin = useCallback((user) => dispatch(setLogin(user)), []);
-
-  // login state에 저장된 user를 이용하여 로그인 상태로 변경
+  // 회원가입 성공
   useEffect(() => {
     if (loginState.success) {
       const user = loginState.success.data;
       onSetLogin(user);
+      navigate('/');
     }
-  }, [onSetLogin, loginState.success]);
+  }, [loginState, onSetLogin, navigate]);
+
+  // message
+  useMessage(signupState, 'Hello World! 👻');
 
   return (
-    <>
-      {loginState.success && <Navigate to="/" />}
-      <EmailSignupPresenter
-        signup={signup}
-        signupState={signupState}
-        duplicated={duplicated}
-        checked={checked}
-        duplicateCheck={duplicateCheck}
-      />
-    </>
+    <EmailSignupPresenter
+      loading={signupState.loading}
+      onSignup={onSignup}
+      duplicated={duplicated}
+      checked={checked}
+      onDuplicateCheck={onDuplicateCheck}
+    />
   );
 };
 

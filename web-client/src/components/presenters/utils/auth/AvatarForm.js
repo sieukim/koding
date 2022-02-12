@@ -1,80 +1,11 @@
 import { Avatar, Button, message, Upload } from 'antd';
 import { useCallback, useState } from 'react';
-import styled from 'styled-components';
-
-const StyledAvatarForm = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-
-  width: 100%;
-  height: 200px;
-  margin-bottom: 24px;
-
-  border: 1px solid #d9d9d9;
-  border-radius: 10px;
-
-  :hover {
-    pointer: cursor;
-  }
-
-  .upload-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-
-    width: 150px;
-    height: 150px;
-    padding: 10px;
-
-    border: 1px solid #d9d9d9;
-    border-radius: 100px;
-
-    * {
-      margin-bottom: 5px;
-    }
-
-    .upload-text {
-      margin-top: 5px;
-      color: #000000d9;
-      font-size: 15px;
-    }
-
-    .upload-hint {
-      color: #00000073;
-      font-size: 11px;
-    }
-  }
-
-  .ant-avatar {
-    width: 150px;
-    height: 150px;
-  }
-
-  .edit-buttons {
-    display: flex;
-    flex-direction: column;
-
-    width: 100px;
-    margin-left: 30px;
-
-    * {
-      width: 100%;
-    }
-
-    .ant-btn {
-      margin: 10px 0;
-    }
-  }
-`;
+import { StyledAvatarForm } from '../../styled/auth/StyledAvatarForm';
 
 export const AvatarForm = ({
   defaultAvatarUrl,
   setAvatarFile,
-  removeAvatarUrl,
+  onClickRemoveAvatar,
 }) => {
   const [avatarUrl, setAvatarUrl] = useState(defaultAvatarUrl);
 
@@ -96,6 +27,7 @@ export const AvatarForm = ({
     }
 
     return false;
+    // eslint-disable-next-line
   }, []);
 
   // 프로필 사진 삭제 onClick 핸들러
@@ -104,9 +36,10 @@ export const AvatarForm = ({
     setAvatarUrl(null);
 
     if (defaultAvatarUrl) {
-      removeAvatarUrl();
+      onClickRemoveAvatar();
     }
-  }, [defaultAvatarUrl, removeAvatarUrl]);
+    // eslint-disable-next-line
+  }, [defaultAvatarUrl, onClickRemoveAvatar]);
 
   return (
     <StyledAvatarForm>
@@ -121,7 +54,7 @@ export const AvatarForm = ({
           </div>
         </div>
       )}
-      <div className="edit-buttons">
+      <div className="button-container">
         <Upload
           name="avatar"
           accept="image/*"
@@ -130,9 +63,15 @@ export const AvatarForm = ({
           multiple={false}
           beforeUpload={beforeUpload}
         >
-          <Button htmlType="button">등록</Button>
+          <Button htmlType="button" className="button button-action">
+            등록
+          </Button>
         </Upload>
-        <Button htmlType="button" onClick={onClickRemove}>
+        <Button
+          htmlType="button"
+          onClick={onClickRemove}
+          className="button-button-action"
+        >
           삭제
         </Button>
       </div>

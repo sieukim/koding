@@ -5,39 +5,37 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setLogin } from '../../../modules/auth';
 import useAsync from '../../../hooks/useAsync';
+import { useMessage } from '../../../hooks/useMessage';
 
 const EmailLoginContainer = () => {
-  /* 로그인 */
+  // navigate
+  const navigate = useNavigate();
+  // 로그인 전역 상태
+  const dispatch = useDispatch();
+  // eslint-disable-next-line
+  const onSetLogin = useCallback((user) => dispatch(setLogin(user)), []);
 
-  // login state
+  // 로그인 api
   const [loginState, loginFetch] = useAsync(
     (user) => api.login(user),
     [],
     true,
   );
 
-  const dispatch = useDispatch();
-  const onSetLogin = useCallback((user) => dispatch(setLogin(user)), []);
-
-  // 로그인 api 호출
-  const login = useCallback(
-    async (user) => {
-      await loginFetch(user);
-    },
-    [loginFetch],
-  );
-
-  // login state에 저장된 user를 이용하여 로그인 상태로 변경
+  // 로그인 성공
   useEffect(() => {
     if (loginState.success) {
       const user = loginState.success.data;
       onSetLogin(user);
+      navigate('/');
     }
-  }, [onSetLogin, loginState.success]);
+  }, [loginState, onSetLogin, navigate]);
 
-  /* github 로그인 */
+  // message
+  useMessage(loginState, '오늘도 멋진 하루 보내세요 ✨');
 
-  const url = useMemo(() => {
+  // github 로그인 url
+  const githubLoginUrl = useMemo(() => {
     const CLIENT_ID = '855268489b238ce4aa0e';
     const REDIRECT_URL = 'http://localhost:3000/github/login';
     const params = new URLSearchParams({
@@ -51,16 +49,12 @@ const EmailLoginContainer = () => {
     return `https://github.com/login/oauth/authorize?${params.toString()}`;
   }, []);
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (loginState.success) {
-      navigate('/');
-    }
-  }, [loginState.success, navigate]);
-
   return (
-    <EmailLoginPresenter login={login} loginState={loginState} url={url} />
+    <EmailLoginPresenter
+      loading={loginState.loading}
+      onLogin={loginFetch}
+      githubLoginUrl={githubLoginUrl}
+    />
   );
 };
 

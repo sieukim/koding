@@ -1,59 +1,41 @@
-import styled from 'styled-components';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Form, Input } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import { useMessage } from '../../../hooks/useMessage';
-
-const StyledGithubSignup = styled.div`
-  .title-text {
-    text-align: center;
-    font-weight: bold;
-    font-size: 32px;
-    margin: 24px 0;
-  }
-
-  .github-signup-form {
-    max-width: 500px;
-    min-width: 350px;
-  }
-
-  .github-signup-form-button {
-    width: 100%;
-  }
-`;
+import { StyledTitle } from '../styled/StyledTitle';
+import { StyledAuthPage } from '../styled/auth/StyledAuthPage';
 
 const GithubSignupPresenter = ({
-  githubSignup,
-  githubSignupState,
+  loading,
+  onGithubSignup,
   duplicated,
   checked,
-  duplicateCheck,
+  onDuplicateCheck,
 }) => {
   const [form] = Form.useForm();
   const [validated, setValidated] = useState(false);
 
   // 회원가입 Form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
-    (values) => githubSignup(values.nickname),
-    [githubSignup],
+    (values) => onGithubSignup(values.nickname),
+    [onGithubSignup],
   );
+
+  // 닉네임
+  const nickname = form.getFieldValue('nickname');
 
   // 닉네임 onChange 리스너
   const onChangeNickname = useCallback(
     (e) => {
-      duplicateCheck('nickname', e.target.value);
+      onDuplicateCheck('nickname', e.target.value);
     },
-    [duplicateCheck],
+    [onDuplicateCheck],
   );
-
-  // 닉네임 유효성 검증
-  const nickname = form.getFieldValue('nickname');
 
   useEffect(() => {
     if (checked && duplicated) {
-      setValidated((validated) => false);
+      setValidated(false);
     } else {
-      setValidated((validated) => true);
+      setValidated(true);
     }
   }, [checked, duplicated, nickname]);
 
@@ -89,19 +71,10 @@ const GithubSignupPresenter = ({
     [validated],
   );
 
-  // message
-  useMessage(githubSignupState, 'Hello World! 👻');
-
   return (
-    <StyledGithubSignup>
-      <div className="title-text">깃허브 회원가입</div>
-
-      <Form
-        name="github-signup-form"
-        form={form}
-        className="github-signup-form"
-        onFinish={onFinish}
-      >
+    <StyledAuthPage width="350px">
+      <StyledTitle>깃허브 회원가입</StyledTitle>
+      <Form name="github-signup-form" form={form} onFinish={onFinish}>
         <Form.Item
           name="nickname"
           hasFeedback
@@ -117,18 +90,16 @@ const GithubSignupPresenter = ({
             allowClear={true}
           />
         </Form.Item>
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="github-signup-form-button"
-            loading={githubSignupState.loading}
-          >
-            회원가입
-          </Button>
-        </Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          className="button button-action"
+        >
+          회원가입
+        </Button>
       </Form>
-    </StyledGithubSignup>
+    </StyledAuthPage>
   );
 };
 
