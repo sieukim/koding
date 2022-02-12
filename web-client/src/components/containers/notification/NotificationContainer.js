@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
 import { useCallback, useEffect, useState } from 'react';
+import { useMessage } from '../../../hooks/useMessage';
 
 const NotificationContainer = () => {
   const user = useSelector((state) => state.auth.user);
@@ -26,6 +27,7 @@ const NotificationContainer = () => {
 
   useEffect(() => {
     getNotification();
+    // eslint-disable-next-line
   }, []);
 
   // 알림 삭제
@@ -35,10 +37,9 @@ const NotificationContainer = () => {
     true,
   );
 
-  const removeNotification = useCallback(
+  const onRemoveNotification = useCallback(
     async (notificationId) => {
       await removeNotificationFetch(notificationId);
-
       setNotifications((notifications) =>
         notifications.filter(
           (notification) => notification.notificationId !== notificationId,
@@ -48,6 +49,9 @@ const NotificationContainer = () => {
     [removeNotificationFetch],
   );
 
+  // message
+  useMessage(removeNotificationState, '알림을 삭제했습니다 ✂️');
+
   // 전체 알림 삭제
   const [removeAllNotificationState, removeAllNotificationFetch] = useAsync(
     () => api.removeAllNotification(user.nickname),
@@ -55,10 +59,13 @@ const NotificationContainer = () => {
     true,
   );
 
-  const removeAllNotification = useCallback(async () => {
+  const onRemoveAllNotification = useCallback(async () => {
     await removeAllNotificationFetch();
     setNotifications([]);
-  }, [removeNotificationFetch]);
+  }, [removeAllNotificationFetch]);
+
+  // message
+  useMessage(removeAllNotificationState, '알림을 모두 삭제했습니다 ✂️');
 
   // 알림 읽기
   const [readNotificationState, readNotificationFetch] = useAsync(
@@ -67,10 +74,9 @@ const NotificationContainer = () => {
     true,
   );
 
-  const readNotification = useCallback(
+  const onReadNotification = useCallback(
     async (notificationId) => {
       await readNotificationFetch(notificationId);
-
       setNotifications((notifications) =>
         notifications.map((notification) =>
           notification.notificationId === notificationId
@@ -82,6 +88,9 @@ const NotificationContainer = () => {
     [readNotificationFetch],
   );
 
+  // message
+  useMessage(readNotificationState, '알림을 읽었습니다 😎');
+
   // 전체 알림 읽기
   const [readAllNotificationState, readAllNotificationFetch] = useAsync(
     () => api.readAllNotifications(user.nickname),
@@ -89,13 +98,15 @@ const NotificationContainer = () => {
     true,
   );
 
-  const readAllNotification = useCallback(async () => {
+  const onReadAllNotification = useCallback(async () => {
     await readAllNotificationFetch();
-
     setNotifications((notifications) =>
       notifications.map((notification) => ({ ...notification, read: true })),
     );
   }, [readAllNotificationFetch]);
+
+  // message
+  useMessage(readAllNotificationState, '알림을 모두 읽었습니다 😎');
 
   return (
     <NotificationPresenter
@@ -104,10 +115,10 @@ const NotificationContainer = () => {
       setNotifications={setNotifications}
       next={getNotification}
       hasMore={nextPageCursor}
-      removeNotification={removeNotification}
-      removeAllNotification={removeAllNotification}
-      readNotification={readNotification}
-      readAllNotification={readAllNotification}
+      onRemoveNotification={onRemoveNotification}
+      onRemoveAllNotification={onRemoveAllNotification}
+      onReadNotification={onReadNotification}
+      onReadAllNotification={onReadAllNotification}
     />
   );
 };
