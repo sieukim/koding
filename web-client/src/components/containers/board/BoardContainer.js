@@ -1,4 +1,4 @@
-import BoardPresenter from '../../presenters/post/BoardPresenter';
+import BoardPresenter from '../../presenters/board/BoardPresenter';
 import * as api from '../../../modules/api';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,10 @@ import useAsync from '../../../hooks/useAsync';
 const BoardContainer = ({ boardType, tagsParams }) => {
   // 로그인 유저 정보
   const user = useSelector((state) => state.auth.user);
+  // navigate
+  const navigate = useNavigate();
 
+  // 게시글 목록 loading 상태
   const [loading, setLoading] = useState(false);
 
   // 게시글 목록
@@ -30,10 +33,10 @@ const BoardContainer = ({ boardType, tagsParams }) => {
     return () => {
       setPosts([]);
       setNextPageCursor(null);
+      setLoading(false);
     };
+    // eslint-disable-next-line
   }, [boardType, tagsParams]);
-
-  const navigate = useNavigate();
 
   // 게시글 작성 버튼 onClick 핸들러
   const onClickWrite = useCallback(() => {
@@ -42,7 +45,7 @@ const BoardContainer = ({ boardType, tagsParams }) => {
     } else {
       navigate(`/login`);
     }
-  }, [navigate, boardType, user]);
+  }, [user, navigate, boardType]);
 
   // 게시판 내 존재하는 태그 배열 조회
   const [getTagsListState] = useAsync(

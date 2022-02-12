@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { PostLink } from '../link/PostLink';
 import React from 'react';
 
-export const PostList = ({ loading, boardType, title, posts }) => {
+export const RankedPostList = ({ loading, boardType, title, posts }) => {
   return (
     <Card
       title={title}

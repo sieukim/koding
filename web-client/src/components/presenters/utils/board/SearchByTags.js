@@ -1,40 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AutoComplete, Input, message, Tag } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { getTagColor } from '../function/getTagColor';
+import { StyledSearchByTag } from '../../styled/board/StyledSearchByTag';
 
-const StyledTags = styled.div`
-  height: 30px;
-
-  .ant-tag {
-    margin-bottom: 8px;
-  }
-
-  .custom-tag {
-    width: 78px;
-    vertical-align: top;
-    background: #ffff;
-    border-style: dashed;
-
-    :hover {
-      cursor: pointer;
-    }
-  }
-
-  .input-tag-visible {
-    width: 78px;
-    vertical-align: top;
-    margin-bottom: 8px;
-  }
-
-  .input-tag-invisible {
-    display: none;
-  }
-`;
-
-export const Tags = ({ boardType, tagsParams, tagsList }) => {
+export const SearchByTags = ({ boardType, tagsParams, tagsList }) => {
   const navigate = useNavigate();
 
   // 입력창 여부
@@ -49,7 +20,7 @@ export const Tags = ({ boardType, tagsParams, tagsList }) => {
   // 입력 태그 onClick 핸들러
   const onClickInput = useCallback(() => {
     setInputVisible(true);
-  }, [inputRef]);
+  }, []);
 
   useEffect(() => {
     if (inputVisible) inputRef.current.focus();
@@ -117,13 +88,14 @@ export const Tags = ({ boardType, tagsParams, tagsList }) => {
   );
 
   return (
-    <StyledTags>
+    <StyledSearchByTag>
       {tagsParams.map((tag) => (
         <Tag
           key={tag}
           closable
           onClose={() => onCloseTag(tag)}
           color={getTagColor(tag)}
+          className="tag"
         >
           {tag}
         </Tag>
@@ -133,7 +105,7 @@ export const Tags = ({ boardType, tagsParams, tagsList }) => {
         filterOption={filterOption}
         value={inputTag}
         onSelect={onSelectTag}
-        className={inputVisible ? `input-tag-visible` : `input-tag-invisible`}
+        className={inputVisible ? `tag-visible` : `tag-invisible`}
       >
         <Input
           type="text"
@@ -146,13 +118,13 @@ export const Tags = ({ boardType, tagsParams, tagsList }) => {
         />
       </AutoComplete>
       {!inputVisible && (
-        <Tag className="custom-tag" onClick={onClickInput}>
+        <Tag className="tag tag-action" onClick={onClickInput}>
           <PlusOutlined /> 태그 검색
         </Tag>
       )}
-      <Tag className="custom-tag" onClick={onClickRemoveAll}>
+      <Tag className="tag tag-action" onClick={onClickRemoveAll}>
         <MinusOutlined /> 전체 삭제
       </Tag>
-    </StyledTags>
+    </StyledSearchByTag>
   );
 };

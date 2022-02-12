@@ -1,5 +1,5 @@
 import { Avatar, List, Spin } from 'antd';
-import { IconText } from './IconText';
+import { IconText } from '../post/IconText';
 import {
   EyeOutlined,
   FieldTimeOutlined,
@@ -11,7 +11,7 @@ import {
 import { NicknameLink } from '../link/NicknameLink';
 import { getCreatedAt } from '../function/getCreatedAt';
 import { PostLink } from '../link/PostLink';
-import { Tags } from './Tags';
+import { Tags } from '../post/Tags';
 import React from 'react';
 import styled from 'styled-components';
 

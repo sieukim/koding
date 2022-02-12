@@ -1,13 +1,6 @@
-import BoardContainer from '../../components/containers/post/BoardContainer';
+import BoardContainer from '../../components/containers/board/BoardContainer';
 import { useLocation, useParams } from 'react-router-dom';
-import styled from 'styled-components';
-
-const StyledPage = styled.div`
-  display: flex;
-  justify-content: center;
-  margin: 0 auto;
-  width: 100%;
-`;
+import { StyledBody } from '../../components/presenters/styled/StyledBody';
 
 const BoardPage = () => {
   const params = useParams();
@@ -18,9 +11,9 @@ const BoardPage = () => {
   const tags = searchParams.get('tags')?.split(',') ?? [];
 
   return (
-    <StyledPage>
+    <StyledBody>
       <BoardContainer boardType={boardType} tagsParams={tags} />
-    </StyledPage>
+    </StyledBody>
   );
 };
 

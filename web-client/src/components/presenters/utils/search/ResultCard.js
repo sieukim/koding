@@ -1,6 +1,6 @@
 import { Card, List, Spin } from 'antd';
 import { NavLink } from 'react-router-dom';
-import { PostList } from '../post/PostList';
+import { PostList } from '../board/PostList';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { AvatarLink } from '../link/AvatarLink';
 import { NicknameLink } from '../link/NicknameLink';
