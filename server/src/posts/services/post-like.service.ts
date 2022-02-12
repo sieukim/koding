@@ -14,6 +14,7 @@ import { PostLikedEvent } from "../events/post-liked.event";
 import { PostUnlikedEvent } from "../events/post-unliked.event";
 import { SortType } from "../../common/repository/sort-option";
 import { PostDocument } from "../../schemas/post.schema";
+import { Retryable } from "typescript-retry-decorator";
 
 @Injectable()
 export class PostLikeService {
@@ -24,6 +25,10 @@ export class PostLikeService {
     private readonly eventBus: EventBus,
   ) {}
 
+  // 여러 사용자가 동시에 create 시 발생하는 Duplicate Error 대응용
+  @Retryable({
+    maxAttempts: 3,
+  })
   async likePost(postIdentifier: PostIdentifier, nickname: string) {
     const { postId, boardType } = postIdentifier;
     const exists = await this.postLikeModel.exists({

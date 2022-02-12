@@ -16,6 +16,7 @@ import { PostInfoDto } from "./dto/post-info.dto";
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
@@ -53,6 +54,8 @@ import { ScrapPostCommand } from "../users/commands/scrap-post.command";
 import { UnscrapPostCommand } from "../users/commands/unscrap-post.command";
 import { CheckUserScrapPostQuery } from "./query/check-user-scrap-post.query";
 import { UserScrapPostInfoDto } from "./dto/user-scrap-post-info.dto";
+import { ReportPostCommand } from "./commands/report-post.command";
+import { ReportPostRequestDto } from "./dto/report-post-request.dto";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -305,5 +308,28 @@ export class PostsController {
     return this.queryBus.execute(
       new CheckUserScrapPostQuery({ postId, boardType }, nickname),
     );
+  }
+
+  /*
+   * 게시글 신고
+   */
+  @ApiNoContentResponse({
+    description: "게시글 신고 성공",
+  })
+  @ApiConflictResponse({
+    description: "이미 신고한 게시글",
+  })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post(":boardType/:postId/report/:nickname")
+  async reportPost(
+    @Param()
+    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
+    @Body() { reportReason }: ReportPostRequestDto,
+  ) {
+    await this.commandBus.execute(
+      new ReportPostCommand({ postId, boardType }, nickname, reportReason),
+    );
+    return;
   }
 }

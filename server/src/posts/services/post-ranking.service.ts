@@ -96,6 +96,7 @@ export class PostRankingService {
       .exec();
   }
 
+  // 여러 사용자가 동시에 create 시 발생하는 Duplicate Error 대응용
   @Retryable({
     maxAttempts: 3,
   })

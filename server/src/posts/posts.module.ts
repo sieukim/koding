@@ -21,6 +21,10 @@ import {
   PostScrapDocument,
   PostScrapSchema,
 } from "../schemas/post-scrap.schema";
+import {
+  PostReportDocument,
+  PostReportSchema,
+} from "../schemas/post-report.schema";
 
 @Module({
   imports: [
@@ -32,6 +36,7 @@ import {
         name: PostDailyRankingDocument.name,
         schema: PostDailyRankingSchema,
       },
+      { name: PostReportDocument.name, schema: PostReportSchema },
     ]),
     CqrsModule,
     forwardRef(() => UsersModule),

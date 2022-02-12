@@ -32,23 +32,26 @@ export class NotificationSaga {
           this.commentsRepository.findByCommentId(commentId),
           this.postsRepository.findByPostId({ postId, boardType }),
         ]);
-        if (comment.writerNickname !== post.writerNickname) {
-          // 본인 게시글에 본인이 댓글을 단 경우는 알람에서 제외
-          return null;
-        }
-        return new AddNotificationCommand(
-          post.writerNickname,
-          new CommentNotificationData({
-            commentId,
-            boardType,
-            postId,
-            commentContent: comment.content,
-            commentWriterNickname: comment.writerNickname,
-            postTitle: post.title,
-          }),
-        );
+        return { post, comment };
       }),
-      filter((value) => value instanceof AddNotificationCommand),
+      filter(
+        // 본인 게시글에 본인이 댓글을 단 경우는 알람에서 제외
+        ({ post, comment }) => comment.writerNickname !== post.writerNickname,
+      ),
+      map(
+        ({ post, comment }) =>
+          new AddNotificationCommand(
+            post.writerNickname,
+            new CommentNotificationData({
+              commentId: comment.commentId,
+              boardType: post.boardType,
+              postId: post.postId,
+              commentContent: comment.content,
+              commentWriterNickname: comment.writerNickname,
+              postTitle: post.title,
+            }),
+          ),
+      ),
     );
 
   @Saga()
@@ -60,22 +63,25 @@ export class NotificationSaga {
           this.commentsRepository.findByCommentId(commentId),
           this.postsRepository.findByPostId({ postId, boardType }),
         ]);
-        return comment.mentionedNicknames.map(
+        return { post, comment };
+      }),
+      map(({ post, comment }) =>
+        comment.mentionedNicknames.map(
           (mentionedNickname) =>
             new AddNotificationCommand(
               mentionedNickname,
               new MentionNotificationData({
-                postId,
+                postId: post.postId,
                 postTitle: post.title,
                 commentContent: comment.content,
-                commentId,
+                commentId: comment.commentId,
                 commentWriterNickname: comment.writerNickname,
-                boardType,
+                boardType: post.boardType,
               }),
             ),
-        );
-      }),
-      mergeAll(), // 배열 flat
+        ),
+      ),
+      mergeAll(),
     );
 
   @Saga()

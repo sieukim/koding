@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsString,
   IsUrl,
+  MaxLength,
   Min,
 } from "class-validator";
 import { ForbiddenException } from "@nestjs/common";
@@ -67,6 +68,7 @@ export class Post extends AggregateRoot {
   writer?: User;
 
   @Expose()
+  @MaxLength(5, { each: true })
   @IsString({ each: true })
   @ApiProperty({
     description: "게시글 태그",
@@ -96,6 +98,7 @@ export class Post extends AggregateRoot {
   createdAt: Date;
 
   @Expose()
+  @MaxLength(15, { each: true })
   @IsUrl(undefined, { each: true })
   @ApiProperty({
     description: "게시글에서 사용하는 이미지 url들",
@@ -139,6 +142,14 @@ export class Post extends AggregateRoot {
   })
   scrapCount: number;
 
+  @Expose()
+  @IsNumber()
+  @Min(0)
+  @ApiProperty({
+    description: "신고 수",
+  })
+  reportCount: number;
+
   constructor();
   constructor(param: {
     title: string;
@@ -171,6 +182,7 @@ export class Post extends AggregateRoot {
       this.readCount = 0;
       this.likeCount = 0;
       this.commentCount = 0;
+      this.reportCount = 0;
       this.createdAt = getCurrentTime();
     }
   }

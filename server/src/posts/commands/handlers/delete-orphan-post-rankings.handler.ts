@@ -1,14 +1,14 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { DeleteOrphanPostRankingCommand } from "../delete-orphan-post-ranking.command";
+import { DeleteOrphanPostRankingsCommand } from "../delete-orphan-post-rankings.command";
 import { PostRankingService } from "../../services/post-ranking.service";
 
-@CommandHandler(DeleteOrphanPostRankingCommand)
-export class DeleteOrphanPostRankingHandler
-  implements ICommandHandler<DeleteOrphanPostRankingCommand>
+@CommandHandler(DeleteOrphanPostRankingsCommand)
+export class DeleteOrphanPostRankingsHandler
+  implements ICommandHandler<DeleteOrphanPostRankingsCommand>
 {
   constructor(private readonly postRankingService: PostRankingService) {}
 
-  async execute(command: DeleteOrphanPostRankingCommand) {
+  async execute(command: DeleteOrphanPostRankingsCommand) {
     const { postIdentifier } = command;
     return this.postRankingService.removeOrphanPostRanking(postIdentifier);
   }
