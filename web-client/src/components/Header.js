@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import { NavLink, useMatch, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import * as api from '../modules/api';
@@ -7,65 +6,7 @@ import { Avatar, Badge, Dropdown, Menu, message } from 'antd';
 import { setLogout } from '../modules/auth';
 import useAsync from '../hooks/useAsync';
 import { BellFilled, SearchOutlined, UserOutlined } from '@ant-design/icons';
-
-const StyledHeader = styled.nav`
-  display: flex;
-  flex-direction: row;
-  padding: 16px 32px;
-  justify-content: space-between;
-  align-items: center;
-
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-  .web-title {
-    font-size: 30px;
-  }
-
-  .ant-menu-horizontal {
-    border-bottom: none;
-  }
-
-  li {
-    margin: auto 30px;
-    font-weight: bold;
-    font-size: 1rem;
-    color: grey;
-  }
-
-  .login {
-    width: 88px;
-    text-align: right;
-    font-weight: bold;
-    font-size: 1rem;
-  }
-
-  .icon-groups {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: right;
-    width: 176px;
-    height: 32px;
-
-    a {
-      display: flex;
-      align-items: center;
-      margin-left: 32px;
-
-      font-weight: bold;
-      font-size: 1rem;
-
-      .anticon-bell,
-      .anticon-search {
-        color: grey;
-      }
-    }
-
-    .ant-dropdown-trigger {
-      margin-left: 32px;
-    }
-  }
-`;
+import { StyledHeader } from './presenters/styled/StyledHeader';
 
 const NavigationBar = () => {
   const [current, setCurrent] = useState(null);
@@ -131,7 +72,7 @@ const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
   const [visible, setVisible] = useState(false);
 
   // dropdown onClick 핸들러
-  const onClickDropdown = useCallback((e) => {
+  const onClickDropdown = useCallback(() => {
     setVisible((visible) => !visible);
   }, []);
 
@@ -183,6 +124,7 @@ const Header = () => {
     } catch (e) {
       message.error('오류가 발생했어요 😭 잠시 후 다시 시도해주세요!');
     }
+    // eslint-disable-next-line
   }, []);
 
   return (
