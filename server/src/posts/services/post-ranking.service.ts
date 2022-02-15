@@ -7,7 +7,7 @@ import { SortOrder } from "../../common/repository/sort-option";
 import { InjectModel } from "@nestjs/mongoose";
 import { IncreaseType } from "../commands/increase-comment-count.command";
 import { PostDocument } from "../../schemas/post.schema";
-import { Retryable } from "typescript-retry-decorator";
+import { BackOffPolicy, Retryable } from "typescript-retry-decorator";
 
 @Injectable()
 export class PostRankingService {
@@ -99,6 +99,8 @@ export class PostRankingService {
   // 여러 사용자가 동시에 create 시 발생하는 Duplicate Error 대응용
   @Retryable({
     maxAttempts: 3,
+    backOff: 100,
+    backOffPolicy: BackOffPolicy.FixedBackOffPolicy,
   })
   private async modifyAggregateField(
     fieldName: keyof PostDailyRankingDocument &

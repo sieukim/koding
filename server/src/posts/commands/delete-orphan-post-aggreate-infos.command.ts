@@ -1,5 +1,5 @@
 import { PostIdentifier } from "../../models/post.model";
 
-export class DeleteOrphanPostScrapsCommand {
+export class DeleteOrphanPostAggreateInfosCommand {
   constructor(public readonly postIdentifier: PostIdentifier) {}
 }

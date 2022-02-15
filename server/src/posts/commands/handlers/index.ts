@@ -5,11 +5,8 @@ import { RenamePostWriterToNullHandler } from "./rename-post-writer-to-null.hand
 import { LikePostHandler } from "./like-post.handler";
 import { UnlikePostHandler } from "./unlike-post.handler";
 import { IncreaseCommentCountHandler } from "./increase-comment-count.handler";
-import { DeleteOrphanPostLikesHandler } from "./delete-orphan-post-likes.handler";
+import { DeleteOrphanPostAggregateInfosHandler } from "./delete-orphan-post-aggregate-infos.handler";
 import { IncreaseReadCountHandler } from "./increase-read-count.handler";
-import { DeleteOrphanPostRankingsHandler } from "./delete-orphan-post-rankings.handler";
-import { DeleteOrphanPostScrapsHandler } from "./delete-orphan-post-scraps.handler";
-import { DeleteOrphanPostReportsHandler } from "./delete-orphan-post-reports.handler";
 import { ReportPostHandler } from "./report-post.handler";
 
 export const PostCommandHandlers = [
@@ -20,10 +17,7 @@ export const PostCommandHandlers = [
   LikePostHandler,
   UnlikePostHandler,
   IncreaseCommentCountHandler,
-  DeleteOrphanPostLikesHandler,
+  DeleteOrphanPostAggregateInfosHandler,
   IncreaseReadCountHandler,
-  DeleteOrphanPostRankingsHandler,
-  DeleteOrphanPostScrapsHandler,
-  DeleteOrphanPostReportsHandler,
   ReportPostHandler,
 ];

@@ -10,6 +10,7 @@ import { EventBus } from "@nestjs/cqrs";
 import { PostScrappedEvent } from "../events/post-scrapped.event";
 import { getCurrentTime } from "../../common/utils/time.util";
 import { PostUnscrappedEvent } from "../events/post-unscrapped.event";
+import { BackOffPolicy, Retryable } from "typescript-retry-decorator";
 
 @Injectable()
 export class PostScrapService {
@@ -20,6 +21,11 @@ export class PostScrapService {
     private readonly eventBus: EventBus,
   ) {}
 
+  @Retryable({
+    maxAttempts: 3,
+    backOff: 100,
+    backOffPolicy: BackOffPolicy.FixedBackOffPolicy,
+  })
   async scrapPost(postIdentifier: PostIdentifier, nickname: string) {
     const { postId, boardType } = postIdentifier;
     const updateResult = await this.postScrapModel

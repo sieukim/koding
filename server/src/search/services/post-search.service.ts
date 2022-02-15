@@ -214,6 +214,7 @@ export class PostSearchService {
       const { body } = await this.elasticsearchService.search(searchParams);
       return body;
     } catch (e) {
+      console.error("error in search", e);
       throw new ServiceUnavailableException(
         "검색엔진이 아직 준비되지 않았습니다",
       );

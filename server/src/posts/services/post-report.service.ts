@@ -115,10 +115,7 @@ export class PostReportService {
 
   removeOrphanPostReports({ postId, boardType }: PostIdentifier) {
     return this.postReportModel
-      .deleteMany({
-        postId: new Types.ObjectId(postId),
-        boardType,
-      })
+      .deleteMany({ postId: new Types.ObjectId(postId), boardType })
       .exec();
   }
 }
