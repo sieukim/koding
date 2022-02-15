@@ -1,36 +1,17 @@
-import PostPresenter from '../../presenters/post/PostPresenter';
+import PostViewerPresenter from '../../presenters/post/PostViewerPresenter';
 import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
 import { useNavigate } from 'react-router-dom';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { useMessage } from '../../../hooks/useMessage';
 import { message } from 'antd';
 
-const PostContainer = ({ boardType, postId, post, setPost }) => {
+const PostViewerContainer = ({ loading, boardType, postId, post, setPost }) => {
   // 로그인 유저
-  const user = useSelector((state) => state.auth.user);
-
+  const user = useSelector((state) => state.auth.user) ?? {};
+  // navigate
   const navigate = useNavigate();
-
-  // 게시글 상태
-  const [prev, setPrev] = useState({});
-  const [next, setNext] = useState({});
-
-  // 게시글 가져오기
-  const [getPostState] = useAsync(
-    () => api.readPost(boardType, postId),
-    [boardType, postId],
-    false,
-  );
-
-  useEffect(() => {
-    if (getPostState.success) {
-      setPost(getPostState.success.data.post);
-      setPrev(getPostState.success.data.prevPostInfo);
-      setNext(getPostState.success.data.nextPostInfo);
-    }
-  }, [getPostState]);
 
   // 게시글 좋아요
   const [likePostState, likePostFetch] = useAsync(
@@ -50,7 +31,8 @@ const PostContainer = ({ boardType, postId, post, setPost }) => {
       likeCount: post.likeCount + 1,
       liked: true,
     }));
-  }, [likePostFetch]);
+    // eslint-disable-next-line
+  }, [post.writerNickname, user.nickname, likePostFetch]);
 
   useMessage(
     likePostState,
@@ -71,8 +53,10 @@ const PostContainer = ({ boardType, postId, post, setPost }) => {
       likeCount: post.likeCount - 1,
       liked: false,
     }));
+    // eslint-disable-next-line
   }, [unlikePostFetch]);
 
+  // message
   useMessage(unlikePostState, '🪄 좋아요를 취소했습니다.');
 
   // 게시글 스크랩
@@ -93,8 +77,10 @@ const PostContainer = ({ boardType, postId, post, setPost }) => {
       scrapCount: post.scrapCount + 1,
       scrapped: true,
     }));
-  }, [scrapPostFetch]);
+    // eslint-disable-next-line
+  }, [post.writerNickname, user.writerNickname, scrapPostFetch]);
 
+  // message
   useMessage(
     scrapPostState,
     '스크랩된 게시글은 내 프로필에서 확인 가능합니다 📚',
@@ -114,8 +100,10 @@ const PostContainer = ({ boardType, postId, post, setPost }) => {
       scrapCount: post.scrapCount - 1,
       scrapped: false,
     }));
+    // eslint-disable-next-line
   }, [unscrapPostFetch]);
 
+  // message
   useMessage(unscrapPostState, '🪄 스크랩을 취소했습니다.');
 
   // 게시글 수정
@@ -133,43 +121,24 @@ const PostContainer = ({ boardType, postId, post, setPost }) => {
   const onClickRemove = useCallback(async () => {
     await removePostFetch();
     navigate(`/board/${boardType}`);
-  }, [removePostFetch, navigate]);
+  }, [removePostFetch, navigate, boardType]);
 
+  // mgessage
   useMessage(removePostState, 'Good Bye ~ 🥺');
 
-  // 이전 글 이동
-  const onClickPrev = useCallback(() => {
-    navigate(`/board/${prev.boardType}/${prev.postId}`);
-  }, [post, navigate]);
-
-  // 다음 글 이동
-  const onClickNext = useCallback(() => {
-    navigate(`/board/${next.boardType}/${next.postId}`);
-  }, [post, navigate]);
-
-  // 게시판 이동
-  const onClickBoard = useCallback(() => {
-    navigate(`/board/${boardType}`);
-  }, [navigate, boardType]);
-
   return (
-    <PostPresenter
+    <PostViewerPresenter
       user={user}
-      loading={getPostState.loading}
+      loading={loading}
       post={post}
-      prev={prev}
-      next={next}
       onClickLike={onClickLike}
       onClickUnlike={onClickUnlike}
       onClickScrap={onClickScrap}
       onClickUnscrap={onClickUnscrap}
       onClickEdit={onClickEdit}
       onClickRemove={onClickRemove}
-      onClickPrev={onClickPrev}
-      onClickNext={onClickNext}
-      onClickBoard={onClickBoard}
     />
   );
 };
 
-export default PostContainer;
+export default PostViewerContainer;

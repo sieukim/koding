@@ -1,50 +1,20 @@
-import styled from 'styled-components';
+import { StyledPostEditorPage } from '../styled/post/StyledPostEditorPage';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Editor } from '../utils/editor/Editor';
 import { Button, Form, Input } from 'antd';
+import { Editor } from '../utils/editor/Editor';
 import { Tags } from '../utils/editor/Tags';
 
-const StyledEditPost = styled.div`
-  border: 1px solid rgb(217, 217, 217);
-  border-radius: 8px;
-  margin: 50px 0;
-  padding: 32px 32px 8px 32px;
-  width: 900px;
-
-  input {
-    border: none;
-    border-left: 1px solid rgb(217, 217, 217);
-  }
-
-  .form-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-`;
-
-const EditPostPresenter = ({
+const PostEditorPresenter = ({
   loading,
   boardType,
-  post,
+  postId,
+  onClickWrite,
   onClickEdit,
+  existingPost,
   tagsList,
 }) => {
   const editorRef = useRef();
-
   const [form] = Form.useForm();
-
-  // 제목
-  useEffect(() => {
-    form.setFieldsValue({ title: post.title });
-  }, [form, post]);
-
-  // 내용
-  useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.getInstance().setMarkdown(post.markdownContent);
-    }
-  }, [editorRef, post]);
 
   // 입력 태그 배열
   const [tags, setTags] = useState([]);
@@ -52,19 +22,14 @@ const EditPostPresenter = ({
   // 이미지 Url
   const [imageUrls, setImageUrls] = useState([]);
 
-  useEffect(() => {
-    setTags(post.tags ?? []);
-    setImageUrls(post.imageUrls ?? []);
-  }, [post]);
-
-  // 게시글 수정
+  // form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
     (values) => {
       if (editorRef.current) {
         const markdownContent = editorRef.current.getInstance().getMarkdown();
         const htmlContent = editorRef.current.getInstance().getHTML();
 
-        onClickEdit({
+        const post = {
           ...values,
           markdownContent,
           htmlContent,
@@ -72,20 +37,45 @@ const EditPostPresenter = ({
           imageUrls: imageUrls.filter((imageUrl) =>
             markdownContent.includes(imageUrl),
           ),
-        });
+        };
+
+        // 게시글 등록
+        if (!postId) onClickWrite(post);
+        // 게시글 편집
+        else onClickEdit(post);
       }
     },
-    [editorRef, onClickEdit, tags, imageUrls],
+    [editorRef, postId, onClickWrite, onClickEdit, tags, imageUrls],
   );
 
+  // 제목
+  useEffect(() => {
+    form.setFieldsValue({ title: existingPost.title ?? '' });
+  }, [form, existingPost]);
+
+  // 내용
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current
+        .getInstance()
+        .setMarkdown(existingPost.markdownContent ?? '');
+    }
+  }, [editorRef, existingPost]);
+
+  // 태그, 이미지 주소
+  useEffect(() => {
+    setTags(existingPost.tags ?? []);
+    setImageUrls(existingPost.imageUrls ?? []);
+  }, [existingPost]);
+
   return (
-    <StyledEditPost>
+    <StyledPostEditorPage>
       <Form form={form} onFinish={onFinish}>
         <Form.Item
           name="title"
           rules={[{ required: true, message: '제목을 입력하세요.' }]}
         >
-          <Input placeholder="제목을 입력하세요." />
+          <Input placeholder="제목을 입력하세요." className="title-container" />
         </Form.Item>
         <Form.Item
           name="content"
@@ -93,7 +83,7 @@ const EditPostPresenter = ({
         >
           <Editor innerRef={editorRef} setImageUrls={setImageUrls} />
         </Form.Item>
-        <div className="form-footer">
+        <div className="tags-container">
           <Form.Item name="tags">
             <Tags
               boardType={boardType}
@@ -107,8 +97,8 @@ const EditPostPresenter = ({
           </Button>
         </div>
       </Form>
-    </StyledEditPost>
+    </StyledPostEditorPage>
   );
 };
 
-export default EditPostPresenter;
+export default PostEditorPresenter;

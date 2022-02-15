@@ -1,4 +1,9 @@
-import { IconText } from './IconText';
+import React, { useEffect, useRef } from 'react';
+import { Viewer } from '../utils/editor/Viewer';
+import { Avatar, Button, List, Spin } from 'antd';
+import { TagList } from '../utils/post/TagList';
+import { StyledPost } from '../styled/post/StyledPost';
+import { IconText } from '../utils/post/IconText';
 import {
   AlertOutlined,
   DeleteOutlined,
@@ -12,12 +17,10 @@ import {
   StarTwoTone,
   UserOutlined,
 } from '@ant-design/icons';
-import { NicknameLink } from '../link/NicknameLink';
-import { Avatar, Button } from 'antd';
-import React from 'react';
-import { getCreatedAt } from '../function/getCreatedAt';
+import { NicknameLink } from '../utils/link/NicknameLink';
+import { getCreatedAt } from '../utils/function/getCreatedAt';
 
-export const metadata = (
+const metadata = (
   user,
   post,
   onClickLike,
@@ -124,3 +127,62 @@ export const metadata = (
     ? writerMetadata
     : readerMetadata;
 };
+
+const PostViewerPresenter = ({
+  user,
+  loading,
+  post,
+  onClickLike,
+  onClickUnlike,
+  onClickScrap,
+  onClickUnscrap,
+  onClickEdit,
+  onClickRemove,
+}) => {
+  // 게시글 내용 viewer
+  const viewerRef = useRef();
+
+  useEffect(() => {
+    if (viewerRef.current) {
+      viewerRef.current.getInstance().setMarkdown(post.markdownContent);
+    }
+  }, [viewerRef, post.markdownContent]);
+
+  return (
+    <StyledPost>
+      {loading ? (
+        <div className="spinner">
+          <Spin />
+        </div>
+      ) : (
+        <List
+          dataSource={[post]}
+          renderItem={(post) => (
+            <List.Item
+              key={post.postId}
+              actions={metadata(
+                user,
+                post,
+                onClickLike,
+                onClickUnlike,
+                onClickScrap,
+                onClickUnscrap,
+                onClickEdit,
+                onClickRemove,
+              )}
+            >
+              <List.Item.Meta
+                title={<div className="post-title">{post.title}</div>}
+              />
+              <Viewer innerRef={viewerRef} />
+              <TagList post={post} tags={post.tags ?? []} />
+            </List.Item>
+          )}
+          itemLayout="vertical"
+        />
+      )}
+    </StyledPost>
+  );
+};
+
+export default PostViewerPresenter;

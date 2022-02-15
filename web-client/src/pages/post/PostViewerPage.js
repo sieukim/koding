@@ -1,20 +1,13 @@
-import PostContainer from '../../components/containers/post/PostContainer';
-import styled from 'styled-components';
+import PostViewerContainer from '../../components/containers/post/PostViewerContainer';
 import { useParams } from 'react-router-dom';
 import CommentContainer from '../../components/containers/post/CommentContainer';
 import { useEffect, useState } from 'react';
 import useAsync from '../../hooks/useAsync';
 import * as api from '../../modules/api';
+import { StyledBody } from '../../components/presenters/styled/StyledBody';
+import NavContainer from '../../components/containers/post/NavContainer';
 
-const StyledPage = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0 auto;
-  width: 100%;
-`;
-
-const PostPage = () => {
+const PostViewerPage = () => {
   const params = useParams();
   const boardType = params.boardType;
   const postId = params.postId;
@@ -36,20 +29,23 @@ const PostPage = () => {
   }, [getPostState]);
 
   return (
-    <StyledPage>
-      <PostContainer
+    <StyledBody flexDirection="column">
+      <PostViewerContainer
+        loading={getPostState.loading}
         boardType={boardType}
         postId={postId}
         post={post}
         setPost={setPost}
       />
+      <NavContainer getPostState={getPostState} post={post} />
       <CommentContainer
         boardType={boardType}
         postId={postId}
+        post={post}
         setPost={setPost}
       />
-    </StyledPage>
+    </StyledBody>
   );
 };
 
-export default PostPage;
+export default PostViewerPage;

@@ -1,19 +1,42 @@
-import EditPostPresenter from '../../presenters/post/EditPostPresenter';
+import PostEditorPresenter from '../../presenters/post/PostEditorPresenter';
+import { useNavigate } from 'react-router-dom';
 import useAsync from '../../../hooks/useAsync';
 import * as api from '../../../modules/api';
-import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback, useEffect } from 'react';
 import { useMessage } from '../../../hooks/useMessage';
 
-const EditPostContainer = ({ boardType, postId }) => {
+const PostEditorContainer = ({ boardType, postId }) => {
   const navigate = useNavigate();
 
+  // 게시글 등록
+  const [writePostState, writePostFetch] = useAsync(
+    (post) => api.writePost(boardType, post),
+    [],
+    true,
+  );
+
+  const onClickWrite = useCallback(
+    async (post) => {
+      const response = await writePostFetch(post);
+      navigate(`/board/${boardType}/${response.data.postId}`);
+    },
+    [writePostFetch, navigate, boardType],
+  );
+
+  // message
+  useMessage(writePostState, '게시물이 등록되었습니다 📝');
+
   // 게시글 읽어오기
-  const [readPostState] = useAsync(
+  const [readPostState, readPostFetch] = useAsync(
     () => api.readPost(boardType, postId),
     [boardType, postId],
-    false,
+    true,
   );
+
+  useEffect(() => {
+    if (postId) readPostFetch();
+    // eslint-disable-next-line
+  }, [postId]);
 
   // 게시글 수정
   const [editPostState, editPostFetch] = useAsync(
@@ -30,6 +53,7 @@ const EditPostContainer = ({ boardType, postId }) => {
     [editPostFetch, navigate, boardType, postId],
   );
 
+  // message
   useMessage(editPostState, '게시물이 수정되었습니다 📝');
 
   // 게시판 내 존재하는 태그 배열 조회
@@ -43,14 +67,16 @@ const EditPostContainer = ({ boardType, postId }) => {
   );
 
   return (
-    <EditPostPresenter
-      loading={editPostState.loading}
+    <PostEditorPresenter
+      loading={writePostState.loading || editPostState.loading}
       boardType={boardType}
-      post={readPostState.success?.data?.post ?? {}}
+      postId={postId}
+      onClickWrite={onClickWrite}
       onClickEdit={onClickEdit}
+      existingPost={readPostState.success?.data?.post ?? {}}
       tagsList={getTagsListState.success ?? []}
     />
   );
 };
 
-export default EditPostContainer;
+export default PostEditorContainer;

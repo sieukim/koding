@@ -1,31 +1,9 @@
-import { Avatar, Button, Form, Mentions } from 'antd';
-import { useCallback, useState } from 'react';
-import { UserOutlined } from '@ant-design/icons';
-import styled from 'styled-components';
+import { Button, Form, Mentions } from 'antd';
+import { useCallback, useEffect, useState } from 'react';
+import { StyledCommentEditor } from '../../styled/post/StyledCommentEditor';
+import { AvatarLink } from '../link/AvatarLink';
 
-const StyledCommentEditor = styled.div`
-  .editor-form {
-    display: flex;
-    align-items: center;
-
-    .editor-meta {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      .ant-avatar {
-        margin-bottom: 10px;
-      }
-    }
-
-    .editor-content {
-      width: 100%;
-      margin-left: 20px;
-    }
-  }
-`;
-
-export const CommentEditor = ({ user, loading, writers, onClick }) => {
+export const CommentEditor = ({ user, loading, post, writers, onClick }) => {
   const [form] = Form.useForm();
 
   const [mentionedNicknames, setMentionedNicknames] = useState([]);
@@ -45,9 +23,14 @@ export const CommentEditor = ({ user, loading, writers, onClick }) => {
     const content = form.getFieldValue('content');
 
     onClick({ content: content, mentionedNicknames: mentionedNicknames });
-
     form.resetFields(['content']);
+    setMentionedNicknames([]);
   }, [form, onClick, mentionedNicknames]);
+
+  // 게시글 변경시 댓글 내용 초기화
+  useEffect(() => {
+    return () => form.resetFields(['content']);
+  }, [form, post]);
 
   return (
     <StyledCommentEditor>
@@ -57,22 +40,16 @@ export const CommentEditor = ({ user, loading, writers, onClick }) => {
         className="editor-form"
         onFinish={onFinish}
       >
-        <Form.Item>
-          <div className="editor-meta">
-            {user.avatarUrl ? (
-              <Avatar src={user.avatarUrl} />
-            ) : (
-              <Avatar icon={<UserOutlined />} />
-            )}
-            <Button type="primary" htmlType="submit" loading={loading}>
-              등록
-            </Button>
-          </div>
-        </Form.Item>
+        <div className="editor-meta">
+          <AvatarLink nickname={user.nickname} className="writer-avatar" />
+          <Button type="primary" htmlType="submit" loading={loading}>
+            등록
+          </Button>
+        </div>
         <Form.Item
           name="content"
-          rules={[{ required: true, message: '⚠️ 댓글 내용이 없습니다. ⚠️' }]}
-          className="editor-content"
+          rules={[{ required: true, message: '댓글 내용이 없습니다.️' }]}
+          className="editor"
         >
           <Mentions
             autoSize={{ minRows: 4 }}
