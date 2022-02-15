@@ -8,7 +8,7 @@ import {
   isSameDate,
 } from "../../common/utils/time.util";
 import { EventBus } from "@nestjs/cqrs";
-import { SortType } from "../../common/repository/sort-option";
+import { SortOrder } from "../../common/repository/sort-option";
 import { CommentUnlikedEvent } from "../events/comment-unliked.event";
 import { CommentLikedEvent } from "../events/comment-liked.event";
 import { CommentsRepository } from "../comments.repository";
@@ -104,7 +104,7 @@ export class CommentLikeService {
   async getLikeComments(nickname: string) {
     const likePosts = await this.commentLikeModel
       .find({ nickname })
-      .sort({ _id: SortType.ASC }) // 스크랩한지 오래된 순으로
+      .sort({ _id: SortOrder.ASC }) // 스크랩한지 오래된 순으로
       .populate("comment")
       .exec();
     return likePosts

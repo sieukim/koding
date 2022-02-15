@@ -12,12 +12,15 @@ export class SearchPostHandler
   async execute({
     boardType,
     query,
+    tags,
+    sortType,
     pageSize,
     cursor,
   }: SearchPostQuery): Promise<PostListWithCursorDto> {
     return this.postSearchService.searchPostsWithCursor(
       boardType,
-      query,
+      { query, tags },
+      sortType,
       pageSize,
       cursor,
     );

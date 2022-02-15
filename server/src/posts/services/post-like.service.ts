@@ -12,7 +12,7 @@ import {
 import { EventBus } from "@nestjs/cqrs";
 import { PostLikedEvent } from "../events/post-liked.event";
 import { PostUnlikedEvent } from "../events/post-unliked.event";
-import { SortType } from "../../common/repository/sort-option";
+import { SortOrder } from "../../common/repository/sort-option";
 import { PostDocument } from "../../schemas/post.schema";
 import { Retryable } from "typescript-retry-decorator";
 
@@ -94,7 +94,7 @@ export class PostLikeService {
   async getLikePosts(nickname: string) {
     const likePosts = await this.postLikeModel
       .find({ nickname })
-      .sort({ _id: SortType.ASC }) // 스크랩한지 오래된 순으로
+      .sort({ _id: SortOrder.ASC }) // 스크랩한지 오래된 순으로
       .populate("post")
       .exec();
     return likePosts

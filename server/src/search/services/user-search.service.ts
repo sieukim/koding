@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { ConfigService } from "@nestjs/config";
-import { SortType } from "../../common/repository/sort-option";
+import { SortOrder } from "../../common/repository/sort-option";
 import {
   NicknameAndAvatar,
   NicknameSearchResultDto,
@@ -27,7 +27,7 @@ export class UserSearchService {
   ) {
     if (cursor?.length === 0) cursor = undefined;
     let nextPageCursor: string | undefined;
-    const body = await this.search(nickname, SortType.DESC, pageSize, cursor);
+    const body = await this.search(nickname, SortOrder.DESC, pageSize, cursor);
     const totalCount = body.hits.total.value as number;
     const users = (body.hits.hits as any[]).map(
       (item) =>
@@ -46,7 +46,7 @@ export class UserSearchService {
 
   private async search(
     nickname: string,
-    sortType: SortType,
+    sortType: SortOrder,
     pageSize: number,
     cursor?: string,
   ) {
@@ -79,8 +79,8 @@ export class UserSearchService {
           },
         },
         sort: [
-          { _score: sortType === SortType.DESC ? "desc" : "asc" },
-          { _id: sortType === SortType.DESC ? "desc" : "asc" },
+          { _score: sortType === SortOrder.DESC ? "desc" : "asc" },
+          { _id: sortType === SortOrder.DESC ? "desc" : "asc" },
         ],
         size: pageSize,
       },

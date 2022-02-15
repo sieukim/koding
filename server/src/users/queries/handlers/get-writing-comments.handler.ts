@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetWritingCommentsQuery } from "../get-writing-comments.query";
 import { CommentsRepository } from "../../../comments/comments.repository";
-import { SortType } from "../../../common/repository/sort-option";
+import { SortOrder } from "../../../common/repository/sort-option";
 import { FindOption } from "../../../common/repository/find-option";
 import { Comment } from "../../../models/comment.model";
 import { WritingCommentsInfoDto } from "../../dto/writing-comments-info.dto";
@@ -23,7 +23,7 @@ export class GetWritingCommentsHandler
     if (cursor) findOption.commentId = { lte: cursor };
     const comments = await this.commentsRepository.findAll(
       findOption,
-      { commentId: SortType.DESC },
+      { commentId: SortOrder.DESC },
       pageSize + 1,
     );
     let nextPageCursor: string | undefined;

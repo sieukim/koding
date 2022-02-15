@@ -2,7 +2,7 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetPostListQuery } from "../get-post-list.query";
 import { PostsRepository } from "../../posts.repository";
 import { Post } from "../../../models/post.model";
-import { SortType } from "../../../common/repository/sort-option";
+import { SortOrder } from "../../../common/repository/sort-option";
 import { PostListWithCursorDto } from "../../dto/post-list-with-cursor.dto";
 import { PostWithWriterInfoDto } from "../../dto/post-with-writer-info.dto";
 
@@ -39,7 +39,7 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
           },
           ["writer"],
           {
-            postId: SortType.DESC,
+            postId: SortOrder.DESC,
           },
           pageSize + 1,
         ),
@@ -56,7 +56,7 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
           },
           ["writer"],
           {
-            postId: SortType.DESC,
+            postId: SortOrder.DESC,
           },
           pageSize + 1,
         ),
@@ -67,7 +67,7 @@ export class GetPostListHandler implements IQueryHandler<GetPostListQuery> {
             ...searchOption,
           },
           {
-            postId: SortType.ASC,
+            postId: SortOrder.ASC,
           },
           pageSize,
         ),

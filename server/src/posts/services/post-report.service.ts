@@ -5,7 +5,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { PostIdentifier } from "../../models/post.model";
 import { PostsRepository } from "../posts.repository";
 import { PostDocument } from "../../schemas/post.schema";
-import { SortType } from "../../common/repository/sort-option";
+import { SortOrder } from "../../common/repository/sort-option";
 
 @Injectable()
 export class PostReportService {
@@ -104,7 +104,7 @@ export class PostReportService {
     const postsWithReports = await this.postModel
       .find(findOption)
       .limit(pageSize)
-      .sort({ reportCount: SortType.DESC }) // 신고 수가 많은 순서대로
+      .sort({ reportCount: SortOrder.DESC }) // 신고 수가 많은 순서대로
       .populate("reports")
       .exec();
     return postsWithReports as Array<

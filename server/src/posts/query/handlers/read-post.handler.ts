@@ -4,7 +4,7 @@ import { PostWithAroundInfoDto } from "../../dto/post-with-around-info.dto";
 import { PostsRepository } from "../../posts.repository";
 import { NotFoundException } from "@nestjs/common";
 import { Post } from "../../../models/post.model";
-import { SortType } from "../../../common/repository/sort-option";
+import { SortOrder } from "../../../common/repository/sort-option";
 import { PostLikeService } from "../../services/post-like.service";
 import { PostScrapService } from "../../services/post-scrap.service";
 
@@ -42,14 +42,14 @@ export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
           boardType: { eq: boardType },
           postId: { gt: postId },
         },
-        { postId: SortType.ASC },
+        { postId: SortOrder.ASC },
       ),
       this.postRepository.findOne(
         {
           boardType: { eq: boardType },
           postId: { lt: postId },
         },
-        { postId: SortType.DESC },
+        { postId: SortOrder.DESC },
       ),
     ]);
     post.commit();

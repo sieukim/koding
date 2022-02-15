@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
 import {
+  ArrayMaxSize,
   IsDate,
   IsEnum,
   IsNumber,
   IsString,
   IsUrl,
-  MaxLength,
   Min,
 } from "class-validator";
 import { ForbiddenException } from "@nestjs/common";
@@ -68,7 +68,7 @@ export class Post extends AggregateRoot {
   writer?: User;
 
   @Expose()
-  @MaxLength(5, { each: true })
+  @ArrayMaxSize(5)
   @IsString({ each: true })
   @ApiProperty({
     description: "게시글 태그",
@@ -98,7 +98,7 @@ export class Post extends AggregateRoot {
   createdAt: Date;
 
   @Expose()
-  @MaxLength(15, { each: true })
+  @ArrayMaxSize(15)
   @IsUrl(undefined, { each: true })
   @ApiProperty({
     description: "게시글에서 사용하는 이미지 url들",
