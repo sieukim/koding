@@ -1,5 +1,5 @@
-import { useCallback, useEffect } from 'react';
-import { Button, Form, Input, message } from 'antd';
+import { useCallback } from 'react';
+import { Button, Form, Input } from 'antd';
 import {
   ContactsOutlined,
   GithubOutlined,
@@ -7,53 +7,22 @@ import {
   SearchOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import styled from 'styled-components';
+import { StyledTitle } from '../styled/StyledTitle';
+import { StyledAuthPage } from '../styled/auth/StyledAuthPage';
 
-const StyledForm = styled.div`
-  .title-text {
-    text-align: center;
-    font-weight: bold;
-    font-size: 32px;
-    margin: 24px 0;
-  }
-
-  .login-form {
-    max-width: 300px;
-  }
-
-  .login-form-navLink {
-    display: flex;
-    justify-content: center;
-  }
-
-  .login-form-button {
-    width: 100%;
-  }
-`;
-
-const EmailLoginPresenter = ({ login, loginState, url }) => {
+const EmailLoginPresenter = ({ loading, onLogin, githubLoginUrl }) => {
   // 로그인 Form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
     (values) => {
-      login({ ...values });
+      onLogin(values);
     },
-    [login],
+    [onLogin],
   );
 
-  // message
-  useEffect(() => {
-    if (loginState.success) {
-      message.success('오늘도 멋진 하루 보내세요 ✨');
-    }
-    if (loginState.error) {
-      message.error('오류가 발생했어요 😭 잠시 후 다시 시도해주세요!');
-    }
-  }, [loginState]);
-
   return (
-    <StyledForm>
-      <div className="title-text">로그인</div>
-      <Form name="login-form" className="login-form" onFinish={onFinish}>
+    <StyledAuthPage width="250px">
+      <StyledTitle>로그인</StyledTitle>
+      <Form name="login-form" onFinish={onFinish}>
         <Form.Item
           name="email"
           rules={[{ required: true, message: '이메일을 입력하세요.' }]}
@@ -64,7 +33,6 @@ const EmailLoginPresenter = ({ login, loginState, url }) => {
             allowClear={true}
           />
         </Form.Item>
-
         <Form.Item
           name="password"
           rules={[{ required: true, message: '비밀번호를 입력하세요.' }]}
@@ -75,45 +43,42 @@ const EmailLoginPresenter = ({ login, loginState, url }) => {
             allowClear={true}
           />
         </Form.Item>
-
-        <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          className="button button-action"
+        >
+          로그인
+        </Button>
+        <Button
+          type="primary"
+          href={githubLoginUrl}
+          icon={<GithubOutlined />}
+          className="button button-action"
+        >
+          깃허브 로그인
+        </Button>
+        <div className="button-container">
           <Button
-            type="primary"
-            htmlType="submit"
-            className="login-form-button"
-            loading={loginState.loading}
+            type="link"
+            href="/signup"
+            icon={<ContactsOutlined />}
+            className="button button-link"
           >
-            로그인
+            회원가입
           </Button>
-        </Form.Item>
-
-        <Form.Item>
           <Button
-            type="primary"
-            href={url}
-            icon={<GithubOutlined />}
-            className="login-form-button"
+            type="link"
+            href="/reset-password"
+            icon={<SearchOutlined />}
+            className="button button-link"
           >
-            깃허브 로그인
+            비밀번호 찾기
           </Button>
-        </Form.Item>
-
-        <Form.Item>
-          <div className="login-form-navLink">
-            <Button type="link" href="/signup" icon={<ContactsOutlined />}>
-              회원가입
-            </Button>
-            <Button
-              type="link"
-              href="/reset-password"
-              icon={<SearchOutlined />}
-            >
-              비밀번호 찾기
-            </Button>
-          </div>
-        </Form.Item>
+        </div>
       </Form>
-    </StyledForm>
+    </StyledAuthPage>
   );
 };
 

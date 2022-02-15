@@ -28,12 +28,15 @@ const SearchContainer = ({ query }) => {
   }, [nextPageCursor, query]);
 
   useEffect(() => {
-    getUsers();
+    if (query) {
+      getUsers();
+    }
 
     return () => {
       setUsers([]);
       setNextPageCursor(null);
     };
+    // eslint-disable-next-line
   }, [query]);
 
   const onClickSearch = useCallback(

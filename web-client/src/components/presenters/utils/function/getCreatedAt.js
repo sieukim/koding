@@ -12,7 +12,7 @@ const getAbsoluteCreatedAt = (createdAt) => {
 
 export const getCreatedAt = (createdAt) => {
   return (
-    <Tooltip title={getAbsoluteCreatedAt(createdAt)}>
+    <Tooltip placement="bottom" title={getAbsoluteCreatedAt(createdAt)}>
       {getRelativeCreatedAt(createdAt)}
     </Tooltip>
   );

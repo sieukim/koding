@@ -1,54 +1,39 @@
-import styled from 'styled-components';
 import { useCallback, useEffect, useState } from 'react';
 import { Button, Col, Form, Input, Row } from 'antd';
 import { KeyOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
-import { useMessage } from '../../../hooks/useMessage';
-
-const StyledResetPassword = styled.div`
-  .title-text {
-    text-align: center;
-    font-weight: bold;
-    font-size: 32px;
-    margin: 24px 0;
-  }
-
-  .reset-password-form {
-    max-width: 500px;
-    min-width: 350px;
-  }
-
-  .reset-password-form-button {
-    width: 100%;
-  }
-`;
+import { StyledTitle } from '../styled/StyledTitle';
+import { StyledAuthPage } from '../styled/auth/StyledAuthPage';
 
 const ResetPasswordPresenter = ({
-  sendToken,
-  sendState,
-  verifyToken,
-  verifyState,
-  resetPassword,
-  resetState,
+  sendLoading,
+  sendData,
+  sendError,
+  verifyLoading,
+  verifyData,
+  verifyError,
+  resetLoading,
+  onSendToken,
+  onVerifyToken,
+  onResetPassword,
   initializeState,
 }) => {
   const [form] = Form.useForm();
 
+  // 발송 상태
+  const [sent, setSent] = useState(false);
+
   // 비밀번호 초기화 Form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
-    (values) => {
-      resetPassword({ ...values });
-    },
-    [resetPassword],
+    (values) => onResetPassword({ ...values }),
+    [onResetPassword],
   );
-
-  const [sent, setSent] = useState(false);
 
   // 인증 코드 발송 버튼 onClick 이벤트 핸들러
   const onClickSend = useCallback(() => {
     const email = form.getFieldValue('email');
-    sendToken({ email: email });
+    onSendToken({ email: email });
     setSent(true);
-  }, [sendToken, form]);
+  }, [onSendToken, form]);
 
   // 인증 코드 발송 상태 초기화 이벤트 핸들러
   const onChangeMail = useCallback(() => {
@@ -58,16 +43,16 @@ const ResetPasswordPresenter = ({
 
   // 이메일 유효성 검증
   const validateEmail = useCallback(() => {
-    if (sendState.error) {
+    if (sendError) {
       return Promise.reject(new Error('유효한 이메일이 아닙니다.'));
     }
 
-    if (!sent && !sendState.success) {
+    if (!sent && !sendData) {
       return Promise.reject(new Error('인증 코드 발송이 필요합니다.'));
     }
 
     return Promise.resolve();
-  }, [sent, sendState]);
+  }, [sent, sendError, sendData]);
 
   const [checked, setChecked] = useState(false);
 
@@ -77,26 +62,26 @@ const ResetPasswordPresenter = ({
       'email',
       'verifyToken',
     ]);
-    verifyToken({ email: email, verifyToken: token });
+    onVerifyToken({ email: email, verifyToken: token });
     setChecked(true);
-  }, [verifyToken, form]);
+  }, [onVerifyToken, form]);
 
   // 인증 코드 유효성 검증
   const validateToken = useCallback(
     (_, value) => {
       if (!value || value.length !== 6) return Promise.reject();
 
-      if (verifyState.error) {
+      if (verifyError) {
         return Promise.reject(new Error('인증번호가 일치하지 않습니다.'));
       }
 
-      if (!checked && !verifyState.success) {
+      if (!checked && !verifyData) {
         return Promise.reject(new Error('인증 코드 확인이 필요합니다.'));
       }
 
       return Promise.resolve();
     },
-    [checked, verifyState],
+    [checked, verifyError, verifyData],
   );
 
   useEffect(() => {
@@ -106,7 +91,7 @@ const ResetPasswordPresenter = ({
     if (checked) {
       form.validateFields(['verifyToken']);
     }
-  }, [sent, checked, form, sendState.error, verifyState.error]);
+  }, [sent, checked, form, sendError, verifyError]);
 
   // 비밀번호 유효성 검증
   const validatePassword = useCallback((_, value) => {
@@ -122,38 +107,27 @@ const ResetPasswordPresenter = ({
   }, []);
 
   // 비밀번호 동일성 검증
-  const validatePasswordCheck = useCallback((_, value) => {
-    if (!value) return Promise.reject();
+  const validatePasswordCheck = useCallback(
+    (_, value) => {
+      if (!value) return Promise.reject();
 
-    if (value.length < 8 || value.length > 16) {
-      return Promise.reject();
-    }
+      if (value.length < 8 || value.length > 16) {
+        return Promise.reject();
+      }
 
-    if (form.getFieldValue('password') !== value) {
-      return Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
-    }
+      if (form.getFieldValue('password') !== value) {
+        return Promise.reject(new Error('비밀번호가 일치하지 않습니다.'));
+      }
 
-    return Promise.resolve();
-  }, []);
-
-  // message
-  useMessage(sendState, '인증코드가 발송되었어요! 확인해주세요 🔑');
-  useMessage(
-    verifyState,
-    '인증번호가 확인되었어요! 비밀번호 변경을 진행해주세요 🔑',
+      return Promise.resolve();
+    },
+    [form],
   );
-  useMessage(resetState, '비밀번호를 변경했어요! 까먹지 않도록 해요 🤙');
 
   return (
-    <StyledResetPassword>
-      <div className="title-text">비밀번호 변경</div>
-
-      <Form
-        name="reset-password-form"
-        form={form}
-        className="reset-password-form"
-        onFinish={onFinish}
-      >
+    <StyledAuthPage minWidth="350px" maxWidth="500px">
+      <StyledTitle>비밀번호 변경</StyledTitle>
+      <Form name="reset-password-form" form={form} onFinish={onFinish}>
         <Row gutter={8}>
           <Col flex={3}>
             <Form.Item
@@ -175,12 +149,11 @@ const ResetPasswordPresenter = ({
             </Form.Item>
           </Col>
           <Col flex={1}>
-            <Button onClick={onClickSend} loading={sendState.loading}>
+            <Button onClick={onClickSend} loading={sendLoading}>
               인증 코드 발송
             </Button>
           </Col>
         </Row>
-
         <Row gutter={8}>
           <Col flex={3}>
             <Form.Item
@@ -199,12 +172,11 @@ const ResetPasswordPresenter = ({
             </Form.Item>
           </Col>
           <Col flex={1}>
-            <Button onClick={onClickVerify} loading={verifyState.loading}>
+            <Button onClick={onClickVerify} loading={verifyLoading}>
               인증 코드 확인
             </Button>
           </Col>
         </Row>
-
         <Form.Item
           name="password"
           hasFeedback
@@ -219,7 +191,6 @@ const ResetPasswordPresenter = ({
             allowClear={true}
           />
         </Form.Item>
-
         <Form.Item
           name="password-check"
           hasFeedback
@@ -234,19 +205,16 @@ const ResetPasswordPresenter = ({
             allowClear={true}
           />
         </Form.Item>
-
-        <Form.Item>
-          <Button
-            type="primary"
-            htmlType="submit"
-            className="reset-password-form-button"
-            loading={resetState.loading}
-          >
-            비밀번호 변경
-          </Button>
-        </Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          className="button button-action"
+          loading={resetLoading}
+        >
+          비밀번호 변경
+        </Button>
       </Form>
-    </StyledResetPassword>
+    </StyledAuthPage>
   );
 };
 export default ResetPasswordPresenter;

@@ -172,6 +172,14 @@ export const unscrapPost = (boardType, postId, nickname) => {
   return axios.delete(`/api/posts/${boardType}/${postId}/scrap/${nickname}`);
 };
 
+// 게시글 신고
+export const reportPost = (boardType, postId, nickname, reportReason) => {
+  return axios.post(
+    `/api/posts/${boardType}/${postId}/report/${nickname}`,
+    reportReason,
+  );
+};
+
 // 댓글 읽기
 export const readComment = (boardType, postId, cursor) => {
   const query = new URLSearchParams();
@@ -219,6 +227,14 @@ export const unlikeComment = (boardType, postId, commentId, nickname) => {
 // 태그 목록 조회
 export const getTagList = (boardType) => {
   return axios.get(`/api/tags/${boardType}`);
+};
+
+// 일일 랭킹 조회
+export const getRanking = (boardType, pageSize = 5) => {
+  const query = new URLSearchParams();
+  if (pageSize) query.set('pageSize', pageSize);
+
+  return axios.get(`/api/post-ranking/daily/${boardType}?pageSize=${pageSize}`);
 };
 
 /*

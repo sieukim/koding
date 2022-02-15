@@ -1,13 +1,6 @@
 import SearchContainer from '../../components/containers/search/SearchContainer';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
-
-const StyledPage = styled.div`
-  display: flex;
-  justify-content: center;
-  margin: 0 auto;
-  width: 60%;
-`;
+import { StyledBody } from '../../components/presenters/styled/StyledBody';
 
 const SearchPage = () => {
   const { search } = useLocation();
@@ -15,9 +8,9 @@ const SearchPage = () => {
   const query = searchParams.get('query');
 
   return (
-    <StyledPage>
+    <StyledBody>
       <SearchContainer query={query} />
-    </StyledPage>
+    </StyledBody>
   );
 };
 

@@ -5,7 +5,7 @@ import { UserOutlined } from '@ant-design/icons';
 import { NavLink } from 'react-router-dom';
 
 export const AvatarLink = (props) => {
-  const { nickname, rest } = props;
+  const { nickname, className, rest } = props;
 
   // 아바타 정보 가져오기
   const [getUserState] = useAsync(
@@ -17,7 +17,7 @@ export const AvatarLink = (props) => {
   const avatarUrl = getUserState.success?.data?.avatarUrl;
 
   return (
-    <NavLink to={`/user/${nickname}/profile`} {...rest}>
+    <NavLink to={`/user/${nickname}/profile`} className={className} {...rest}>
       {avatarUrl ? (
         <Avatar src={avatarUrl} />
       ) : (
