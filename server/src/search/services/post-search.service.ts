@@ -1,4 +1,8 @@
-import { Injectable, Logger } from "@nestjs/common";
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from "@nestjs/common";
 import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { ConfigService } from "@nestjs/config";
 import { PostMetadataInfoDto } from "../../posts/dto/post-metadata-info.dto";
@@ -193,7 +197,12 @@ export class PostSearchService {
       };
     } else {
       // 둘 다 없는 경우. 단순 목록 조회
-      searchParams.body.query.match_all = {};
+      searchParams.body.query.bool = {
+        must: [{ match_all: {} }],
+        filter: [
+          { match: { boardType } }, // 특정 게시판으로 필터링
+        ],
+      };
     }
 
     if (cursor) {
@@ -201,7 +210,13 @@ export class PostSearchService {
     }
 
     this.logger.log(`search param: ${JSON.stringify(searchParams)}`);
-    const { body } = await this.elasticsearchService.search(searchParams);
-    return body;
+    try {
+      const { body } = await this.elasticsearchService.search(searchParams);
+      return body;
+    } catch (e) {
+      throw new ServiceUnavailableException(
+        "검색엔진이 아직 준비되지 않았습니다",
+      );
+    }
   }
 }

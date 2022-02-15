@@ -35,6 +35,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiServiceUnavailableResponse,
   ApiTags,
   ApiUnauthorizedResponse,
   refs,
@@ -468,6 +469,9 @@ export class UsersController {
   @ApiOkResponse({
     description: "조회 성공",
     type: WritingPostsInfoDto,
+  })
+  @ApiServiceUnavailableResponse({
+    description: "검색엔진이 아직 초기화중인 경우",
   })
   @HttpCode(HttpStatus.OK)
   @Get(":nickname/posts/:boardType")
