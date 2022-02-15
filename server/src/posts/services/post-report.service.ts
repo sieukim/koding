@@ -89,11 +89,12 @@ export class PostReportService {
     { postId, boardType }: PostIdentifier,
     nickname: string,
   ): Promise<boolean> {
-    return this.postReportModel.exists({
+    const exists = await this.postReportModel.exists({
       postId: new Types.ObjectId(postId),
       nickname,
       boardType,
     });
+    return exists ?? false;
   }
 
   async getReportedPosts(pageSize: number, cursor?: string) {

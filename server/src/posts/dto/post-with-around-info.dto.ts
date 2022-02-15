@@ -21,6 +21,7 @@ export class PostWithAroundInfoDto {
     post: Post,
     liked: boolean,
     scrapped: boolean,
+    reported: boolean,
     prevPost?: Post,
     nextPost?: Post,
   ) {
@@ -30,8 +31,11 @@ export class PostWithAroundInfoDto {
     this.nextPostInfo = nextPost
       ? PostMetadataInfoDto.fromModel(nextPost)
       : undefined;
-    console.log("liked ", liked);
-    console.log("scrapped ", scrapped);
-    this.post = PostReadInfoDto.fromJson({ ...post, liked, scrapped });
+    this.post = PostReadInfoDto.fromJson({
+      ...post,
+      liked,
+      scrapped,
+      reported,
+    });
   }
 }

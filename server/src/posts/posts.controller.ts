@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Patch,
   Post,
@@ -55,6 +56,7 @@ import { ReportPostCommand } from "./commands/report-post.command";
 import { ReportPostRequestDto } from "./dto/report-post-request.dto";
 import { SearchPostQuery } from "../search/queries/search-post.query";
 import { SearchPostQueryDto } from "../search/dto/query/search-post-query.dto";
+import { RealIp } from "nestjs-real-ip";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -65,6 +67,8 @@ import { SearchPostQueryDto } from "../search/dto/query/search-post-query.dto";
 })
 @Controller("api/posts")
 export class PostsController {
+  private readonly logger = new Logger(PostsController.name);
+
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
@@ -128,9 +132,11 @@ export class PostsController {
   async readPost(
     @Param() { postId, boardType }: PostIdentifierParamDto,
     @LoginUser() loginUser: User,
+    @RealIp() ip: string,
   ) {
+    this.logger.log(`readPost: ip ${ip}, postId:${postId}`);
     return this.queryBus.execute(
-      new ReadPostQuery({ boardType, postId }, loginUser?.nickname),
+      new ReadPostQuery({ boardType, postId }, ip, loginUser?.nickname),
     );
   }
 

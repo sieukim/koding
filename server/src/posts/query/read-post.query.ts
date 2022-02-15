@@ -4,6 +4,7 @@ import { PostIdentifier } from "../../models/post.model";
 export class ReadPostQuery implements IQuery {
   constructor(
     public readonly postIdentifier: PostIdentifier,
+    public readonly readerIp: string,
     public readonly readerNickname?: string,
   ) {}
 }

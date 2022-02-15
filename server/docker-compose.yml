@@ -8,9 +8,11 @@ services:
     depends_on:
       - elasticsearch-mapping-init
       - monstache
+      - redis
     links:
       - mongo
       - elasticsearch
+      - redis
 
 
   elasticsearch:
@@ -83,6 +85,10 @@ services:
     links:
       - mongo
 
+  redis:
+    image: redis:6.2.6-alpine
+    ports:
+      - "6379:6379"
 #networks:
 #  monstache-network:
 #    driver: bridge
