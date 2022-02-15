@@ -82,6 +82,8 @@ import { GetLikePostsQuery } from "./queries/get-like-posts.query";
 import { GetLikePostsHandler } from "./queries/handlers/get-like-posts.handler";
 import { ProfileAvatarUploadInterceptor } from "../upload/interceptors/profile-avatar-upload.interceptor";
 import { DeleteAvatarCommand } from "./commands/delete-avatar.command";
+import { GetPostsOfFollowingsQuery } from "../posts/query/get-posts-of-followings.query";
+import { PostListWithCursorDto } from "../posts/dto/post-list-with-cursor.dto";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -421,6 +423,25 @@ export class UsersController {
     return this.queryBus.execute(
       new GetFollowingUsersQuery(nickname),
     ) as ReturnType<GetFollowingUsersHandler["execute"]>;
+  }
+
+  @ApiOperation({
+    summary: "팔로잉 하는 유저의 게시글 모아보기",
+  })
+  @ApiOkResponse({
+    description: "조회 성고",
+    type: PostListWithCursorDto,
+  })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get(":nickname/followings/posts")
+  getPostsOfFollowings(
+    @Param() { nickname }: NicknameParamDto,
+    @Query() { pageSize, cursor }: CursorPagingQueryDto,
+  ) {
+    return this.queryBus.execute(
+      new GetPostsOfFollowingsQuery(nickname, pageSize, cursor),
+    );
   }
 
   @ApiOperation({

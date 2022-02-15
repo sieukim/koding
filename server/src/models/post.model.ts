@@ -203,10 +203,11 @@ export class Post extends AggregateRoot {
       imageUrls?: string[];
     },
   ) {
-    this.apply(new TagChangedEvent(this.boardType, this.tags, tags));
-    this.apply(
-      new PostImageChangedEvent(this.postId, this.imageUrls, imageUrls),
-    );
+    if (tags) this.apply(new TagChangedEvent(this.boardType, this.tags, tags));
+    if (imageUrls)
+      this.apply(
+        new PostImageChangedEvent(this.postId, this.imageUrls, imageUrls),
+      );
     this.apply(
       new PostModifiedEvent({ postId: this.postId, boardType: this.boardType }),
     );

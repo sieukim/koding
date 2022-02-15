@@ -109,53 +109,6 @@ export class PostSearchService {
     });
   }
 
-  private async search(
-    query: string,
-    boardType: PostBoardType,
-    sortOrder: SortOrder,
-    pageSize: number,
-    cursor?: string,
-  ) {
-    const searchParams: any = {
-      index: this.postIndexName,
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    { match_phrase: { title: query } },
-                    { match: { tags: query } },
-                    { match_phrase: { htmlContent: { query, slop: 1 } } },
-                  ],
-                },
-              },
-            ],
-            should: [
-              { match_phrase: { title: query } },
-              { match: { tags: query } },
-              { match_phrase: { htmlContent: { query, slop: 1 } } },
-            ],
-            filter: [{ match: { boardType } }], // 특정 게시판으로 필터링
-          },
-        },
-        sort: [
-          { _score: sortOrder === SortOrder.DESC ? "desc" : "asc" },
-          { _id: sortOrder === SortOrder.DESC ? "desc" : "asc" },
-        ],
-        size: pageSize,
-      },
-    };
-    if (cursor) {
-      const [scoreCursor, idCursor] = cursor.split(",").map((s) => s.trim());
-      searchParams.body.search_after = [scoreCursor, idCursor];
-    }
-
-    const { body } = await this.elasticsearchService.search(searchParams);
-    return body;
-  }
-
   private async searchByQueryAndTags(
     {
       query,
@@ -198,7 +151,13 @@ export class PostSearchService {
     if (query) {
       // 검색어가 있을 경우 검색어 기준으로 검색
       searchParams.body.query.bool = {
-        must: [
+        should: [
+          { match_phrase: { title: query } },
+          { match: { tags: query } },
+          { match_phrase: { htmlContent: { query, slop: 1 } } },
+        ],
+        filter: [
+          { match: { boardType } },
           {
             bool: {
               should: [
@@ -208,13 +167,7 @@ export class PostSearchService {
               ],
             },
           },
-        ],
-        should: [
-          { match_phrase: { title: query } },
-          { match: { tags: query } },
-          { match_phrase: { htmlContent: { query, slop: 1 } } },
-        ],
-        filter: [{ match: { boardType } }], // 특정 게시판으로 필터링
+        ], // 특정 게시판으로 필터링
       };
       if (tags) {
         // 검색어와 태그가 함께 있는경우 검색어로 검색하되, 결과를 태그로 필터링
@@ -227,20 +180,16 @@ export class PostSearchService {
     } else if (tags) {
       // 태그만 있을 경우 태그를 기준으로 검색
       searchParams.body.query.bool = {
-        must: [{ match: { tags: query } }],
         should: [
-          {
-            bool: {
-              must: [
-                // 검색어의 모든 태그를 포함하는 경우 검색 순위 높임
-                tags.map((tag) => ({
-                  match: { tags: tag },
-                })),
-              ],
-            },
-          },
+          // 검색어의 태그를 많이 포함할수록 검색 순위를 높임
+          ...tags.map((tag) => ({
+            match: { tags: tag },
+          })),
         ],
-        filter: [{ match: { boardType } }], // 특정 게시판으로 필터링
+        filter: [
+          { match: { boardType } }, // 특정 게시판으로 필터링
+          { terms: { tags: tags } }, // 태그 중 하나라도 일치하는 것이 있도록 필터링
+        ],
       };
     } else {
       // 둘 다 없는 경우. 단순 목록 조회
