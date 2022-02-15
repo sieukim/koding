@@ -11,6 +11,14 @@ export class PostsRepository extends MongooseBaseRepository<
   Post,
   PostDocument
 > {
+  private static updateExcludeProperties = [
+    "reportCount",
+    "commentCount",
+    "readCount",
+    "likeCount",
+    "scrapCount",
+  ] as const;
+
   constructor(
     @InjectModel(PostDocument.name)
     private readonly postModel: Model<PostDocument>,
@@ -52,9 +60,12 @@ export class PostsRepository extends MongooseBaseRepository<
   async update(model: Post): Promise<Post> {
     const postDocument = PostDocument.fromModel(model, this.postModel);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { readCount, likeCount, commentCount, scrapCount, ...rest } =
-      postDocument.toJSON(); // 원자성 문제로 update시 포함시키지 않음.
-    await this.postModel.updateOne({ _id: postDocument._id }, rest); // 조회수를 빼고 업데이트 하므로, replaceOne 대신 updateOne 을 이용
+    const json = postDocument.toJSON();
+    PostsRepository.updateExcludeProperties.forEach(
+      (property) => delete json[property],
+    );
+
+    await this.postModel.updateOne({ _id: postDocument._id }, json); // 일부 필드를 빼고 업데이트 하므로, replaceOne 대신 updateOne 을 이용
     return PostDocument.toModel(postDocument);
   }
 
@@ -121,9 +132,39 @@ export class PostsRepository extends MongooseBaseRepository<
     );
   }
 
+  increaseReportCount(postIdentifier: PostIdentifier) {
+    return this.increaseField(
+      "reportCount",
+      postIdentifier,
+      IncreaseType.Positive,
+    );
+  }
+
+  decreaseReportCount(postIdentifier: PostIdentifier) {
+    return this.increaseField(
+      "reportCount",
+      postIdentifier,
+      IncreaseType.Negative,
+    );
+  }
+
+  async decreaseReportCounts(
+    { postId, boardType }: PostIdentifier,
+    amount: number,
+  ) {
+    const findOption = this.parseFindOption({
+      postId: { eq: postId },
+      boardType: { eq: boardType },
+    });
+    await this.postModel
+      .updateOne(findOption, { $inc: { reportCount: -1 * amount } })
+      .exec();
+    return;
+  }
+
   async increaseField(
     fieldName: keyof Post &
-      ("likeCount" | "commentCount" | "readCount" | "scrapCount"),
+      typeof PostsRepository.updateExcludeProperties[number],
     { postId, boardType }: PostIdentifier,
     delta: IncreaseType,
   ) {

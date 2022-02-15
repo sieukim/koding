@@ -3,7 +3,7 @@ import { Model, Types } from "mongoose";
 import { PostScrapDocument } from "../../schemas/post-scrap.schema";
 import { PostIdentifier } from "../../models/post.model";
 import { PostsRepository } from "../posts.repository";
-import { SortType } from "../../common/repository/sort-option";
+import { SortOrder } from "../../common/repository/sort-option";
 import { PostDocument } from "../../schemas/post.schema";
 import { InjectModel } from "@nestjs/mongoose";
 import { EventBus } from "@nestjs/cqrs";
@@ -63,7 +63,7 @@ export class PostScrapService {
   async getScrapPosts(nickname: string) {
     const scrapPosts = await this.postScrapModel
       .find({ nickname })
-      .sort({ _id: SortType.ASC }) // 스크랩한지 오래된 순으로
+      .sort({ _id: SortOrder.ASC }) // 스크랩한지 오래된 순으로
       .populate("post")
       .exec();
     return scrapPosts
@@ -75,11 +75,12 @@ export class PostScrapService {
     { postId, boardType }: PostIdentifier,
     nickname: string,
   ): Promise<boolean> {
-    return this.postScrapModel.exists({
+    const exists = await this.postScrapModel.exists({
       nickname,
       postId: new Types.ObjectId(postId),
       boardType,
     });
+    return exists ?? false;
   }
 
   removeOrphanPostScraps({ postId, boardType }: PostIdentifier) {

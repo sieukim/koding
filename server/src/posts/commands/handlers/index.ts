@@ -7,8 +7,10 @@ import { UnlikePostHandler } from "./unlike-post.handler";
 import { IncreaseCommentCountHandler } from "./increase-comment-count.handler";
 import { DeleteOrphanPostLikesHandler } from "./delete-orphan-post-likes.handler";
 import { IncreaseReadCountHandler } from "./increase-read-count.handler";
-import { DeleteOrphanPostRankingHandler } from "./delete-orphan-post-ranking.handler";
+import { DeleteOrphanPostRankingsHandler } from "./delete-orphan-post-rankings.handler";
 import { DeleteOrphanPostScrapsHandler } from "./delete-orphan-post-scraps.handler";
+import { DeleteOrphanPostReportsHandler } from "./delete-orphan-post-reports.handler";
+import { ReportPostHandler } from "./report-post.handler";
 
 export const PostCommandHandlers = [
   ModifyPostHandler,
@@ -20,6 +22,8 @@ export const PostCommandHandlers = [
   IncreaseCommentCountHandler,
   DeleteOrphanPostLikesHandler,
   IncreaseReadCountHandler,
-  DeleteOrphanPostRankingHandler,
+  DeleteOrphanPostRankingsHandler,
   DeleteOrphanPostScrapsHandler,
+  DeleteOrphanPostReportsHandler,
+  ReportPostHandler,
 ];

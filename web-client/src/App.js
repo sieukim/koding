@@ -1,23 +1,21 @@
-import React from 'react';
+import styled from 'styled-components';
 import { Route, Routes } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/home/HomePage';
 import EmailSignupPage from './pages/auth/EmailSignupPage';
 import EmailLoginPage from './pages/auth/EmailLoginPage';
 import GithubLoginPage from './pages/auth/GithubLoginPage';
 import GithubSignupPage from './pages/auth/GithubSignupPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
-import WritePostPage from './pages/post/WritePostPage';
-import PostPage from './pages/post/PostPage';
-import BoardPage from './pages/post/BoardPage';
-import EditPostPage from './pages/post/EditPostPage';
+import PostViewerPage from './pages/post/PostViewerPage';
+import BoardPage from './pages/board/BoardPage';
 import ProfilePage from './pages/profile/ProfilePage';
 import FollowListPage from './pages/profile/FollowListPage';
 import EditProfilePage from './pages/profile/EditProfilePage';
 import NotificationPage from './pages/notification/NotificationPage';
 import SearchPage from './pages/search/SearchPage';
-import styled from 'styled-components';
+import PostEditorPage from './pages/post/PostEditorPage';
 
 const StyledPage = styled.div`
   min-width: 1200px;
@@ -40,11 +38,14 @@ function App() {
           <Route path="/github/signup" element={<GithubSignupPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/board/:boardType" element={<BoardPage />} />
-          <Route path="/board/:boardType/write" element={<WritePostPage />} />
-          <Route path="/board/:boardType/:postId" element={<PostPage />} />
+          <Route path="/board/:boardType/write" element={<PostEditorPage />} />
+          <Route
+            path="/board/:boardType/:postId"
+            element={<PostViewerPage />}
+          />
           <Route
             path="/board/:boardType/:postId/edit"
-            element={<EditPostPage />}
+            element={<PostEditorPage />}
           />
           <Route path="/user/:nickname/profile" element={<ProfilePage />} />
           <Route

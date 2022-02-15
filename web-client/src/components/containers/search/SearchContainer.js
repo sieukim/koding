@@ -36,6 +36,7 @@ const SearchContainer = ({ query }) => {
       setUsers([]);
       setNextPageCursor(null);
     };
+    // eslint-disable-next-line
   }, [query]);
 
   const onClickSearch = useCallback(

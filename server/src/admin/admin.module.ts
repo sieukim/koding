@@ -6,10 +6,15 @@ import { PostsModule } from "../posts/posts.module";
 import { CommentsModule } from "../comments/comments.module";
 import { UsersModule } from "../users/users.module";
 import { UserSuspendService } from "./services/user-suspend.service";
+import { AdminQueryHandlers } from "./queries/handlers";
 
 @Module({
   imports: [CqrsModule, PostsModule, CommentsModule, UsersModule],
   controllers: [AdminController],
-  providers: [...AdminCommandHandlers, UserSuspendService],
+  providers: [
+    ...AdminCommandHandlers,
+    ...AdminQueryHandlers,
+    UserSuspendService,
+  ],
 })
 export class AdminModule {}

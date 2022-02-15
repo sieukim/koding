@@ -3,9 +3,11 @@ import { Model, Types } from "mongoose";
 import { PostBoardType, PostIdentifier } from "../../models/post.model";
 import { getCurrentDate } from "../../common/utils/time.util";
 import { PostDailyRankingDocument } from "../../schemas/post-daliy-ranking.schema";
-import { SortType } from "../../common/repository/sort-option";
+import { SortOrder } from "../../common/repository/sort-option";
 import { InjectModel } from "@nestjs/mongoose";
 import { IncreaseType } from "../commands/increase-comment-count.command";
+import { PostDocument } from "../../schemas/post.schema";
+import { Retryable } from "typescript-retry-decorator";
 
 @Injectable()
 export class PostRankingService {
@@ -74,16 +76,30 @@ export class PostRankingService {
     const currentDate = getCurrentDate();
     const dailyRankings = await this.dailyRankingModel
       .find({ aggregateDate: currentDate, boardType, popularity: { $gt: 0 } })
-      .sort({ popularity: SortType.DESC, postId: SortType.DESC })
-      .populate("post")
+      .sort({ popularity: SortOrder.DESC, postId: SortOrder.DESC })
+      .populate({
+        path: "post",
+        populate: { path: "writer" },
+      })
       .limit(pageSize)
       .exec();
     console.log("dailyRankings", dailyRankings);
     return dailyRankings
-      .map((dailyRanking) => dailyRanking.post)
-      .filter((post) => post != null);
+      .filter((post) => post.post != null)
+      .map((dailyRanking) => PostDocument.toModel(dailyRanking.post));
   }
 
+  async getDailyRankingCount(boardType: PostBoardType) {
+    const currentDate = getCurrentDate();
+    return this.dailyRankingModel
+      .count({ aggregateDate: currentDate, boardType, popularity: { $gt: 0 } })
+      .exec();
+  }
+
+  // 여러 사용자가 동시에 create 시 발생하는 Duplicate Error 대응용
+  @Retryable({
+    maxAttempts: 3,
+  })
   private async modifyAggregateField(
     fieldName: keyof PostDailyRankingDocument &
       ("likeCount" | "readCount" | "scrapCount" | "commentCount"),
@@ -92,17 +108,19 @@ export class PostRankingService {
   ) {
     const currentDate = getCurrentDate();
     const popularityDelta = this.resolvePopularityWeight(fieldName) * delta;
-    await this.dailyRankingModel.updateOne(
-      {
-        postId: new Types.ObjectId(postId),
-        aggregateDate: currentDate,
-        boardType,
-      },
-      {
-        $inc: { [fieldName]: delta, popularity: popularityDelta },
-      },
-      { upsert: delta === IncreaseType.Positive },
-    );
+    await this.dailyRankingModel
+      .updateOne(
+        {
+          postId: new Types.ObjectId(postId),
+          aggregateDate: currentDate,
+          boardType,
+        },
+        {
+          $inc: { [fieldName]: delta, popularity: popularityDelta },
+        },
+        { upsert: delta === IncreaseType.Positive },
+      )
+      .exec();
   }
 
   private resolvePopularityWeight(

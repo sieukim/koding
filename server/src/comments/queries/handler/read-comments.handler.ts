@@ -3,7 +3,7 @@ import { ReadCommentsQuery } from "../read-comments.query";
 import { PostsRepository } from "../../../posts/posts.repository";
 import { CommentsRepository } from "../../comments.repository";
 import { ReadCommentsDto } from "../../dto/read-comments.dto";
-import { SortType } from "../../../common/repository/sort-option";
+import { SortOrder } from "../../../common/repository/sort-option";
 import { NotFoundException } from "@nestjs/common";
 import { Comment } from "../../../models/comment.model";
 import { CommentLikeService } from "../../services/comment-like.service";
@@ -32,7 +32,7 @@ export class ReadCommentsHandler
         },
         ["writer"],
         {
-          commentId: SortType.ASC,
+          commentId: SortOrder.ASC,
         },
         pageSize + 1,
       );
@@ -44,7 +44,7 @@ export class ReadCommentsHandler
         },
         ["writer"],
         {
-          commentId: SortType.ASC,
+          commentId: SortOrder.ASC,
         },
         pageSize + 1,
       );
@@ -53,7 +53,7 @@ export class ReadCommentsHandler
           postId: { eq: postIdentifier.postId },
           commentId: { lt: cursorCommentId },
         },
-        { commentId: SortType.DESC },
+        { commentId: SortOrder.DESC },
         pageSize,
       );
       if (prevComments.length > 0) {

@@ -2,7 +2,7 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetWritingPostsQuery } from "../get-writing-posts.query";
 import { PostsRepository } from "../../../posts/posts.repository";
 import { Post } from "../../../models/post.model";
-import { SortType } from "../../../common/repository/sort-option";
+import { SortOrder } from "../../../common/repository/sort-option";
 import { WritingPostsInfoDto } from "../../dto/writing-posts-info.dto";
 import { FindOption } from "../../../common/repository/find-option";
 
@@ -21,7 +21,7 @@ export class GetWritingPostsHandler
     if (cursor) findOption.postId = { lte: cursor };
     const posts = await this.postsRepository.findAll(
       findOption,
-      { postId: SortType.DESC },
+      { postId: SortOrder.DESC },
       pageSize + 1,
     );
     let nextPageCursor: string | undefined;

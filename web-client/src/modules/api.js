@@ -172,6 +172,14 @@ export const unscrapPost = (boardType, postId, nickname) => {
   return axios.delete(`/api/posts/${boardType}/${postId}/scrap/${nickname}`);
 };
 
+// 게시글 신고
+export const reportPost = (boardType, postId, nickname, reportReason) => {
+  return axios.post(
+    `/api/posts/${boardType}/${postId}/report/${nickname}`,
+    reportReason,
+  );
+};
+
 // 댓글 읽기
 export const readComment = (boardType, postId, cursor) => {
   const query = new URLSearchParams();

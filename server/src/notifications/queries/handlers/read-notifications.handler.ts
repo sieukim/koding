@@ -2,7 +2,7 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { ReadNotificationsQuery } from "../read-notifications.query";
 import { NotificationsRepository } from "../../notifications.repository";
 import { Notification } from "../../../models/notification.model";
-import { SortType } from "../../../common/repository/sort-option";
+import { SortOrder } from "../../../common/repository/sort-option";
 import { ReadNotificationsDto } from "../../dto/read-notifications.dto";
 
 @QueryHandler(ReadNotificationsQuery)
@@ -24,7 +24,7 @@ export class ReadNotificationsHandler
           receiverNickname: { eq: nickname },
         },
         {
-          notificationId: SortType.DESC,
+          notificationId: SortOrder.DESC,
         },
         pageSize + 1,
       );
@@ -35,7 +35,7 @@ export class ReadNotificationsHandler
           notificationId: { lte: cursorNotificationId },
         },
         {
-          notificationId: SortType.DESC,
+          notificationId: SortOrder.DESC,
         },
         pageSize + 1,
       );
@@ -44,7 +44,7 @@ export class ReadNotificationsHandler
           receiverNickname: { eq: nickname },
           notificationId: { gt: cursorNotificationId },
         },
-        { notificationId: SortType.ASC },
+        { notificationId: SortOrder.ASC },
         pageSize,
       );
       if (prevNotifications.length > 0) {

@@ -1,6 +1,7 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetDailyRankingQuery } from "../get-daily-ranking.query";
 import { PostRankingService } from "../../services/post-ranking.service";
+import { PostListDto } from "../../dto/post-list.dto";
 
 @QueryHandler(GetDailyRankingQuery)
 export class GetDailyRankingHandler
@@ -10,6 +11,10 @@ export class GetDailyRankingHandler
 
   async execute(query: GetDailyRankingQuery): Promise<any> {
     const { pageSize, boardType } = query;
-    return this.postRankingService.getDailyRanking(boardType, pageSize);
+    const [posts, totalCount] = await Promise.all([
+      this.postRankingService.getDailyRanking(boardType, pageSize),
+      this.postRankingService.getDailyRankingCount(boardType),
+    ]);
+    return PostListDto.fromModel(posts, totalCount);
   }
 }

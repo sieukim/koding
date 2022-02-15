@@ -14,7 +14,8 @@ import { IncreaseReadCountCommand } from "../commands/increase-read-count.comman
 import { PostDeletedEvent } from "../events/post-deleted.event";
 import { DeleteOrphanPostLikesCommand } from "../commands/delete-orphan-post-likes.command";
 import { DeleteOrphanPostScrapsCommand } from "../commands/delete-orphan-post-scraps.command";
-import { DeleteOrphanPostRankingCommand } from "../commands/delete-orphan-post-ranking.command";
+import { DeleteOrphanPostRankingsCommand } from "../commands/delete-orphan-post-rankings.command";
+import { DeleteOrphanPostReportsCommand } from "../commands/delete-orphan-post-reports.command";
 
 @Injectable()
 export class PostsSaga {
@@ -61,7 +62,8 @@ export class PostsSaga {
       mergeMap(({ postIdentifier }) => [
         new DeleteOrphanPostLikesCommand(postIdentifier),
         new DeleteOrphanPostScrapsCommand(postIdentifier),
-        new DeleteOrphanPostRankingCommand(postIdentifier),
+        new DeleteOrphanPostRankingsCommand(postIdentifier),
+        new DeleteOrphanPostReportsCommand(postIdentifier),
       ]),
     );
 }

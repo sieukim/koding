@@ -1,24 +1,12 @@
-import styled from 'styled-components';
-import { CommentList } from '../utils/comment/CommentList';
-import { CommentEditor } from '../utils/comment/CommentEditor';
-
-const StyledComment = styled.div`
-  border: 1px solid rgb(217, 217, 217);
-  border-radius: 8px;
-  margin-bottom: 50px;
-  padding: 32px;
-  width: 900px;
-
-  .spinner {
-    width: 100%;
-    text-align: center;
-  }
-`;
+import { CommentList } from '../utils/post/CommentList';
+import { CommentEditor } from '../utils/post/CommentEditor';
+import { StyledCommentContainer } from '../styled/post/StyledCommentContainer';
 
 const CommentPresenter = ({
   user,
   loading,
   writeLoading,
+  post,
   comments,
   getComments,
   writers,
@@ -29,11 +17,12 @@ const CommentPresenter = ({
   onClickUnlike,
 }) => {
   return (
-    <StyledComment>
+    <StyledCommentContainer>
       {user && (
         <CommentEditor
           user={user}
           loading={writeLoading}
+          post={post}
           writers={writers}
           onClick={onClickWrite}
         />
@@ -48,7 +37,7 @@ const CommentPresenter = ({
         onClickUnlike={onClickUnlike}
         onClickRemove={onClickRemove}
       />
-    </StyledComment>
+    </StyledCommentContainer>
   );
 };
 

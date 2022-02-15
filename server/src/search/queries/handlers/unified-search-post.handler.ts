@@ -13,11 +13,13 @@ export class UnifiedSearchPostHandler
   async execute({
     postsPerBoard,
     query,
+    tags,
+    sortType,
   }: UnifiedSearchPostQuery): Promise<any> {
     const promises = await Promise.all(
       PostBoardTypes.map((boardType) =>
         this.postSearchService
-          .searchPosts(query, boardType, postsPerBoard)
+          .searchPosts(boardType, { query, tags }, sortType, postsPerBoard)
           .then((result) => ({ ...result, boardType })),
       ),
     );

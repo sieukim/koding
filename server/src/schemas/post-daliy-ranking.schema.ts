@@ -42,7 +42,10 @@ export class PostDailyRankingDocument extends Document {
 export const PostDailyRankingSchema = SchemaFactory.createForClass(
   PostDailyRankingDocument,
 );
-PostDailyRankingSchema.index({ postId: 1, aggregateDate: 1 }); // 필드 값 업데이트 쿼리를 위해
+PostDailyRankingSchema.index(
+  { postId: 1, aggregateDate: 1, boardType: 1 },
+  { unique: true },
+); // 필드 값 업데이트 쿼리를 위해
 PostDailyRankingSchema.index({
   aggregateDate: 1,
   boardType: 1,

@@ -1,18 +1,11 @@
 import ResetPasswordContainer from '../../components/containers/auth/ResetPasswordContainer';
-import styled from 'styled-components';
-
-const StyledPage = styled.div`
-  display: flex;
-  justify-content: center;
-  margin: 0 auto;
-  width: 100%;
-`;
+import { StyledBody } from '../../components/presenters/styled/StyledBody';
 
 const ResetPasswordPage = () => {
   return (
-    <StyledPage>
+    <StyledBody>
       <ResetPasswordContainer />
-    </StyledPage>
+    </StyledBody>
   );
 };
 

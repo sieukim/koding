@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Patch,
   Post,
@@ -16,13 +17,13 @@ import { PostInfoDto } from "./dto/post-info.dto";
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
@@ -31,10 +32,8 @@ import { ModifyPostRequestDto } from "./dto/modify-post-request.dto";
 
 import { PostListWithCursorDto } from "./dto/post-list-with-cursor.dto";
 import { PostWithAroundInfoDto } from "./dto/post-with-around-info.dto";
-import { ReadPostQueryDto } from "./dto/query/read-post-query.dto";
 import { User } from "../models/user.model";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { GetPostListQuery } from "./query/get-post-list.query";
 import { ReadPostQuery } from "./query/read-post.query";
 import { BoardTypeParamDto } from "./dto/param/board-type-param.dto";
 import { PostIdentifierParamDto } from "./dto/param/post-identifier-param.dto";
@@ -53,6 +52,11 @@ import { ScrapPostCommand } from "../users/commands/scrap-post.command";
 import { UnscrapPostCommand } from "../users/commands/unscrap-post.command";
 import { CheckUserScrapPostQuery } from "./query/check-user-scrap-post.query";
 import { UserScrapPostInfoDto } from "./dto/user-scrap-post-info.dto";
+import { ReportPostCommand } from "./commands/report-post.command";
+import { ReportPostRequestDto } from "./dto/report-post-request.dto";
+import { SearchPostQuery } from "../search/queries/search-post.query";
+import { SearchPostQueryDto } from "../search/dto/query/search-post-query.dto";
+import { RealIp } from "nestjs-real-ip";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -63,6 +67,8 @@ import { UserScrapPostInfoDto } from "./dto/user-scrap-post-info.dto";
 })
 @Controller("api/posts")
 export class PostsController {
+  private readonly logger = new Logger(PostsController.name);
+
   constructor(
     private readonly queryBus: QueryBus,
     private readonly commandBus: CommandBus,
@@ -93,31 +99,21 @@ export class PostsController {
   }
 
   @ApiOperation({
-    summary: "게시글 목록 조회",
-  })
-  @ApiQuery({
-    required: false,
-    name: "tags",
+    summary: "게시글 목록 조회 & 검색",
     description:
-      "검색할 태그들. 여러개인 경우 , 로 구분하며, 각각은 OR로 묶임. 검색이 필요 없는 경우 값을 넣지 않음",
-    type: String,
-  })
-  @ApiQuery({
-    required: false,
-    name: "writer",
-    description: "검색할 작성자. 검색이 필요 없는 경우 값을 넣지 않음",
+      "query 와 tags 를 지정하지 않는다면 게시글 목록 조회. 둘 중 하나라도 지정할 경우 해당 조건으로 검색",
   })
   @ApiOkResponse({
-    description: "게시글 목록 조회 성공",
+    description: "게시글 조회 성공",
     type: PostListWithCursorDto,
   })
   @Get(":boardType")
   async readPosts(
     @Param() { boardType }: BoardTypeParamDto,
-    @Query() { cursor, tags, writer, pageSize }: ReadPostQueryDto,
+    @Query() { cursor, query, pageSize, sort, tags }: SearchPostQueryDto,
   ) {
     return this.queryBus.execute(
-      new GetPostListQuery(boardType, pageSize, cursor, { tags, writer }),
+      new SearchPostQuery(boardType, query, tags, sort, pageSize, cursor),
     );
   }
 
@@ -136,9 +132,11 @@ export class PostsController {
   async readPost(
     @Param() { postId, boardType }: PostIdentifierParamDto,
     @LoginUser() loginUser: User,
+    @RealIp() ip: string,
   ) {
+    this.logger.log(`readPost: ip ${ip}, postId:${postId}`);
     return this.queryBus.execute(
-      new ReadPostQuery({ boardType, postId }, loginUser?.nickname),
+      new ReadPostQuery({ boardType, postId }, ip, loginUser?.nickname),
     );
   }
 
@@ -305,5 +303,28 @@ export class PostsController {
     return this.queryBus.execute(
       new CheckUserScrapPostQuery({ postId, boardType }, nickname),
     );
+  }
+
+  /*
+   * 게시글 신고
+   */
+  @ApiNoContentResponse({
+    description: "게시글 신고 성공",
+  })
+  @ApiConflictResponse({
+    description: "이미 신고한 게시글",
+  })
+  @UseGuards(ParamNicknameSameUserGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post(":boardType/:postId/report/:nickname")
+  async reportPost(
+    @Param()
+    { nickname, boardType, postId }: PostIdentifierWithNicknameParamDto,
+    @Body() { reportReason }: ReportPostRequestDto,
+  ) {
+    await this.commandBus.execute(
+      new ReportPostCommand({ postId, boardType }, nickname, reportReason),
+    );
+    return;
   }
 }

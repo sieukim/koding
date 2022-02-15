@@ -6,7 +6,7 @@ import useAsync from '../../../hooks/useAsync';
 import { useMessage } from '../../../hooks/useMessage';
 import { message } from 'antd';
 
-const CommentContainer = ({ boardType, postId, setPost }) => {
+const CommentContainer = ({ boardType, postId, post, setPost }) => {
   // 로그인 유저
   const user = useSelector((state) => state.auth.user);
 
@@ -14,9 +14,21 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
 
   // 댓글 상태
   const [comments, setComments] = useState([]);
+
   const [nextPageCursor, setNextPageCursor] = useState(null);
   // 댓글 내 작성자 배열
   const [writers, setWriters] = useState([]);
+
+  useEffect(() => {
+    if (post) {
+      setWriters((writers) =>
+        [...writers, post.writerNickname].filter(
+          (nickname, index, writers) =>
+            nickname && writers.indexOf(nickname) === index,
+        ),
+      );
+    }
+  }, [post]);
 
   // 댓글 가져오기
   const getComments = useCallback(async () => {
@@ -25,22 +37,19 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
     setComments((comments) => [...comments, ...response.data.comments]);
     setNextPageCursor(response.data.nextPageCursor);
 
-    // 중복 제거 전 닉네임 배열
-    const writerNicknames = [
-      ...response.data.comments.map((comment) => comment.writerNickname),
-    ];
-
-    setWriters((writers) => [
-      ...writers,
-      // 중복 제거 후 설정
-      ...writerNicknames.filter(
-        (writerNickname, index) =>
-          writerNicknames.indexOf(writerNickname) === index,
+    setWriters((writers) =>
+      [
+        ...writers,
+        ...response.data.comments.map((comment) => comment.writerNickname),
+      ].filter(
+        (nickname, index, writers) =>
+          nickname && writers.indexOf(nickname) === index,
       ),
-    ]);
+    );
 
     setLoading(false);
-  }, [boardType, postId, nextPageCursor]);
+    // eslint-disable-next-line
+  }, [boardType, postId, nextPageCursor, post]);
 
   useEffect(() => {
     getComments();
@@ -51,6 +60,7 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
       setNextPageCursor(null);
       setWriters([]);
     };
+    // eslint-disable-next-line
   }, [boardType, postId]);
 
   // 댓글 작성
@@ -69,9 +79,11 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
       ]);
       setPost((post) => ({ ...post, commentCount: post.commentCount + 1 }));
     },
+    // eslint-disable-next-line
     [writeCommentFetch, user],
   );
 
+  // message
   useMessage(writeCommentState, '댓글을 작성했습니다! 📝');
 
   // 댓글 삭제
@@ -89,9 +101,11 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
       );
       setPost((post) => ({ ...post, commentCount: post.commentCount - 1 }));
     },
+    // eslint-disable-next-line
     [removeCommentFetch],
   );
 
+  // message
   useMessage(removeCommentState, '댓글을 삭제했습니다! 🤧');
 
   // 댓글 좋아요
@@ -107,7 +121,6 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
         message.error('본인 댓글은 추천할 수 없습니다.');
         return;
       }
-
       await likeCommentFetch(commentId);
       setComments((comments) =>
         comments.map((comment) => {
@@ -126,6 +139,7 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
     [user, likeCommentFetch],
   );
 
+  // message
   useMessage(likeCommentState, '🪄 댓글을 추천했습니다.');
 
   // 댓글 좋아요 취소
@@ -156,6 +170,7 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
     [unlikeCommentFetch],
   );
 
+  // message
   useMessage(unlikeCommentState, '🪄 댓글 추천을 취소했습니다.');
 
   return (
@@ -163,6 +178,7 @@ const CommentContainer = ({ boardType, postId, setPost }) => {
       user={user}
       loading={loading}
       writeLoading={writeCommentState.loading}
+      post={post}
       comments={comments}
       getComments={getComments}
       writers={writers}

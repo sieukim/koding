@@ -1,15 +1,6 @@
 import { Divider } from 'antd';
-import styled from 'styled-components';
+import { StyledFooter } from './presenters/styled/StyledFooter';
 
-const StyledFooter = styled.div`
-  height: 80px;
-
-  p {
-    margin: 10px 0;
-    color: gray;
-    text-align: center;
-  }
-`;
 const Footer = () => {
   return (
     <StyledFooter>
