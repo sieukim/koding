@@ -24,6 +24,7 @@ import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiServiceUnavailableResponse,
   ApiTags,
 } from "@nestjs/swagger";
 import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
@@ -102,6 +103,9 @@ export class PostsController {
     summary: "게시글 목록 조회 & 검색",
     description:
       "query 와 tags 를 지정하지 않는다면 게시글 목록 조회. 둘 중 하나라도 지정할 경우 해당 조건으로 검색",
+  })
+  @ApiServiceUnavailableResponse({
+    description: "검색엔진이 아직 초기화중인 경우",
   })
   @ApiOkResponse({
     description: "게시글 조회 성공",
