@@ -106,6 +106,26 @@ const PostViewerContainer = ({ loading, boardType, postId, post, setPost }) => {
   // message
   useMessage(unscrapPostState, '🪄 스크랩을 취소했습니다.');
 
+  // 게시글 신고
+  const [reportPostState, reportPostFetch] = useAsync(
+    (reportReason) =>
+      api.reportPost(boardType, postId, user.nickname, { reportReason }),
+    [boardType, postId, user],
+    true,
+  );
+
+  const onClickReport = useCallback(
+    async (reportReason) => {
+      await reportPostFetch(reportReason);
+      setPost((post) => ({ ...post, reported: true }));
+    },
+    // eslint-disable-next-line
+    [reportPostFetch],
+  );
+
+  // message
+  useMessage(reportPostState, '게시물이 신고되었습니다.');
+
   // 게시글 수정
   const onClickEdit = useCallback(() => {
     navigate(`/board/${boardType}/${postId}/edit`);
@@ -123,7 +143,7 @@ const PostViewerContainer = ({ loading, boardType, postId, post, setPost }) => {
     navigate(`/board/${boardType}`);
   }, [removePostFetch, navigate, boardType]);
 
-  // mgessage
+  // message
   useMessage(removePostState, 'Good Bye ~ 🥺');
 
   return (
@@ -137,6 +157,7 @@ const PostViewerContainer = ({ loading, boardType, postId, post, setPost }) => {
       onClickUnscrap={onClickUnscrap}
       onClickEdit={onClickEdit}
       onClickRemove={onClickRemove}
+      onClickReport={onClickReport}
     />
   );
 };

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Viewer } from '../utils/editor/Viewer';
-import { Avatar, Button, List, Spin } from 'antd';
+import { Avatar, Button, Input, List, message, Modal, Spin } from 'antd';
 import { TagList } from '../utils/post/TagList';
 import { StyledPost } from '../styled/post/StyledPost';
 import { IconText } from '../utils/post/IconText';
@@ -29,6 +29,8 @@ const metadata = (
   onClickUnscrap,
   onClickEdit,
   onClickRemove,
+  onClickModal,
+  ReportModal,
 ) => {
   const defaultMetadata = [
     <IconText
@@ -95,12 +97,15 @@ const metadata = (
 
   const readerMetadata = [
     ...defaultMetadata,
-    <IconText
-      key="report"
-      icon={<AlertOutlined />}
-      text="신고"
-      className="item-red"
-    />,
+    <Button type="text" onClick={() => onClickModal()}>
+      <IconText
+        key="report"
+        icon={<AlertOutlined />}
+        text="신고"
+        className="item-red"
+      />
+    </Button>,
+    ReportModal,
   ];
 
   const writerMetadata = [
@@ -138,6 +143,7 @@ const PostViewerPresenter = ({
   onClickUnscrap,
   onClickEdit,
   onClickRemove,
+  onClickReport,
 }) => {
   // 게시글 내용 viewer
   const viewerRef = useRef();
@@ -147,6 +153,52 @@ const PostViewerPresenter = ({
       viewerRef.current.getInstance().setMarkdown(post.markdownContent);
     }
   }, [viewerRef, post.markdownContent]);
+
+  // 신고 modal
+  const [modalVisible, setModalVisible] = useState(false);
+  // 신고 이유
+  const [reportReason, setReportReason] = useState('');
+
+  const onClickModal = useCallback(() => {
+    if (post.reported) {
+      message.warning('이미 신고한 게시글입니다.');
+    } else {
+      setModalVisible(true);
+    }
+  }, [post]);
+
+  const onOk = useCallback(() => {
+    onClickReport(reportReason);
+    setModalVisible(false);
+    setReportReason('');
+  }, [onClickReport, reportReason]);
+
+  const onCancel = useCallback(() => {
+    setModalVisible(false);
+    setReportReason('');
+  }, []);
+
+  // 신고 이유 Input onChange 핸들러
+  const onChange = useCallback((e) => {
+    setReportReason(e.target.value);
+  }, []);
+
+  const ReportModal = (
+    <Modal
+      title="신고 이유를 입력하세요."
+      visible={modalVisible}
+      okText="신고"
+      cancelText="취소"
+      onOk={onOk}
+      onCancel={onCancel}
+    >
+      <Input.TextArea
+        rows={4}
+        placeholder="신고에 의해 게시글이 삭제될 수 있습니다. 타인에게 불쾌감을 주는 언행, 광고, 정치 등의 경우를 잘 판단하여 신고 부탁드립니다."
+        onChange={onChange}
+      />
+    </Modal>
+  );
 
   return (
     <StyledPost>
@@ -169,6 +221,8 @@ const PostViewerPresenter = ({
                 onClickUnscrap,
                 onClickEdit,
                 onClickRemove,
+                onClickModal,
+                ReportModal,
               )}
             >
               <List.Item.Meta
