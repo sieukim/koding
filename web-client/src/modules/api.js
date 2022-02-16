@@ -124,12 +124,15 @@ export const checkNotifications = (nickname) => {
  */
 
 // 게시글 목록 갖고오기
-export const readBoard = (boardType, tags, cursor) => {
-  const query = new URLSearchParams();
-  if (tags && tags.length > 0) query.set('tags', tags);
-  if (cursor) query.set('cursor', cursor);
+export const readBoard = (boardType, cursor, query, tags, sort) => {
+  const queries = new URLSearchParams();
+  if (cursor) queries.set('cursor', cursor);
+  if (query) queries.set('query', query);
+  if (tags && tags.length > 0) queries.set('tags', tags);
+  if (sort) queries.set('sort', sort);
+  else queries.set('sort', 'latest');
 
-  return axios.get(`/api/posts/${boardType}?${query.toString()}`);
+  return axios.get(`/api/posts/${boardType}?${queries.toString()}`);
 };
 
 // 게시글 작성

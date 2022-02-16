@@ -7,14 +7,29 @@ export const StyledBoardPage = styled.div`
   padding: 32px;
   width: 900px;
 
-  .board-header {
+  .board-action {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     margin: 20px 0;
 
-    .button {
+    .button-write {
       margin-left: 20px;
+    }
+  }
+
+  .board-sort {
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    margin: 10px 0;
+
+    .button-sort {
+      color: grey;
+    }
+
+    .button-selected {
+      color: #1890ff;
     }
   }
 

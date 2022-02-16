@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { getTagColor } from '../function/getTagColor';
 import { StyledSearchByTag } from '../../styled/board/StyledSearchByTag';
 
-export const SearchByTags = ({ boardType, tagsParams, tagsList }) => {
+export const SearchByTags = ({ boardType, tagsParams, tagsList, queries }) => {
   const navigate = useNavigate();
 
   // 입력창 여부
@@ -39,12 +39,13 @@ export const SearchByTags = ({ boardType, tagsParams, tagsList }) => {
     }
 
     if (inputTag && tagsParams.indexOf(inputTag) === -1) {
-      const newTags = [...tagsParams, inputTag].join(',');
-      navigate(`/board/${boardType}?tags=${newTags}`);
+      const newTags = [...tagsParams, inputTag];
+      queries.set('tags', newTags);
+      navigate(`/board/${boardType}?${queries.toString()}`);
     }
     setInputVisible(false);
     setInputTag('');
-  }, [navigate, inputTag, tagsParams, boardType]);
+  }, [navigate, boardType, queries, tagsParams, inputTag]);
 
   // 입력창 엔터 버튼 onPress 핸들러 (-> 입력 태그 추가)
   const onPressEnter = useCallback(() => {
@@ -54,18 +55,19 @@ export const SearchByTags = ({ boardType, tagsParams, tagsList }) => {
   // 태그 onClose 핸들러
   const onCloseTag = useCallback(
     (closedTag) => {
-      const newTags = tagsParams.filter((tag) => tag !== closedTag).join(',');
-
-      if (newTags.length === 0) navigate(`/board/${boardType}`);
-      else navigate(`/board/${boardType}?tags=${newTags}`);
+      const newTags = tagsParams.filter((tag) => tag !== closedTag);
+      if (newTags.length === 0) queries.delete('tags');
+      else queries.set('tags', newTags);
+      navigate(`/board/${boardType}?${queries.toString()}`);
     },
-    [navigate, tagsParams, boardType],
+    [navigate, boardType, queries, tagsParams],
   );
 
   // 전체 태그 삭제 onClick 핸들러
   const onClickRemoveAll = useCallback(() => {
-    navigate(`/board/${boardType}`);
-  }, [navigate, boardType]);
+    queries.delete('tags');
+    navigate(`/board/${boardType}?${queries.toString()}`);
+  }, [navigate, boardType, queries]);
 
   // autoComplete filterOption
   const filterOption = useCallback(
@@ -76,15 +78,16 @@ export const SearchByTags = ({ boardType, tagsParams, tagsList }) => {
 
   // autoComplete onSelect 핸들러
   const onSelectTag = useCallback(
-    (value) => {
-      if (value && tagsParams.indexOf(value) === -1) {
-        const newTags = [...tagsParams, value].join(',');
-        navigate(`/board/${boardType}?tags=${newTags}`);
+    (selectedTag) => {
+      if (selectedTag && tagsParams.indexOf(selectedTag) === -1) {
+        const newTags = [...tagsParams, selectedTag];
+        queries.set('tags', newTags);
+        navigate(`/board/${boardType}?${queries.toString()}`);
       }
       setInputVisible(false);
       setInputTag('');
     },
-    [navigate, tagsParams, boardType],
+    [navigate, boardType, queries, tagsParams],
   );
 
   return (
