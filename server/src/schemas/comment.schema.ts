@@ -6,7 +6,7 @@ import { IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Comment } from "../models/comment.model";
 import { PostDocument } from "./post.schema";
-import { Expose, plainToClass, Transform, Type } from "class-transformer";
+import { Expose, plainToClass, Type } from "class-transformer";
 import { PostBoardType, PostBoardTypes } from "../models/post.model";
 
 @Expose({ toClassOnly: true })
@@ -32,11 +32,6 @@ export class CommentDocument extends Document {
   postId: Types.ObjectId;
 
   @Type(() => PostDocument)
-  @Transform(
-    ({ value }) =>
-      value instanceof PostDocument ? PostDocument.toModel(value) : value,
-    { toClassOnly: true },
-  )
   post?: PostDocument;
 
   @Prop({
@@ -49,11 +44,6 @@ export class CommentDocument extends Document {
   writerNickname?: string;
 
   @Type(() => UserDocument)
-  @Transform(
-    ({ value }) =>
-      value instanceof UserDocument ? UserDocument.toModel(value) : value,
-    { toClassOnly: true },
-  )
   writer?: UserDocument;
 
   @IsNotEmpty()
@@ -78,17 +68,11 @@ export class CommentDocument extends Document {
   mentionedNicknames: string[];
 
   @Type(() => UserDocument)
-  @Transform(
-    ({ value }) =>
-      value instanceof UserDocument ? UserDocument.toModel(value) : value,
-    { toClassOnly: true },
-  )
   mentionedUsers?: UserDocument[];
 
   static toModel(commentDocument: CommentDocument): Comment {
     return plainToClass(Comment, commentDocument, {
       excludeExtraneousValues: true,
-      enableImplicitConversion: true,
     });
   }
 

@@ -21,8 +21,9 @@ export class GetWritingCommentsHandler
       boardType: { eq: boardType },
     };
     if (cursor) findOption.commentId = { lte: cursor };
-    const comments = await this.commentsRepository.findAll(
+    const comments = await this.commentsRepository.findAllWith(
       findOption,
+      ["post"],
       { commentId: SortOrder.DESC },
       pageSize + 1,
     );
