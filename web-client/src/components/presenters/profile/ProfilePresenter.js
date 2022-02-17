@@ -7,9 +7,9 @@ const ProfilePresenter = ({
   profileUser,
   getUserData = {},
   followState,
-  follow,
+  onClickFollow,
   unfollowState,
-  unfollow,
+  onClickUnfollow,
   isFollowingState,
   followers,
   followings,
@@ -19,7 +19,7 @@ const ProfilePresenter = ({
   hasNextPost,
   getUserPost,
 }) => {
-  return <StyledProfile></StyledProfile>;
+  return <StyledProfile>{loginUser.nickname}</StyledProfile>;
 };
 
 export default ProfilePresenter;

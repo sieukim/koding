@@ -1,23 +1,18 @@
 import FollowListContainer from '../../components/containers/profile/FollowListContainer';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
-
-const StyledFollowList = styled.div`
-  display: flex;
-  flex-direction: column;
-  margin: 0 auto;
-  width: 30%;
-`;
+import { StyledBody } from '../../components/presenters/styled/StyledBody';
 
 const FollowListPage = () => {
   const params = useParams();
+  // 페이지 유저
   const profileUser = params.nickname;
-  const tab = params.tab;
+  // 페이지 종류
+  const type = params.type;
 
   return (
-    <StyledFollowList>
-      <FollowListContainer profileUser={profileUser} tab={tab} />
-    </StyledFollowList>
+    <StyledBody flexDirection="column">
+      <FollowListContainer profileUser={profileUser} type={type} />
+    </StyledBody>
   );
 };
 

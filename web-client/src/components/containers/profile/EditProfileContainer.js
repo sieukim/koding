@@ -1,46 +1,72 @@
 import EditProfilePresenter from '../../presenters/profile/EditProfilePresenter';
 import * as api from '../../../modules/api';
 import useAsync from '../../../hooks/useAsync';
-import { useDispatch, useSelector } from 'react-redux';
-import { editProfile } from '../../../modules/auth';
-import { useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { editProfile, setLogout } from '../../../modules/auth';
+import { useCallback, useEffect } from 'react';
+import { useMessage } from '../../../hooks/useMessage';
+import { useNavigate } from 'react-router-dom';
 
-const EditProfileContainer = ({ profileNickname }) => {
-  const user = useSelector((state) => state.auth.user);
-
+const EditProfileContainer = ({ user }) => {
+  // 전역 상태
   const dispatch = useDispatch();
+  // 로그아웃
+  // eslint-disable-next-line
+  const logout = useCallback(() => dispatch(setLogout()), [setLogout]);
+  // navigate
+  const navigate = useNavigate();
 
   // 유저 정보 변경
-  const [changeUserInfoState, changeUserInfoFetch] = useAsync(
+  const [changeUserState, changeUserFetch] = useAsync(
     async (userInfo) => {
-      const response = await api.changeUserInfo(profileNickname, userInfo);
+      const response = await api.changeUserInfo(user.nickname, userInfo);
       dispatch(editProfile(response.data));
     },
-    [profileNickname, dispatch],
+    // eslint-disable-next-line
+    [user],
     true,
   );
+
+  // message
+  useMessage(changeUserState, '멋진 프로필이네요! 🤩');
 
   // 유저 탈퇴
-  const [revokeState, revokeFetch] = useAsync(
-    (nickname) => api.revokeUser(nickname),
-    [],
+  const [revokeUserState, revokeUserFetch] = useAsync(
+    () => api.revokeUser(user.nickname),
+    [user],
     true,
   );
 
+  useEffect(() => {
+    if (revokeUserState.success) {
+      logout();
+      navigate('/');
+    }
+  }, [revokeUserState, logout, navigate]);
+
+  // message
+  useMessage(revokeUserState, '다음에 또 만나요 🥺');
+
   // 프로필 사진 삭제
-  const removeAvatarUrl = useCallback(
+  const removeAvatar = useCallback(
     () => api.removeAvatarUrl(user.nickname),
     [user],
   );
 
+  // 비밀번호 변경
+  const onClickChangePwd = useCallback(() => {
+    navigate('/reset-password');
+  }, [navigate]);
+
   return (
     <EditProfilePresenter
       user={user ?? {}}
-      changeUserInfoState={changeUserInfoState}
-      changeUserInfoFetch={changeUserInfoFetch}
-      revokeState={revokeState}
-      revokeFetch={revokeFetch}
-      removeAvatarUrl={removeAvatarUrl}
+      changeUserLoading={changeUserState.loading}
+      revokeUserLoading={revokeUserState.loading}
+      onClickChangeUser={changeUserFetch}
+      onClickRevokeUser={revokeUserFetch}
+      onClickRemoveAvatar={removeAvatar}
+      onClickChangePwd={onClickChangePwd}
     />
   );
 };

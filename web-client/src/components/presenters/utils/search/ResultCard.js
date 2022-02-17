@@ -15,12 +15,18 @@ export const ResultCard = ({
   hasMore,
   data,
 }) => {
+  const searchQuery = new URLSearchParams();
+
+  if (query) searchQuery.set('query', query);
+
   if (type === 'post') {
     return (
       <Card
         title={title}
         extra={
-          <NavLink to={`/board/${boardType}?search=${query}`}>더 보기</NavLink>
+          <NavLink to={`/board/${boardType}?${searchQuery.toString()}`}>
+            더 보기
+          </NavLink>
         }
         className="result-card"
       >

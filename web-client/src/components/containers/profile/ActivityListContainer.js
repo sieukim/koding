@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import * as api from '../../../modules/api';
-import TabPresenter from '../../presenters/profile/TabPresenter';
+import ActivityListPresenter from '../../presenters/profile/ActivityListPresenter';
 
-const TabContainer = ({ profileUser }) => {
+const ActivityListContainer = ({ profileUser }) => {
   // 게시글
   const [posts, setPosts] = useState({
     common: [],
@@ -42,6 +42,7 @@ const TabContainer = ({ profileUser }) => {
     getUserPosts('question');
     getUserPosts('study-group');
     getUserPosts('column');
+    // eslint-disable-next-line
   }, []);
 
   // 댓글
@@ -83,10 +84,11 @@ const TabContainer = ({ profileUser }) => {
     getUserComments('question');
     getUserComments(`study-group`);
     getUserComments('column');
+    // eslint-disable-next-line
   }, []);
 
   return (
-    <TabPresenter
+    <ActivityListPresenter
       posts={posts}
       getPosts={getUserPosts}
       nextPostCursor={nextPostCursor}
@@ -97,4 +99,4 @@ const TabContainer = ({ profileUser }) => {
   );
 };
 
-export default TabContainer;
+export default ActivityListContainer;

@@ -3,10 +3,15 @@ import * as api from '../../../modules/api';
 import useAsync from '../../../hooks/useAsync';
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useMessage } from '../../../hooks/useMessage';
 
 const ProfileContainer = ({ profileUser }) => {
   // 로그인 유저
   const loginUser = useSelector((state) => state.auth.user);
+
+  // 팔로우, 팔로잉 유저 리스트
+  const [followers, setFollowers] = useState();
+  const [followings, setFollowings] = useState();
 
   // 프로필 유저
   const [getUserState] = useAsync(
@@ -14,9 +19,6 @@ const ProfileContainer = ({ profileUser }) => {
     [profileUser],
     false,
   );
-
-  const [followers, setFollowers] = useState();
-  const [followings, setFollowings] = useState();
 
   useEffect(() => {
     if (getUserState.success) {
@@ -39,11 +41,13 @@ const ProfileContainer = ({ profileUser }) => {
     true,
   );
 
-  const follow = useCallback(
-    async (loginUserNickname, followedUserNickname) =>
-      await followFetch(loginUserNickname, followedUserNickname),
-    [followFetch],
+  const onClickFollow = useCallback(
+    async () => await followFetch(loginUser.nickname, profileUser),
+    [followFetch, loginUser, profileUser],
   );
+
+  // message
+  useMessage(followState, `${profileUser}님을 팔로우했습니다.`);
 
   // 언팔로우
   const [unfollowState, unfollowFetch] = useAsync(
@@ -59,11 +63,13 @@ const ProfileContainer = ({ profileUser }) => {
     true,
   );
 
-  const unfollow = useCallback(
-    async (loginUserNickname, unfollowedUserNickname) =>
-      await unfollowFetch(loginUserNickname, unfollowedUserNickname),
-    [unfollowFetch],
+  const onClickUnfollow = useCallback(
+    async () => await unfollowFetch(loginUser.nickname, profileUser),
+    [unfollowFetch, loginUser, profileUser],
   );
+
+  // message
+  useMessage(unfollowState, `${profileUser}님을 언팔로우했습니다.`);
 
   // 팔로잉 조회
   const [getFollowingState] = useAsync(
@@ -105,9 +111,9 @@ const ProfileContainer = ({ profileUser }) => {
       profileUser={profileUser}
       getUserData={getUserState.success?.data}
       followState={followState}
-      follow={follow}
+      onClickFollow={onClickFollow}
       unfollowState={unfollowState}
-      unfollow={unfollow}
+      onClickUnfollow={onClickUnfollow}
       isFollowingState={isFollowingState}
       followers={followers}
       followings={followings}

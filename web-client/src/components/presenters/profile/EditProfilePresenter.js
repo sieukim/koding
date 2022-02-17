@@ -1,57 +1,18 @@
-import styled from 'styled-components';
 import { useCallback, useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { setLogout } from '../../../modules/auth';
 import { Button, Checkbox, Form, Input } from 'antd';
 import { LinkOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
-import { useMessage } from '../../../hooks/useMessage';
-import { AvatarForm } from '../utils/profile/AvatarForm';
-
-const StyledEditProfile = styled.div`
-  .title-text {
-    text-align: center;
-    font-weight: bold;
-    font-size: 32px;
-    margin: 24px 0;
-  }
-
-  .nothing,
-  .edit-profile-form,
-  .edit-password-form {
-    max-width: 500px;
-    min-width: 350px;
-  }
-
-  .edit-profile-button,
-  .edit-password-button,
-  .revoke-button {
-    width: 100%;
-    margin-bottom: 24px;
-  }
-
-  .url-container {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .url {
-    width: 80%;
-  }
-
-  .text {
-    text-align: center;
-    font-weight: bold;
-  }
-`;
+import { AvatarForm } from '../utils/auth/AvatarForm';
+import { StyledTitle } from '../styled/StyledTitle';
+import { StyledEditProfilePage } from '../styled/profile/StyledEditProfilePage';
 
 const EditProfilePresenter = ({
   user,
-  changeUserInfoState,
-  changeUserInfoFetch,
-  revokeState,
-  revokeFetch,
-  removeAvatarUrl,
+  changeUserLoading,
+  revokeUserLoading,
+  onClickChangeUser,
+  onClickRevokeUser,
+  onClickRemoveAvatar,
+  onClickChangePwd,
 }) => {
   // profile 변경 form
   const [profileForm] = Form.useForm();
@@ -73,67 +34,34 @@ const EditProfilePresenter = ({
   // 프로필 편집 버튼 onFinish(onSubmit) 핸들러
   const onFinishEditProfile = useCallback(
     (values) => {
-      changeUserInfoFetch({ ...values, avatar: avatarFile });
+      onClickChangeUser({ ...values, avatar: avatarFile });
     },
-    [changeUserInfoFetch, avatarFile],
+    [onClickChangeUser, avatarFile],
   );
 
-  // 탈퇴
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  // 로그아웃
-  const logout = useCallback(() => dispatch(setLogout()), [setLogout]);
-
-  // 탈퇴 버튼 onClick 핸들러
-  const onClickRevoke = useCallback(() => {
-    revokeFetch(user.nickname);
-  }, [revokeFetch, user]);
-
-  useEffect(() => {
-    if (revokeState.success) {
-      logout();
-      navigate('/');
-    }
-  }, [logout, navigate, revokeState.success]);
-
-  // message
-  useMessage(changeUserInfoState, '멋진 프로필이네요! 🤩');
-  useMessage(revokeState, '다음에 또 만나요 🥺');
-
   return (
-    <StyledEditProfile>
-      <div className="title-text">프로필</div>
-
+    <StyledEditProfilePage>
+      <StyledTitle>프로필</StyledTitle>
       <AvatarForm
         defaultAvatarUrl={user.avatarUrl}
         setAvatarFile={setAvatarFile}
-        removeAvatarUrl={removeAvatarUrl}
+        onClickRemoveAvatar={onClickRemoveAvatar}
       />
-
-      <Form className="nothing">
-        <Form.Item>
-          <span className="ant-input-affix-wrapper">
-            <UserOutlined className="site-form-item-icon ant-input-prefix" />
-            {user.nickname}
-          </span>
-        </Form.Item>
-
-        <Form.Item>
-          <span className="ant-input-affix-wrapper">
-            <MailOutlined className="site-form-item-icon ant-input-prefix" />
-            {user.email}
-          </span>
-        </Form.Item>
-      </Form>
-
+      <div className="default-value-container">
+        <UserOutlined className="default-value-icon" />
+        {user.nickname}
+      </div>
+      <div className="default-value-container">
+        <MailOutlined className="default-value-icon" />
+        {user.email}
+      </div>
       <Form
         name="edit-profile-form"
         form={profileForm}
-        className="edit-profile-form"
         onFinish={onFinishEditProfile}
+        className="edit-profile-form"
       >
-        <div className="url-container">
+        <div className="variable-value-container">
           <Form.Item
             name="blogUrl"
             rules={[
@@ -143,7 +71,7 @@ const EditProfilePresenter = ({
                 message: '올바른 주소 형식이 아닙니다. ex) https://blog.com',
               },
             ]}
-            className="url"
+            className="variable-value-url"
           >
             <Input
               prefix={<LinkOutlined className="site-form-item-icon" />}
@@ -151,13 +79,15 @@ const EditProfilePresenter = ({
               allowClear={true}
             />
           </Form.Item>
-
-          <Form.Item name="isBlogUrlPublic" valuePropName="checked">
+          <Form.Item
+            name="isBlogUrlPublic"
+            valuePropName="checked"
+            className="variable-value-checkbox"
+          >
             <Checkbox>공개</Checkbox>
           </Form.Item>
         </div>
-
-        <div className="url-container">
+        <div className="variable-value-container">
           <Form.Item
             name="githubUrl"
             rules={[
@@ -167,7 +97,7 @@ const EditProfilePresenter = ({
                 message: '올바른 주소 형식이 아닙니다. ex) https://github.com',
               },
             ]}
-            className="url"
+            className="variable-value-url"
           >
             <Input
               prefix={<LinkOutlined className="site-form-item-icon" />}
@@ -175,13 +105,15 @@ const EditProfilePresenter = ({
               allowClear={true}
             />
           </Form.Item>
-
-          <Form.Item name="isGithubUrlPublic" valuePropName="checked">
+          <Form.Item
+            name="isGithubUrlPublic"
+            valuePropName="checked"
+            className="variable-value-checkbox"
+          >
             <Checkbox>공개</Checkbox>
           </Form.Item>
         </div>
-
-        <div className="url-container">
+        <div className="variable-value-container ">
           <Form.Item
             name="portfolioUrl"
             rules={[
@@ -192,7 +124,7 @@ const EditProfilePresenter = ({
                   '올바른 주소 형식이 아닙니다. ex) https://portfolio.com',
               },
             ]}
-            className="url"
+            className="variable-value-url"
           >
             <Input
               prefix={<LinkOutlined className="site-form-item-icon" />}
@@ -200,37 +132,41 @@ const EditProfilePresenter = ({
               allowClear={true}
             />
           </Form.Item>
-
-          <Form.Item name="isPortfolioUrlPublic" valuePropName="checked">
+          <Form.Item
+            name="isPortfolioUrlPublic"
+            valuePropName="checked"
+            className="variable-value-checkbox"
+          >
             <Checkbox>공개</Checkbox>
           </Form.Item>
         </div>
-
         <Button
           type="primary"
           htmlType="submit"
-          className="edit-profile-button"
-          loading={changeUserInfoState.loading}
+          loading={changeUserLoading}
+          className="button button-action"
         >
           편집
         </Button>
       </Form>
-
       {user.isEmailUser && (
-        <Button type="primary" className="edit-password-button">
-          <NavLink to="/reset-password">비밀번호 변경</NavLink>
+        <Button
+          type="primary"
+          onClick={onClickChangePwd}
+          className="button button-action"
+        >
+          비밀번호 변경
         </Button>
       )}
-
       <Button
         type="primary"
-        className="revoke-button"
-        onClick={onClickRevoke}
-        loading={revokeState.loading}
+        onClick={onClickRevokeUser}
+        loading={revokeUserLoading}
+        className="button button-action"
       >
         탈퇴
       </Button>
-    </StyledEditProfile>
+    </StyledEditProfilePage>
   );
 };
 
