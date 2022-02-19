@@ -8,6 +8,7 @@ import { User } from "../../models/user.model";
 import { IsOptional } from "class-validator";
 import { Exclude } from "class-transformer";
 import { BooleanTransform } from "../../common/decorator/boolean-transform.decorator";
+import { StringToStringArrayTransform } from "../../common/decorator/string-to-string-array-transform.decorator";
 
 const keys = [
   "blogUrl",
@@ -16,6 +17,8 @@ const keys = [
   "isBlogUrlPublic",
   "isGithubUrlPublic",
   "isPortfolioUrlPublic",
+  "techStack",
+  "interestTech",
 ] as const;
 
 export class ChangeProfileRequestDto extends PartialType<
@@ -32,6 +35,14 @@ export class ChangeProfileRequestDto extends PartialType<
   @BooleanTransform()
   @IsOptional()
   isPortfolioUrlPublic?: boolean;
+
+  @IsOptional()
+  @StringToStringArrayTransform()
+  techStack?: string[];
+
+  @IsOptional()
+  @StringToStringArrayTransform()
+  interestTech?: string[];
 
   @ApiProperty({
     type: String,

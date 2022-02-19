@@ -19,6 +19,8 @@ export class MyUserInfoDto extends PickType(User, [
   "isGithubUser",
   "isEmailUser",
   "avatarUrl",
+  "techStack",
+  "interestTech",
   "roles",
 ] as const) {
   @Expose()

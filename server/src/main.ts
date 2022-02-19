@@ -1,7 +1,11 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { NotFoundException, ValidationPipe } from "@nestjs/common";
+import {
+  CACHE_MANAGER,
+  NotFoundException,
+  ValidationPipe,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as cookieParser from "cookie-parser";
 import * as session from "express-session";
@@ -9,9 +13,20 @@ import * as passport from "passport";
 import * as mongoose from "mongoose";
 import { NextFunction, Request, Response } from "express";
 import { RequestErrorLoggerInterceptor } from "./common/interceptors/request-error-logger.interceptor";
+import { Cache } from "cache-manager";
+
+async function testRedisConnection(cache: Cache) {
+  await cache.set("test", "success");
+  const success = (await cache.get("test")) === "success";
+  if (success) console.log(`Redis Connection Success`);
+  else console.warn(`Redis Connection Fail`);
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // elasticCache 연결 테스트
+  await testRedisConnection(app.get(CACHE_MANAGER));
   // 몽구스 쿼리 디버그
   mongoose.set("debug", true);
   const configService = app.get(ConfigService);

@@ -11,6 +11,7 @@ export class PostWithWriterInfoDto extends PostInfoDto {
   @Expose()
   @ApiPropertyOptional({
     description: "작성자 정보. 탈퇴한 사용자인 경우 값 없음",
+    type: UserInfoDto,
   })
   writer?: UserInfoDto;
 

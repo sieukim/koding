@@ -38,4 +38,5 @@ dist/
 
 # config
 config.yml
+config-aws.yml
 .env

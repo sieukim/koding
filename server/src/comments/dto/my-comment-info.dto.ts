@@ -1,6 +1,7 @@
-import { PickType } from "@nestjs/swagger";
+import { ApiProperty, PickType } from "@nestjs/swagger";
 import { Comment } from "../../models/comment.model";
-import { plainToClass } from "class-transformer";
+import { Expose, plainToClass, Transform } from "class-transformer";
+import { PostInfoDto } from "../../posts/dto/post-info.dto";
 
 export class MyCommentInfoDto extends PickType(Comment, [
   "commentId",
@@ -11,8 +12,17 @@ export class MyCommentInfoDto extends PickType(Comment, [
   "createdAt",
   "mentionedNicknames",
   "likeCount",
-  "post",
 ] as const) {
+  @Transform(({ value }) => value && PostInfoDto.fromModel(value), {
+    toClassOnly: true,
+  })
+  @Expose()
+  @ApiProperty({
+    description: "댓글의 게시글 정보",
+    type: PostInfoDto,
+  })
+  post: PostInfoDto;
+
   static fromModel(model: Comment) {
     return plainToClass(MyCommentInfoDto, model, {
       excludeExtraneousValues: true,

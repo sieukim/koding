@@ -13,6 +13,14 @@ import { SearchServices } from "./services";
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         node: configService.get<string>("database.elasticsearch.host"),
+        auth: {
+          username: configService.get<string>(
+            "database.elasticsearch.username",
+          ),
+          password: configService.get<string>(
+            "database.elasticsearch.password",
+          ),
+        },
         maxRetries: 10,
         requestTimeout: 60000,
         pingTimeout: 60000,

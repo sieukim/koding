@@ -16,6 +16,8 @@ export class UserInfoDto extends PickType(User, [
   "githubSignupVerified",
   "followersCount",
   "followingsCount",
+  "techStack",
+  "interestTech",
   "avatarUrl",
 ] as const) {
   @Expose()

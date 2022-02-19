@@ -119,6 +119,7 @@ export class UsersController {
     @Body() body: SignupLocalRequestDto,
     @UploadedFile() avatarFile?: Express.MulterS3.File,
   ) {
+    console.log(`signup local request: ${JSON.stringify(body)}`);
     console.log("avatar : ", avatarFile);
     body.avatarUrl = avatarFile?.location;
     const user = await this.usersService.signupLocal(body);

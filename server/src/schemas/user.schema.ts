@@ -168,11 +168,7 @@ export class UserDocument extends Document {
   avatarUrl?: string;
 
   @Prop({
-    type: [
-      {
-        type: String,
-      },
-    ],
+    type: [String],
     default: [],
   })
   followingNicknames: string[];
@@ -186,11 +182,7 @@ export class UserDocument extends Document {
   followings?: UserDocument[];
 
   @Prop({
-    type: [
-      {
-        type: String,
-      },
-    ],
+    type: [String],
     default: [],
   })
   followerNicknames: string[];
@@ -198,6 +190,12 @@ export class UserDocument extends Document {
   @Type(() => UserDocument)
   @Transform(({ value }) => UserDocument.toModel(value), { toPlainOnly: true })
   followers?: UserDocument[];
+
+  @Prop({ type: [String], default: [] })
+  techStack: string[];
+
+  @Prop({ type: [String], default: [] })
+  interestTech: string[];
 
   static toModel(userDocument: UserDocument): User {
     return plainToClass(User, userDocument, {

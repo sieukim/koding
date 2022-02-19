@@ -26,6 +26,8 @@ export class SignupLocalHandler implements ICommandHandler<SignupLocalCommand> {
       githubUrl,
       portfolioUrl,
       avatarUrl,
+      techStack,
+      interestTech,
     } = signupLocalRequest;
     const users = await Promise.all([
       this.userRepository.findByNickname(nickname),
@@ -42,6 +44,8 @@ export class SignupLocalHandler implements ICommandHandler<SignupLocalCommand> {
       portfolioUrl,
       avatarUrl,
       isEmailUser: true,
+      techStack,
+      interestTech,
     });
     await user.hashPassword();
     await this.userRepository.persist(user);

@@ -9,6 +9,7 @@ import { EmailUserSignedUpEvent } from "../users/events/email-user-signed-up.eve
 import { ResetPasswordRequestedEvent } from "../users/events/reset-password-requested.event";
 import { GithubUserInfo } from "../schemas/user.schema";
 import {
+  ArrayMaxSize,
   IsBoolean,
   IsDate,
   IsEmail,
@@ -252,6 +253,22 @@ export class User extends AggregateRoot {
   })
   avatarUrl?: string;
 
+  @Expose()
+  @IsString({ each: true })
+  @ArrayMaxSize(5)
+  @ApiProperty({
+    description: "보유 기술들",
+  })
+  techStack: string[];
+
+  @Expose()
+  @IsString({ each: true })
+  @ArrayMaxSize(5)
+  @ApiProperty({
+    description: "관심 분야들",
+  })
+  interestTech: string[];
+
   constructor();
   constructor(param: {
     email: string;
@@ -262,6 +279,8 @@ export class User extends AggregateRoot {
     portfolioUrl?: string;
     isEmailUser: true;
     avatarUrl?: string;
+    techStack?: string[];
+    interestTech?: string[];
   });
 
   constructor(param: {
@@ -283,6 +302,8 @@ export class User extends AggregateRoot {
     githubUserIdentifier?: number;
     githubUserInfo?: GithubUserInfo;
     avatarUrl?: string;
+    techStack?: string[];
+    interestTech?: string[];
   }) {
     super();
     if (param) {
@@ -304,6 +325,8 @@ export class User extends AggregateRoot {
       this.followingNicknames = [];
       this.followerNicknames = [];
       this.avatarUrl = param.avatarUrl;
+      this.techStack = param.techStack ?? [];
+      this.interestTech = param.interestTech ?? [];
       this.createdAt = getCurrentTime();
       this.roles = [Role.User];
       if (this.isEmailUser) {
@@ -369,6 +392,8 @@ export class User extends AggregateRoot {
       isPortfolioUrlPublic,
       portfolioUrl,
       avatarUrl,
+      interestTech,
+      techStack,
     } = request;
     this.githubUrl = githubUrl ?? this.githubUrl;
     this.blogUrl = blogUrl ?? this.blogUrl;
@@ -382,6 +407,8 @@ export class User extends AggregateRoot {
         new ProfileAvatarChangedEvent(this.nickname, this.avatarUrl, avatarUrl),
       );
     this.avatarUrl = avatarUrl ?? this.avatarUrl;
+    this.techStack = techStack ?? this.techStack;
+    this.interestTech = interestTech ?? this.interestTech;
   }
 
   verifySameUser(nickname: string);
