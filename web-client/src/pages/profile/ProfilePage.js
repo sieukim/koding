@@ -8,7 +8,7 @@ const ProfilePage = () => {
   const profileUser = params.nickname;
 
   return (
-    <StyledBody>
+    <StyledBody flexDirection="column">
       <ProfileContainer profileUser={profileUser} />
       <ActivityListContainer profileUser={profileUser} />
     </StyledBody>

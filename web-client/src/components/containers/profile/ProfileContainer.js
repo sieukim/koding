@@ -9,9 +9,9 @@ const ProfileContainer = ({ profileUser }) => {
   // 로그인 유저
   const loginUser = useSelector((state) => state.auth.user);
 
-  // 팔로우, 팔로잉 유저 리스트
-  const [followers, setFollowers] = useState();
-  const [followings, setFollowings] = useState();
+  // 팔로우, 팔로잉 유저 수
+  const [followersCount, setFollowersCount] = useState();
+  const [followingsCount, setFollowingsCount] = useState();
 
   // 프로필 유저
   const [getUserState] = useAsync(
@@ -22,8 +22,8 @@ const ProfileContainer = ({ profileUser }) => {
 
   useEffect(() => {
     if (getUserState.success) {
-      setFollowings(getUserState.success.data.followingsCount);
-      setFollowers(getUserState.success.data.followersCount);
+      setFollowingsCount(getUserState.success.data.followingsCount);
+      setFollowersCount(getUserState.success.data.followersCount);
     }
   }, [getUserState.success]);
 
@@ -34,7 +34,7 @@ const ProfileContainer = ({ profileUser }) => {
         loginUserNickname,
         followedUserNickname,
       );
-      setFollowers((followerNumber) => followerNumber + 1);
+      setFollowersCount((followerNumber) => followerNumber + 1);
       return response;
     },
     [],
@@ -56,7 +56,7 @@ const ProfileContainer = ({ profileUser }) => {
         loginUserNickname,
         unfollowedUserNickname,
       );
-      setFollowers((followerNumber) => followerNumber - 1);
+      setFollowersCount((followerNumber) => followerNumber - 1);
       return response;
     },
     [],
@@ -92,31 +92,28 @@ const ProfileContainer = ({ profileUser }) => {
         return api.isFollowing(loginUser.nickname, profileUser);
       }
     },
-    [loginUser, profileUser, followers, followings],
+    [loginUser, profileUser, followersCount, followingsCount],
     false,
   );
 
   useEffect(() => {
     if (getFollowingState.success) {
-      setFollowings(getFollowingState.success.data.count);
+      setFollowingsCount(getFollowingState.success.data.count);
     }
     if (getFollowerState.success) {
-      setFollowers(getFollowerState.success.data.count);
+      setFollowersCount(getFollowerState.success.data.count);
     }
   }, [getFollowingState.success, getFollowerState.success]);
 
   return (
     <ProfilePresenter
       loginUser={loginUser}
-      profileUser={profileUser}
-      getUserData={getUserState.success?.data}
-      followState={followState}
+      profileUser={getUserState.success?.data ?? {}}
       onClickFollow={onClickFollow}
-      unfollowState={unfollowState}
       onClickUnfollow={onClickUnfollow}
       isFollowingState={isFollowingState}
-      followers={followers}
-      followings={followings}
+      followersCount={followersCount}
+      followingsCount={followingsCount}
     />
   );
 };

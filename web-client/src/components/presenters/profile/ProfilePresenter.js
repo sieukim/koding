@@ -1,25 +1,52 @@
-import styled from 'styled-components';
-
-const StyledProfile = styled.div``;
+import { StyledProfilePage } from '../styled/profile/StyledProfilePage';
+import { AvatarItem } from '../utils/profile/AvatarItem';
+import { FollowItem } from '../utils/profile/FollowItem';
+import { ButtonItem } from '../utils/profile/ButtonItem';
+import { UrlItem } from '../utils/profile/UrlItem';
+import { SkillItem } from '../utils/profile/SkillItem';
+import { UserInfoItem } from '../utils/profile/UserInfoItem';
 
 const ProfilePresenter = ({
   loginUser,
   profileUser,
-  getUserData = {},
-  followState,
   onClickFollow,
-  unfollowState,
   onClickUnfollow,
   isFollowingState,
-  followers,
-  followings,
-  getUserPostFetch,
-  posts,
-  setPosts,
-  hasNextPost,
-  getUserPost,
+  followersCount,
+  followingsCount,
 }) => {
-  return <StyledProfile>{loginUser.nickname}</StyledProfile>;
+  return (
+    <StyledProfilePage>
+      <div className="item-container item-container-default">
+        <AvatarItem
+          nickname={profileUser.nickname}
+          className="item avatar-item"
+        />
+        <FollowItem
+          nickname={profileUser.nickname}
+          followersCount={followersCount}
+          followingsCount={followingsCount}
+          className="item follow-item"
+        />
+        <UserInfoItem
+          profileUser={profileUser}
+          className="item user-info-item"
+        />
+        <ButtonItem
+          profileUser={profileUser}
+          loginUser={loginUser}
+          isFollowingState={isFollowingState}
+          onClickFollow={onClickFollow}
+          onClickUnfollow={onClickUnfollow}
+          className="item button-item"
+        />
+      </div>
+      <div className="item-container item-container-editable">
+        <UrlItem profileUser={profileUser} className="item url-item" />
+        <SkillItem profileUser={profileUser} className="item skill-item" />
+      </div>
+    </StyledProfilePage>
+  );
 };
 
 export default ProfilePresenter;

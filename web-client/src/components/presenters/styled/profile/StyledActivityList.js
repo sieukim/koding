@@ -4,7 +4,7 @@ export const StyledActivityList = styled.div`
   border: 1px solid #d9d9d9;
   border-radius: 10px;
   padding: 4px 10px 20px 10px;
-  margin: 30px 0;
+  margin: 50px auto;
   width: 900px;
 
   .item-red {
