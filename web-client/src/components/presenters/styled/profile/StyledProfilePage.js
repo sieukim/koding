@@ -52,25 +52,25 @@ export const StyledProfilePage = styled.div`
     .url-item-blog,
     .url-item-github,
     .url-item-portfolio,
-    .skill-item-skills,
-    .skill-item-interests {
+    .techStack-item-techStack,
+    .techStack-item-interestTech {
       border: 1px solid #d9d9d9;
       border-radius: 10px;
       padding: 15px 20px;
-      margin: 10px 0;
+      margin-bottom: 10px;
     }
 
-    .url-item-blog,
-    .skill-item-skills {
-      margin-top: 0;
-    }
-
-    .skill-item-interests {
+    .techStack-item-interestTech {
       margin-bottom: 0;
     }
 
+    .techStack-item-techStack,
+    .techStack-item-interestTech {
+      min-height: 100px;
+    }
+
     .url-item-header,
-    .skill-item-header {
+    .techStack-item-header {
       font-weight: 600;
     }
 
@@ -78,8 +78,8 @@ export const StyledProfilePage = styled.div`
       margin-left: 5px;
     }
 
-    .skill-tag,
-    .interest-tag {
+    .techStack-tag,
+    .interestTech-tag {
       margin: 5px;
     }
   }

@@ -3,7 +3,7 @@ import { AvatarItem } from '../utils/profile/AvatarItem';
 import { FollowItem } from '../utils/profile/FollowItem';
 import { ButtonItem } from '../utils/profile/ButtonItem';
 import { UrlItem } from '../utils/profile/UrlItem';
-import { SkillItem } from '../utils/profile/SkillItem';
+import { TechStackItem } from '../utils/profile/TechStackItem';
 import { UserInfoItem } from '../utils/profile/UserInfoItem';
 
 const ProfilePresenter = ({
@@ -43,7 +43,10 @@ const ProfilePresenter = ({
       </div>
       <div className="item-container item-container-editable">
         <UrlItem profileUser={profileUser} className="item url-item" />
-        <SkillItem profileUser={profileUser} className="item skill-item" />
+        <TechStackItem
+          profileUser={profileUser}
+          className="item techStack-item"
+        />
       </div>
     </StyledProfilePage>
   );

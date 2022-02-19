@@ -18,9 +18,9 @@ export const AvatarItem = (props) => {
   return (
     <div className={className}>
       {avatarUrl ? (
-        <Avatar src={avatarUrl} size={150} />
+        <Avatar src={avatarUrl} size={200} />
       ) : (
-        <Avatar icon={<UserOutlined />} size={150} />
+        <Avatar icon={<UserOutlined />} size={200} />
       )}
     </div>
   );

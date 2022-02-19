@@ -6,6 +6,7 @@ import {
   MailOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import { TechStackForm } from './TechStackForm';
 
 export const SignupForm = ({
   loading,
@@ -13,6 +14,10 @@ export const SignupForm = ({
   duplicated,
   checked,
   onDuplicateCheck,
+  techStack,
+  setTechStack,
+  interestTech,
+  setInterestTech,
 }) => {
   const [form] = Form.useForm();
   const [validated, setValidated] = useState({ email: false, nickname: false });
@@ -242,6 +247,12 @@ export const SignupForm = ({
           allowClear={true}
         />
       </Form.Item>
+      <TechStackForm
+        techStack={techStack}
+        setTechStack={setTechStack}
+        interestTech={interestTech}
+        setInterestTech={setInterestTech}
+      />
       <Button
         type="primary"
         htmlType="submit"
