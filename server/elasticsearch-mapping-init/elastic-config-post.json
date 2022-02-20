@@ -12,31 +12,14 @@
           "filter": [
             "lowercase",
             "nori_part_of_speech",
-            "unique",
-            "synonyms_koding"
+            "unique"
           ]
-        }
-      },
-      "filter": {
-        "synonyms_koding": {
-          "type": "synonym",
-          "synonyms_path": "synonyms-koding.txt"
         }
       },
       "tokenizer": {
         "nori_mixed": {
           "type": "nori_tokenizer",
-          "decompound_mode": "mixed",
-          "user_dictionary": "user-dictionary.txt"
-        }
-      },
-      "char_filter": {
-        "programming_language_filtter": {
-          "type": "mapping",
-          "mappings": [
-            "+ => _plus_",
-            "# => _sharp_"
-          ]
+          "decompound_mode": "mixed"
         }
       },
       "normalizer": {
@@ -68,13 +51,11 @@
       },
       "tags": {
         "type": "keyword",
-        "boost": 2,
         "normalizer": "post_tag_normalizer"
       },
       "imageUrls": {
         "type": "text",
-        "index": false,
-        "doc_values": false
+        "index": false
       },
       "createdAt": {
         "type": "date"
