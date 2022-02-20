@@ -49,7 +49,7 @@ function App() {
           />
           <Route path="/user/:nickname/profile" element={<ProfilePage />} />
           <Route
-            path="/user/:nickname/profile/:tab"
+            path="/user/:nickname/profile/:type"
             element={<FollowListPage />}
           />
           <Route

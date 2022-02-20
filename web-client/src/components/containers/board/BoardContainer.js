@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import useAsync from '../../../hooks/useAsync';
 
-const BoardContainer = ({ boardType, tagsParams }) => {
+const BoardContainer = ({ boardType, queryParams, tagsParams, sortParams }) => {
   // 로그인 유저 정보
   const user = useSelector((state) => state.auth.user);
   // navigate
@@ -21,22 +21,33 @@ const BoardContainer = ({ boardType, tagsParams }) => {
 
   const getPosts = useCallback(async () => {
     if (!nextPageCursor) setLoading(true);
-    const response = await api.readBoard(boardType, tagsParams, nextPageCursor);
+
+    const response = await api.readBoard(
+      boardType,
+      nextPageCursor,
+      queryParams,
+      tagsParams,
+      sortParams,
+    );
+
     setPosts((posts) => [...posts, ...response.data.posts]);
     setNextPageCursor(response.data.nextPageCursor);
     setLoading(false);
-  }, [boardType, tagsParams, nextPageCursor]);
+  }, [boardType, nextPageCursor, queryParams, tagsParams, sortParams]);
 
   useEffect(() => {
-    getPosts();
-
     return () => {
+      setLoading(false);
       setPosts([]);
       setNextPageCursor(null);
-      setLoading(false);
     };
     // eslint-disable-next-line
-  }, [boardType, tagsParams]);
+  }, [boardType, queryParams, tagsParams, sortParams]);
+
+  useEffect(() => {
+    if (nextPageCursor === null) getPosts();
+    // eslint-disable-next-line
+  }, [boardType, queryParams, tagsParams, sortParams, nextPageCursor]);
 
   // 게시글 작성 버튼 onClick 핸들러
   const onClickWrite = useCallback(() => {
@@ -65,7 +76,9 @@ const BoardContainer = ({ boardType, tagsParams }) => {
       getPosts={getPosts}
       nextPageCursor={nextPageCursor}
       onClickWrite={onClickWrite}
+      queryParams={queryParams}
       tagsParams={tagsParams}
+      sortParams={sortParams}
       tagsList={getTagsListState.success ?? []}
     />
   );

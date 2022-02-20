@@ -1,22 +1,32 @@
 import EditProfileContainer from '../../components/containers/profile/EditProfileContainer';
-import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
-
-const StyledEditProfile = styled.div`
-  display: flex;
-  justify-content: center;
-  margin: 0 auto;
-  width: 60%;
-`;
+import { useNavigate, useParams } from 'react-router-dom';
+import { StyledBody } from '../../components/presenters/styled/StyledBody';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
+import { message } from 'antd';
 
 const EditProfilePage = () => {
+  // 로그인 유저
+  const user = useSelector((state) => state.auth.user);
+
+  // 페이지 유저
   const params = useParams();
-  const profileNickname = params.nickname;
+  const nickname = params.nickname;
+
+  // navigate
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user || user.nickname !== nickname) {
+      message.warning('접근 권한이 없습니다.');
+      navigate('/');
+    }
+  }, [user, nickname, navigate]);
 
   return (
-    <StyledEditProfile>
-      <EditProfileContainer profileNickname={profileNickname} />
-    </StyledEditProfile>
+    <StyledBody>
+      <EditProfileContainer user={user} />
+    </StyledBody>
   );
 };
 
