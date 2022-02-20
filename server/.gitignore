@@ -40,3 +40,6 @@ dist/
 config.yml
 config-aws.yml
 .env
+
+# front build file
+public

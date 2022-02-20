@@ -16,6 +16,7 @@ import { SearchModule } from "./search/search.module";
 import { APP_GUARD } from "@nestjs/core";
 import { RolesGuard } from "./auth/guard/roles.guard";
 import { AdminModule } from "./admin/admin.module";
+import { ServeStaticModule } from "@nestjs/serve-static";
 
 @Module({
   imports: [
@@ -36,6 +37,9 @@ import { AdminModule } from "./admin/admin.module";
         // },
         uri: configService.get<string>("database.mongodb.uri"),
       }),
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: __dirname + "/../public",
     }),
     ScheduleModule.forRoot(),
     AuthModule,
