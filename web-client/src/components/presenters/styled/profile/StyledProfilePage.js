@@ -58,6 +58,14 @@ export const StyledProfilePage = styled.div`
   }
 
   .item-container-editable {
+    a {
+      color: black;
+
+      :hover {
+        color: #1890ff;
+      }
+    }
+
     .url-item-blog,
     .url-item-github,
     .url-item-portfolio,
