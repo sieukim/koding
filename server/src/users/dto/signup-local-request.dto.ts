@@ -25,10 +25,10 @@ export class SignupLocalRequestDto extends PickType(User, [
   avatarUrl: string;
 
   @IsOptional()
-  @StringToStringArrayTransform()
+  @StringToStringArrayTransform({ defaultValue: [] })
   interestTech: string[] = [];
 
   @IsOptional()
-  @StringToStringArrayTransform()
+  @StringToStringArrayTransform({ defaultValue: [] })
   techStack: string[] = [];
 }
