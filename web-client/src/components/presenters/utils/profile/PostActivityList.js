@@ -2,7 +2,7 @@ import { Collapse } from 'antd';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { PostList } from '../board/PostList';
 
-export const PostActivityList = ({ posts, next, hasMore }) => {
+export const PostActivityList = ({ profileUser, posts, next, hasMore }) => {
   return (
     <div className="post-activity-container">
       <Collapse accordion className="collapse" ghost>
@@ -13,7 +13,7 @@ export const PostActivityList = ({ posts, next, hasMore }) => {
             hasMore={hasMore.common}
             loader={null}
           >
-            <PostList posts={posts.common} />
+            <PostList posts={posts.common} profileUser={profileUser} />
           </InfiniteScroll>
         </Collapse.Panel>
         <Collapse.Panel header="Q&A" key="question">
@@ -23,7 +23,7 @@ export const PostActivityList = ({ posts, next, hasMore }) => {
             hasMore={hasMore.question}
             loader={null}
           >
-            <PostList posts={posts.question} />
+            <PostList posts={posts.question} profileUser={profileUser} />
           </InfiniteScroll>
         </Collapse.Panel>
         <Collapse.Panel header="스터디 모집" key="study-group">
@@ -33,7 +33,7 @@ export const PostActivityList = ({ posts, next, hasMore }) => {
             hasMore={hasMore[`study-group`]}
             loader={null}
           >
-            <PostList posts={posts[`study-group`]} />
+            <PostList posts={posts[`study-group`]} profileUser={profileUser} />
           </InfiniteScroll>
         </Collapse.Panel>
       </Collapse>

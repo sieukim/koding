@@ -6,6 +6,7 @@ import { PostActivityList } from '../utils/profile/PostActivityList';
 import { CommentActivityList } from '../utils/profile/CommentActivityList';
 
 const ActivityListPresenter = ({
+  profileUser,
   posts,
   getPosts,
   nextPostCursor,
@@ -21,6 +22,7 @@ const ActivityListPresenter = ({
           tab={<IconText icon={<FormOutlined />} text="게시글" />}
         >
           <PostActivityList
+            profileUser={profileUser}
             posts={posts}
             next={getPosts}
             hasMore={nextPostCursor}

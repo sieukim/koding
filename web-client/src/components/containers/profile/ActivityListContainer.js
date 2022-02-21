@@ -89,6 +89,7 @@ const ActivityListContainer = ({ profileUser }) => {
 
   return (
     <ActivityListPresenter
+      profileUser={profileUser}
       posts={posts}
       getPosts={getUserPosts}
       nextPostCursor={nextPostCursor}

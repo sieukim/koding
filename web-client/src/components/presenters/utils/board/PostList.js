@@ -14,8 +14,16 @@ import { PostLink } from '../link/PostLink';
 import { TagList } from '../post/TagList';
 import React from 'react';
 import { StyledPostList } from '../../styled/board/StyledPostList';
+import { AvatarLink } from '../link/AvatarLink';
 
-export const PostList = ({ loading, posts }) => {
+export const PostList = ({ loading, posts, profileUser }) => {
+  const getAvatar = (post) => {
+    if (profileUser) return <AvatarLink nickname={profileUser} />;
+    else if (post?.writer?.avatarUrl)
+      return <Avatar src={post.writer.avatarUrl} />;
+    else return <Avatar icon={<UserOutlined />} />;
+  };
+
   return (
     <StyledPostList>
       {loading ? (
@@ -29,13 +37,7 @@ export const PostList = ({ loading, posts }) => {
               actions={[
                 <IconText
                   key="nickname"
-                  icon={
-                    post?.writer?.avatarUrl ? (
-                      <Avatar src={post.writer.avatarUrl} />
-                    ) : (
-                      <Avatar icon={<UserOutlined />} />
-                    )
-                  }
+                  icon={getAvatar(post)}
                   text={<NicknameLink nickname={post.writerNickname} />}
                   className="item-nickname"
                 />,
