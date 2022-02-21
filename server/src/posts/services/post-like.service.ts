@@ -97,7 +97,7 @@ export class PostLikeService {
     const likePosts = await this.postLikeModel
       .find({ nickname })
       .sort({ _id: SortOrder.ASC }) // 스크랩한지 오래된 순으로
-      .populate("post")
+      .populate({ path: "post", populate: { path: "writer" } })
       .exec();
     return likePosts
       .filter((likePost) => likePost.post !== null)

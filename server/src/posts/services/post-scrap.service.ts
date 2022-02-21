@@ -70,7 +70,7 @@ export class PostScrapService {
     const scrapPosts = await this.postScrapModel
       .find({ nickname })
       .sort({ _id: SortOrder.ASC }) // 스크랩한지 오래된 순으로
-      .populate("post")
+      .populate({ path: "post", populate: { path: "writer" } })
       .exec();
     return scrapPosts
       .filter((scrapPost) => scrapPost.post !== null)
