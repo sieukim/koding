@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+axios.defaults.baseURL = `http://koding.kr:3001`;
+
 /*
  **************************
  ******** auth api ********
@@ -30,8 +32,12 @@ export const signup = (user) => {
   if (user.avatar) {
     formData.set('avatar', user.avatar);
   }
-  formData.set('techStack', user.techStack);
-  formData.set('interestTech', user.interestTech);
+  if (user.techStack.length > 0) {
+    formData.set('techStack', user.techStack);
+  }
+  if (user.interestTech.length > 0) {
+    formData.set('interestTech', user.interestTech);
+  }
 
   return axios.post('/api/users', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
@@ -312,8 +318,12 @@ export const changeUserInfo = (nickname, user) => {
   if (user.avatar) {
     formData.set('avatar', user.avatar);
   }
-  formData.set('techStack', user.techStack);
-  formData.set('interestTech', user.interestTech);
+  if (user.techStack.length > 0) {
+    formData.set('techStack', user.techStack);
+  }
+  if (user.interestTech.length > 0) {
+    formData.set('interestTech', user.interestTech);
+  }
 
   return axios.patch(`/api/users/${nickname}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

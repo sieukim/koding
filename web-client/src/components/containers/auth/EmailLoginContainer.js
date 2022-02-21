@@ -37,7 +37,7 @@ const EmailLoginContainer = () => {
   // github 로그인 url
   const githubLoginUrl = useMemo(() => {
     const CLIENT_ID = '855268489b238ce4aa0e';
-    const REDIRECT_URL = 'http://localhost:3000/github/login';
+    const REDIRECT_URL = 'http://koding.kr:3001/github/login';
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
       redirect_uri: REDIRECT_URL,
