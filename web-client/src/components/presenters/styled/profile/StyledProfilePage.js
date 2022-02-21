@@ -7,6 +7,11 @@ export const StyledProfilePage = styled.div`
   margin: 82px auto 0 auto;
   width: 900px;
 
+  .spinner {
+    width: 100%;
+    text-align: center;
+  }
+
   .item-container {
     display: flex;
     flex-direction: column;

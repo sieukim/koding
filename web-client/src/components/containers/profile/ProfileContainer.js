@@ -10,8 +10,8 @@ const ProfileContainer = ({ profileUser }) => {
   const loginUser = useSelector((state) => state.auth.user);
 
   // 팔로우, 팔로잉 유저 수
-  const [followersCount, setFollowersCount] = useState();
-  const [followingsCount, setFollowingsCount] = useState();
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingsCount, setFollowingsCount] = useState(0);
 
   // 프로필 유저
   const [getUserState] = useAsync(
@@ -25,7 +25,7 @@ const ProfileContainer = ({ profileUser }) => {
       setFollowingsCount(getUserState.success.data.followingsCount);
       setFollowersCount(getUserState.success.data.followersCount);
     }
-  }, [getUserState.success]);
+  }, [getUserState]);
 
   // 팔로우
   const [followState, followFetch] = useAsync(
@@ -34,7 +34,7 @@ const ProfileContainer = ({ profileUser }) => {
         loginUserNickname,
         followedUserNickname,
       );
-      setFollowersCount((followerNumber) => followerNumber + 1);
+      setFollowersCount((followersCount) => followersCount + 1);
       return response;
     },
     [],
@@ -56,7 +56,7 @@ const ProfileContainer = ({ profileUser }) => {
         loginUserNickname,
         unfollowedUserNickname,
       );
-      setFollowersCount((followerNumber) => followerNumber - 1);
+      setFollowersCount((followersCount) => followersCount - 1);
       return response;
     },
     [],
@@ -71,20 +71,6 @@ const ProfileContainer = ({ profileUser }) => {
   // message
   useMessage(unfollowState, `${profileUser}님을 언팔로우했습니다.`);
 
-  // 팔로잉 조회
-  const [getFollowingState] = useAsync(
-    () => api.getFollowing(profileUser),
-    [profileUser],
-    false,
-  );
-
-  // 팔로워 조회
-  const [getFollowerState] = useAsync(
-    () => api.getFollower(profileUser),
-    [profileUser],
-    false,
-  );
-
   // 팔로우 여부 조회
   const [isFollowingState] = useAsync(
     async () => {
@@ -96,19 +82,11 @@ const ProfileContainer = ({ profileUser }) => {
     false,
   );
 
-  useEffect(() => {
-    if (getFollowingState.success) {
-      setFollowingsCount(getFollowingState.success.data.count);
-    }
-    if (getFollowerState.success) {
-      setFollowersCount(getFollowerState.success.data.count);
-    }
-  }, [getFollowingState.success, getFollowerState.success]);
-
   return (
     <ProfilePresenter
       loginUser={loginUser}
       profileUser={getUserState.success?.data ?? {}}
+      getUserLoading={getUserState.loading}
       followLoading={followState.loading}
       unfollowLoading={unfollowState.loading}
       onClickFollow={onClickFollow}

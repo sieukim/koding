@@ -48,7 +48,7 @@ export const ButtonItem = (props) => {
   }
 
   if (loginUser) {
-    return <Button>임시 버튼</Button>;
+    return <Button />;
   }
 
   return null;
