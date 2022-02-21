@@ -51,6 +51,10 @@ export const StyledProfilePage = styled.div`
         margin-bottom: 10px;
       }
     }
+
+    .collection-button {
+      margin-left: 10px;
+    }
   }
 
   .item-container-editable {

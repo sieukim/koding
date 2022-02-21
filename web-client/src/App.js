@@ -16,6 +16,7 @@ import EditProfilePage from './pages/profile/EditProfilePage';
 import NotificationPage from './pages/notification/NotificationPage';
 import SearchPage from './pages/search/SearchPage';
 import PostEditorPage from './pages/post/PostEditorPage';
+import CollectionPage from './pages/profile/CollectionPage';
 
 const StyledPage = styled.div`
   min-width: 1200px;
@@ -55,6 +56,10 @@ function App() {
           <Route
             path="/user/:nickname/profile/edit"
             element={<EditProfilePage />}
+          />
+          <Route
+            path="/user/:nickname/profile/collection"
+            element={<CollectionPage />}
           />
           <Route
             path="/user/:nickname/notification"

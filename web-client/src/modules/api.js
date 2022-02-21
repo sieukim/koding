@@ -191,6 +191,27 @@ export const reportPost = (boardType, postId, nickname, reportReason) => {
   );
 };
 
+// 팔로잉 하는 유저의 게시글 모아보기
+export const getFollowingPosts = (nickname, cursor, pageSize = 10) => {
+  const query = new URLSearchParams();
+  if (cursor) query.set('cursor', cursor);
+  if (pageSize) query.set('pageSize', pageSize);
+
+  return axios.get(
+    `/api/users/${nickname}/followings/posts?${query.toString()}`,
+  );
+};
+
+// 스크랩한 게시글 모아보기
+export const getScrappedPosts = (nickname) => {
+  return axios.get(`/api/users/${nickname}/scrap-posts`);
+};
+
+// 좋아요한 게시글 모아보기
+export const getLikedPosts = (nickname) => {
+  return axios.get(`/api/users/${nickname}/like-posts`);
+};
+
 // 댓글 읽기
 export const readComment = (boardType, postId, cursor) => {
   const query = new URLSearchParams();
