@@ -9,6 +9,8 @@ import { UserInfoItem } from '../utils/profile/UserInfoItem';
 const ProfilePresenter = ({
   loginUser,
   profileUser,
+  followLoading,
+  unfollowLoading,
   onClickFollow,
   onClickUnfollow,
   isFollowingState,
@@ -36,6 +38,8 @@ const ProfilePresenter = ({
           profileUser={profileUser}
           loginUser={loginUser}
           isFollowingState={isFollowingState}
+          followLoading={followLoading}
+          unfollowLoading={unfollowLoading}
           onClickFollow={onClickFollow}
           onClickUnfollow={onClickUnfollow}
           className="item button-item"

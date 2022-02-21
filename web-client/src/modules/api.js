@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-axios.defaults.baseURL = `http://koding.kr:3001`;
+// axios.defaults.baseURL = `http://koding.kr:3001`;
 
 /*
  **************************

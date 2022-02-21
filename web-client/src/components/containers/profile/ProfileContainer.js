@@ -109,6 +109,8 @@ const ProfileContainer = ({ profileUser }) => {
     <ProfilePresenter
       loginUser={loginUser}
       profileUser={getUserState.success?.data ?? {}}
+      followLoading={followState.loading}
+      unfollowLoading={unfollowState.loading}
       onClickFollow={onClickFollow}
       onClickUnfollow={onClickUnfollow}
       isFollowingState={isFollowingState}

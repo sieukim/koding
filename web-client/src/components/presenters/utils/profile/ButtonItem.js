@@ -5,6 +5,8 @@ export const ButtonItem = (props) => {
     profileUser,
     loginUser,
     isFollowingState,
+    followLoading,
+    unfollowLoading,
     onClickFollow,
     onClickUnfollow,
     className,
@@ -23,7 +25,11 @@ export const ButtonItem = (props) => {
 
   if (loginUser && isFollowingState.success) {
     return (
-      <Button onClick={onClickUnfollow} className={className}>
+      <Button
+        loading={unfollowLoading}
+        onClick={onClickUnfollow}
+        className={className}
+      >
         언팔로우
       </Button>
     );
@@ -31,10 +37,18 @@ export const ButtonItem = (props) => {
 
   if (loginUser && isFollowingState.error) {
     return (
-      <Button onClick={onClickFollow} className={className}>
+      <Button
+        loading={followLoading}
+        onClick={onClickFollow}
+        className={className}
+      >
         팔로우
       </Button>
     );
+  }
+
+  if (loginUser) {
+    return <Button>임시 버튼</Button>;
   }
 
   return null;
