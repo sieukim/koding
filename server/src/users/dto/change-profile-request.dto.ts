@@ -37,12 +37,12 @@ export class ChangeProfileRequestDto extends PartialType<
   isPortfolioUrlPublic?: boolean;
 
   @IsOptional()
-  @StringToStringArrayTransform()
-  techStack?: string[];
+  @StringToStringArrayTransform({ defaultValue: [] })
+  techStack?: string[] = [];
 
   @IsOptional()
-  @StringToStringArrayTransform()
-  interestTech?: string[];
+  @StringToStringArrayTransform({ defaultValue: [] })
+  interestTech?: string[] = [];
 
   @ApiProperty({
     type: String,
