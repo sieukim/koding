@@ -1,4 +1,4 @@
-import { Button, Divider } from 'antd';
+import { Divider } from 'antd';
 import { SearchByTags } from '../utils/board/SearchByTags';
 import { BoardMent } from '../utils/board/BoardMent';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -6,8 +6,10 @@ import { PostList } from '../utils/board/PostList';
 import { StyledBoardPage } from '../styled/board/StyledBoardPage';
 import { SearchByQuery } from '../utils/board/SearchByQuery';
 import SearchBySort from '../utils/board/SearchBySort';
+import { WriteButton } from '../utils/board/WriteButton';
 
 const BoardPresenter = ({
+  user,
   loading,
   boardType,
   posts,
@@ -30,15 +32,11 @@ const BoardPresenter = ({
       <BoardMent boardType={boardType} />
       <div className="board-action">
         <SearchByQuery boardType={boardType} queries={queries} />
-        {boardType !== 'recruit' && (
-          <Button
-            type="primary"
-            onClick={onClickWrite}
-            className="button button-write"
-          >
-            게시글 작성
-          </Button>
-        )}
+        <WriteButton
+          user={user}
+          boardType={boardType}
+          onClickWrite={onClickWrite}
+        />
       </div>
       <SearchByTags
         boardType={boardType}

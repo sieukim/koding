@@ -70,6 +70,7 @@ const BoardContainer = ({ boardType, queryParams, tagsParams, sortParams }) => {
 
   return (
     <BoardPresenter
+      user={user}
       loading={loading}
       boardType={boardType}
       posts={posts}
