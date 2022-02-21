@@ -38,6 +38,11 @@ export const SearchByTags = ({ boardType, tagsParams, tagsList, queries }) => {
       return;
     }
 
+    if (inputTag.includes(',')) {
+      message.error('태그는 ,를 포함할 수 없습니다.');
+      return;
+    }
+
     if (inputTag && tagsParams.indexOf(inputTag) === -1) {
       const newTags = [...tagsParams, inputTag];
       queries.set('tags', newTags);

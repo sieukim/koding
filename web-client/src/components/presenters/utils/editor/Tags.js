@@ -1,37 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AutoComplete, Input, message, Tag } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
-import styled from 'styled-components';
 import { getTagColor } from '../function/getTagColor';
-
-const StyledTags = styled.div`
-  height: 30px;
-
-  .ant-tag {
-    margin-bottom: 8px;
-  }
-
-  .custom-tag {
-    width: 78px;
-    vertical-align: top;
-    background: #ffff;
-    border-style: dashed;
-
-    :hover {
-      cursor: pointer;
-    }
-  }
-
-  .input-tag-visible {
-    width: 78px;
-    vertical-align: top;
-    margin-bottom: 8px;
-  }
-
-  .input-tag-invisible {
-    display: none;
-  }
-`;
+import { StyledTags } from '../../styled/post/StyledTags';
 
 export const Tags = ({ boardType, tags, setTags, tagsList }) => {
   // 입력창 여부
@@ -46,6 +17,7 @@ export const Tags = ({ boardType, tags, setTags, tagsList }) => {
   // 입력 태그 onClick 핸들러
   const onClickInput = useCallback(() => {
     setInputVisible(true);
+    // eslint-disable-next-line
   }, [inputRef]);
 
   useEffect(() => {
@@ -64,11 +36,17 @@ export const Tags = ({ boardType, tags, setTags, tagsList }) => {
       return;
     }
 
+    if (inputTag.includes(',')) {
+      message.error('태그는 ,를 포함할 수 없습니다.');
+      return;
+    }
+
     if (inputTag && tags.indexOf(inputTag) === -1) {
       setTags((tags) => [...tags, inputTag]);
     }
     setInputVisible(false);
     setInputTag('');
+    // eslint-disable-next-line
   }, [inputTag, tags, boardType]);
 
   // 입력창 엔터 버튼 onPress 핸들러 (-> 입력 태그 추가)
@@ -81,10 +59,12 @@ export const Tags = ({ boardType, tags, setTags, tagsList }) => {
     (closedTag) => {
       setTags((tags) => tags.filter((tag) => tag !== closedTag));
     },
+    // eslint-disable-next-line
     [boardType],
   );
 
   // 전체 태그 삭제 onClick 핸들러
+  // eslint-disable-next-line
   const onClickRemoveAll = useCallback(() => setTags([]), [boardType]);
 
   // autoComplete filterOption
@@ -103,6 +83,7 @@ export const Tags = ({ boardType, tags, setTags, tagsList }) => {
       setInputVisible(false);
       setInputTag('');
     },
+    // eslint-disable-next-line
     [tags, boardType],
   );
 
