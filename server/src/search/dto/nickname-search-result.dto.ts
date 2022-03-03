@@ -1,13 +1,13 @@
 import { Type } from "class-transformer";
 import { IsOptional, IsString } from "class-validator";
 import { ApiPropertyOptional, PickType } from "@nestjs/swagger";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 
 export class NicknameAndAvatar extends PickType(User, [
   "nickname",
   "avatarUrl",
 ] as const) {
-  constructor(nickname: string, avatarUrl?: string) {
+  constructor(nickname: string, avatarUrl: string | null) {
     super();
     this.nickname = nickname;
     this.avatarUrl = avatarUrl;

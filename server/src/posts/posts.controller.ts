@@ -27,13 +27,12 @@ import {
   ApiServiceUnavailableResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
 import { ModifyPostRequestDto } from "./dto/modify-post-request.dto";
 
 import { PostListWithCursorDto } from "./dto/post-list-with-cursor.dto";
 import { PostWithAroundInfoDto } from "./dto/post-with-around-info.dto";
-import { User } from "../models/user.model";
+import { User } from "../entities/user.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ReadPostQuery } from "./query/read-post.query";
 import { BoardTypeParamDto } from "./dto/param/board-type-param.dto";
@@ -49,8 +48,8 @@ import { LikePostCommand } from "./commands/like-post.command";
 import { UnlikePostCommand } from "./commands/unlike-post.command";
 import { UserLikePostInfoDto } from "./dto/user-like-post-info.dto";
 import { CheckUserLikePostQuery } from "./query/check-user-like-post.query";
-import { ScrapPostCommand } from "../users/commands/scrap-post.command";
-import { UnscrapPostCommand } from "../users/commands/unscrap-post.command";
+import { ScrapPostCommand } from "./commands/scrap-post.command";
+import { UnscrapPostCommand } from "./commands/unscrap-post.command";
 import { CheckUserScrapPostQuery } from "./query/check-user-scrap-post.query";
 import { UserScrapPostInfoDto } from "./dto/user-scrap-post-info.dto";
 import { ReportPostCommand } from "./commands/report-post.command";
@@ -58,6 +57,7 @@ import { ReportPostRequestDto } from "./dto/report-post-request.dto";
 import { SearchPostQuery } from "../search/queries/search-post.query";
 import { SearchPostQueryDto } from "../search/dto/query/search-post-query.dto";
 import { RealIp } from "nestjs-real-ip";
+import { LoggedInGuard } from "../auth/guard/authorization/logged-in.guard";
 
 @ApiTags("POST")
 @ApiBadRequestResponse({
@@ -85,7 +85,7 @@ export class PostsController {
     description: "게시글 쓰기 성공",
     type: PostInfoDto,
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post(":boardType")
   async writePost(
@@ -157,7 +157,7 @@ export class PostsController {
     description: "게시글 수정 성공",
     type: PostInfoDto,
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.OK)
   @Patch(":boardType/:postId")
   async modifyPost(
@@ -180,7 +180,7 @@ export class PostsController {
   @ApiNoContentResponse({
     description: "게시글 식제 성공",
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":boardType/:postId")
   async deletePost(

@@ -1,5 +1,5 @@
 import { IQuery } from "@nestjs/cqrs";
-import { PostBoardType } from "../../models/post.model";
+import { PostBoardType } from "../../entities/post-board.type";
 
 export class GetWritingCommentsQuery implements IQuery {
   constructor(

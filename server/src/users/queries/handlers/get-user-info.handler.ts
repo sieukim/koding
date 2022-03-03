@@ -1,19 +1,24 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetUserInfoQuery } from "../get-user-info.query";
-import { UsersRepository } from "../../users.repository";
 import { UserInfoDto } from "../../dto/user-info.dto";
-import { NotFoundException } from "@nestjs/common";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { User } from "../../../entities/user.entity";
+import { orThrowNotFoundUser } from "src/common/utils/or-throw";
 
 @QueryHandler(GetUserInfoQuery)
 export class GetUserInfoHandler
   implements IQueryHandler<GetUserInfoQuery, UserInfoDto>
 {
-  constructor(private readonly usersRepository: UsersRepository) {}
-
-  async execute(query: GetUserInfoQuery): Promise<UserInfoDto> {
+  @Transaction()
+  async execute(
+    query: GetUserInfoQuery,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<UserInfoDto> {
+    const em = tm!;
     const { nickname } = query;
-    const user = await this.usersRepository.findByNickname(nickname);
-    if (!user) throw new NotFoundException("잘못된 사용자");
+    const user = await em
+      .findOneOrFail(User, { where: { nickname } })
+      .catch(orThrowNotFoundUser);
     return UserInfoDto.fromModel(user);
   }
 }

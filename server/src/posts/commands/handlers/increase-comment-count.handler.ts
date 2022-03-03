@@ -1,20 +1,23 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import {
-  IncreaseCommentCountCommand,
-  IncreaseType,
-} from "../increase-comment-count.command";
-import { PostsRepository } from "../../posts.repository";
+import { IncreaseCommentCountCommand } from "../increase-comment-count.command";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { Post } from "../../../entities/post.entity";
+import { increaseField } from "../../../common/utils/increase-field";
 
 @CommandHandler(IncreaseCommentCountCommand)
 export class IncreaseCommentCountHandler
   implements ICommandHandler<IncreaseCommentCountCommand>
 {
-  constructor(private readonly postsRepository: PostsRepository) {}
-
-  async execute(command: IncreaseCommentCountCommand): Promise<any> {
-    const { postIdentifier, type } = command;
-    if (type === IncreaseType.Positive)
-      return this.postsRepository.increaseCommentCount(postIdentifier);
-    else return this.postsRepository.decreaseCommentCount(postIdentifier);
+  @Transaction()
+  async execute(
+    command: IncreaseCommentCountCommand,
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
+    const {
+      postIdentifier: { postId, boardType },
+      type,
+    } = command;
+    await increaseField(em, Post, "commentCount", type, { postId, boardType });
   }
 }

@@ -1,79 +1,74 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { ReadCommentsQuery } from "../read-comments.query";
-import { PostsRepository } from "../../../posts/posts.repository";
-import { CommentsRepository } from "../../comments.repository";
 import { ReadCommentsDto } from "../../dto/read-comments.dto";
-import { SortOrder } from "../../../common/repository/sort-option";
-import { NotFoundException } from "@nestjs/common";
-import { Comment } from "../../../models/comment.model";
-import { CommentLikeService } from "../../services/comment-like.service";
+import { Comment } from "../../../entities/comment.entity";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { orThrowNotFoundPost } from "../../../common/utils/or-throw";
+import { Post } from "../../../entities/post.entity";
+import { Fetched } from "../../../common/types/fetched.type";
 
 @QueryHandler(ReadCommentsQuery)
 export class ReadCommentsHandler
   implements IQueryHandler<ReadCommentsQuery, ReadCommentsDto>
 {
-  constructor(
-    private readonly postsRepository: PostsRepository,
-    private readonly commentsRepository: CommentsRepository,
-    private readonly commentLikeService: CommentLikeService,
-  ) {}
-
-  async execute(query: ReadCommentsQuery): Promise<ReadCommentsDto> {
-    const { postIdentifier, cursorCommentId, pageSize, readerNickname } = query;
-    const post = await this.postsRepository.findByPostId(postIdentifier);
-    if (!post) throw new NotFoundException("잘못된 게시글입니다");
-    let comments: Comment[];
-    let nextPageCursor: string | undefined;
-    let prevPageCursor: string | undefined;
-    if (!cursorCommentId) {
-      comments = await this.commentsRepository.findAllWith(
-        {
-          postId: { eq: postIdentifier.postId },
-        },
-        ["writer"],
-        {
-          commentId: SortOrder.ASC,
-        },
-        pageSize + 1,
-      );
-    } else {
-      comments = await this.commentsRepository.findAllWith(
-        {
-          postId: { eq: postIdentifier.postId },
-          commentId: { gte: cursorCommentId },
-        },
-        ["writer"],
-        {
-          commentId: SortOrder.ASC,
-        },
-        pageSize + 1,
-      );
-      const prevComments = await this.commentsRepository.findAll(
-        {
-          postId: { eq: postIdentifier.postId },
-          commentId: { lt: cursorCommentId },
-        },
-        { commentId: SortOrder.DESC },
-        pageSize,
-      );
-      if (prevComments.length > 0) {
-        prevPageCursor = prevComments[prevComments.length - 1].commentId;
-      }
-    }
-    if (comments.length === pageSize + 1) {
-      const nextCursorComment = comments.pop();
-      nextPageCursor = nextCursorComment.commentId;
-    }
-    const userLikeComments = await this.commentLikeService.userLikeCommentsSet(
-      comments.map(({ commentId }) => commentId),
+  @Transaction()
+  async execute(
+    query: ReadCommentsQuery,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<ReadCommentsDto> {
+    const em = tm!;
+    const {
+      postIdentifier: { postId, boardType },
+      cursorCommentId,
+      pageSize,
       readerNickname,
-    );
+    } = query;
+    await em
+      .findOneOrFail(Post, {
+        where: { postId, boardType },
+        select: ["postId"],
+      })
+      .catch(orThrowNotFoundPost);
+    let nextPageCursor: string | undefined;
+    const qb = em
+      .createQueryBuilder(Comment, "comment")
+      .leftJoinAndSelect("comment.writer", "writer")
+      .where("comment.postId = :postId", { postId })
+      .orderBy("comment.createdAt", "ASC")
+      .addOrderBy("comment.commentId", "ASC")
+      .limit(pageSize);
+
+    if (cursorCommentId) {
+      const [createdAt, commentId] = cursorCommentId.split(",");
+      qb.andWhere(
+        "(comment.createdAt > :createdAt OR (comment.createdAt = :createdAt AND comment.commentId > :commentId))",
+        {
+          createdAt: new Date(parseInt(createdAt)),
+          commentId,
+        },
+      );
+    }
+    if (readerNickname)
+      qb.leftJoinAndSelect(
+        "comment.likes",
+        "like",
+        "like.nickname = :nickname",
+        { nickname: readerNickname },
+      );
+
+    const comments = (await qb.getMany()) as Array<Fetched<Comment, "writer">>;
+    if (comments.length === pageSize) {
+      const { createdAt, commentId } = comments[pageSize - 1];
+      nextPageCursor = [createdAt.getTime().toString(), commentId].join(",");
+    }
+
     return new ReadCommentsDto(
-      comments.map((comment: Comment & { liked: boolean }) => {
-        comment.liked = userLikeComments.has(comment.commentId);
-        return comment;
-      }),
-      prevPageCursor,
+      comments.map(
+        (comment: Fetched<Comment, "writer"> & { liked: boolean }) => {
+          comment.liked = (comment.likes?.length ?? 0) > 0;
+          return comment;
+        },
+      ),
       nextPageCursor,
     );
   }

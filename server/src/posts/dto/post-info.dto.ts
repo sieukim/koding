@@ -1,5 +1,5 @@
 import { PickType } from "@nestjs/swagger";
-import { Post } from "../../models/post.model";
+import { Post } from "../../entities/post.entity";
 import { plainToClass } from "class-transformer";
 
 export class PostInfoDto extends PickType(Post, [

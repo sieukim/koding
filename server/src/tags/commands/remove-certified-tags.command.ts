@@ -1,5 +1,5 @@
 import { ICommand } from "@nestjs/cqrs";
-import { PostBoardType } from "../../models/post.model";
+import { PostBoardType } from "../../entities/post-board.type";
 
 export class RemoveCertifiedTagsCommand implements ICommand {
   constructor(

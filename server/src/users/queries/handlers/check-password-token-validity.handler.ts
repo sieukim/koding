@@ -1,18 +1,23 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { CheckPasswordTokenValidityQuery } from "../check-password-token-validity.query";
-import { UsersRepository } from "../../users.repository";
-import { NotFoundException } from "@nestjs/common";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { User } from "../../../entities/user.entity";
+import { orThrowNotFoundUser } from "../../../common/utils/or-throw";
 
 @QueryHandler(CheckPasswordTokenValidityQuery)
 export class CheckPasswordTokenValidityHandler
   implements IQueryHandler<CheckPasswordTokenValidityQuery, void>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
-
-  async execute(query: CheckPasswordTokenValidityQuery): Promise<void> {
+  @Transaction()
+  async execute(
+    query: CheckPasswordTokenValidityQuery,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<void> {
+    const em = tm!;
     const { verifyToken, email } = query;
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new NotFoundException("잘못된 사용자");
+    const user = await em
+      .findOneOrFail(User, { where: { email } })
+      .catch(orThrowNotFoundUser);
     user.verifyPasswordResetToken(verifyToken);
   }
 }

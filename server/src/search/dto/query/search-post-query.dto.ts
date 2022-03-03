@@ -40,5 +40,5 @@ export class SearchPostQueryDto extends CursorPagingQueryDto {
     enum: PostSortType,
     default: PostSortType.Associativity,
   })
-  sort?: PostSortType = PostSortType.Associativity;
+  sort: PostSortType = PostSortType.Associativity;
 }

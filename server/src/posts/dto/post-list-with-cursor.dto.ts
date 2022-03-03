@@ -1,10 +1,10 @@
 import { IntersectionType } from "@nestjs/swagger";
 import { PostListDto } from "./post-list.dto";
-import { WithCursorResponseDto } from "../../common/dto/with-cursor-response.dto";
+import { WithNextCursorDto } from "../../common/dto/with-next-cursor.dto";
 
 export class PostListWithCursorDto extends IntersectionType(
   PostListDto,
-  WithCursorResponseDto,
+  WithNextCursorDto,
 ) {
   constructor(param?: Readonly<PostListWithCursorDto>) {
     super();

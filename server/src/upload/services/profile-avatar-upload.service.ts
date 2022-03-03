@@ -1,10 +1,10 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
 import { S3Service } from "./s3.service";
-import { S3ProfileAvatarDocument } from "../../schemas/s3-profile-avatar.schema";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { getCurrentTime } from "../../common/utils/time.util";
+import { InjectEntityManager } from "@nestjs/typeorm";
+import { EntityManager, MoreThan } from "typeorm";
+import { S3ProfileAvatar } from "../../entities/s3-profile.avatar.entity";
 
 @Injectable()
 export class ProfileAvatarUploadService {
@@ -12,68 +12,62 @@ export class ProfileAvatarUploadService {
 
   constructor(
     private readonly s3Service: S3Service,
-    @InjectModel(S3ProfileAvatarDocument.name)
-    private readonly profileAvatarModel: Model<S3ProfileAvatarDocument>,
+    @InjectEntityManager() private readonly em: EntityManager,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async deleteUnusedTemporaryFile() {
-    const deadline = getCurrentTime();
-    deadline.setHours(
-      deadline.getHours() - S3ProfileAvatarDocument.EXPIRE_HOUR,
-    );
-    const files = await this.profileAvatarModel
-      .find({
-        createdAt: { $gte: deadline },
-        nickname: null,
-      })
-      .exec();
-    await this.s3Service
-      .deleteProfileAvatarFiles(files.map((file) => file.s3FileKey))
-      .catch((err) =>
-        this.logger.error(
-          `error while removing s3 profile avatar : ${err.toString?.() ?? err}`,
-        ),
+    return this.em.transaction(async (em) => {
+      const deadline = getCurrentTime();
+      deadline.setHours(deadline.getHours() - S3ProfileAvatar.EXPIRE_HOUR);
+      const files = await em.find(S3ProfileAvatar, {
+        where: { createdAt: MoreThan(deadline), uploaderNickname: null },
+      });
+
+      await this.s3Service
+        .deleteProfileAvatarFiles(files.map((file) => file.s3FileKey))
+        .catch((err) =>
+          this.logger.error(
+            `error while removing s3 profile avatar : ${
+              err.toString?.() ?? err
+            }`,
+          ),
+        );
+      await em.remove(files);
+      this.logger.log(
+        `unused(during ${S3ProfileAvatar.EXPIRE_HOUR} hour) temporary profile avatar files deleted from AWS S3`,
       );
-    await this.profileAvatarModel
-      .deleteMany({
-        _id: { $in: files.map((file) => file._id) },
-      })
-      .exec();
-    this.logger.log(
-      `unused(during ${S3ProfileAvatarDocument.EXPIRE_HOUR} hour) temporary profile avatar files deleted from AWS S3`,
-    );
+    });
   }
 
   async saveTemporaryProfileAvatarInfo(file: Express.MulterS3.File) {
-    const profileAvatar = await this.profileAvatarModel.create({
-      nickname: null,
+    const profileAvatar = new S3ProfileAvatar({
       s3FileUrl: file.location,
       s3FileKey: file.key,
     });
+    await this.em.save(profileAvatar, { reload: false });
     return profileAvatar.s3FileUrl;
   }
 
   async setOwnerOfProfileAvatarInfo(fileUrl: string, nickname: string) {
-    await this.profileAvatarModel.updateOne(
+    await this.em.update(
+      S3ProfileAvatar,
       { s3FileUrl: fileUrl },
-      {
-        nickname,
-      },
+      { uploaderNickname: nickname },
     );
     return;
   }
 
   async removeProfileAvatarInfo(fileUrl: string) {
-    const file = await this.profileAvatarModel
-      .findOneAndRemove({
-        s3FileUrl: fileUrl,
-      })
-      .exec();
-    if (!file) return;
-    await this.s3Service
-      .deleteProfileAvatarFiles([file.s3FileKey])
-      .catch((err) => this.logger.error(err));
-    return;
+    return this.em.transaction(async (em) => {
+      const file = await em.findOne(S3ProfileAvatar, {
+        where: { s3FileUrl: fileUrl },
+      });
+      if (!file) return;
+      await this.s3Service
+        .deleteProfileAvatarFiles([file.s3FileKey])
+        .catch((err) => this.logger.error(err));
+      await em.remove(file);
+    });
   }
 }

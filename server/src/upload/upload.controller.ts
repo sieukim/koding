@@ -12,10 +12,10 @@ import {
   ApiOperation,
   ApiTags,
 } from "@nestjs/swagger";
-import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { PostImageUploadResultDto } from "./dto/post-image-upload-result.dto";
 import { PostImageUploadRequestDto } from "./dto/post-image-upload-request.dto";
 import { PostImageUploadInterceptor } from "./interceptors/post-image-upload.interceptor";
+import { LoggedInGuard } from "../auth/guard/authorization/logged-in.guard";
 
 @ApiTags("UPLOAD")
 @Controller("api/upload")
@@ -30,7 +30,7 @@ export class UploadController {
     type: PostImageUploadResultDto,
   })
   @UseInterceptors(PostImageUploadInterceptor)
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(LoggedInGuard)
   @Post("/posts")
   saveFile(@UploadedFile() file: Express.MulterS3.File) {
     console.log(file);

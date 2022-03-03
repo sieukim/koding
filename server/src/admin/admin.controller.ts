@@ -10,10 +10,9 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { HasRoles } from "../common/decorator/roles.decorator";
-import { Role } from "../models/role.enum";
-import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
+import { Role } from "../entities/role.enum";
 import { LoginUser } from "../common/decorator/login-user.decorator";
-import { User } from "../models/user.model";
+import { User } from "../entities/user.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ForceDeletePostCommand } from "./commands/force-delete-post.command";
 import { ForceDeleteCommentCommand } from "./commands/force-delete-comment.command";
@@ -40,12 +39,13 @@ import { CancelPostReportCommand } from "./commands/cancel-post-report.command";
 import { CancelPostReportHandler } from "./commands/handlers/cancel-post-report.handler";
 import { CancelPostAllReportsCommand } from "./commands/cancel-post-all-reports.command";
 import { CancelPostAllReportsHandler } from "./commands/handlers/cancel-post-all-reports.handler";
+import { LoggedInGuard } from "../auth/guard/authorization/logged-in.guard";
 
 @ApiTags("ADMIN")
 @ApiForbiddenResponse({
   description: "관리자 전용",
 })
-@UseGuards(VerifiedUserGuard)
+@UseGuards(LoggedInGuard)
 @HasRoles(Role.Admin)
 @Controller("api/admin")
 export class AdminController {
@@ -57,7 +57,6 @@ export class AdminController {
   /*
    * 관리자 추가
    */
-  @HasRoles(Role.User) // TODO: 프로덕션에서는 제거
   @Post("/admins/:nickname")
   setAdmin(@Param("nickname") nickname: string) {
     return this.commandBus.execute(new SetAdminCommand(nickname));

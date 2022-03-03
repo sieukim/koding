@@ -1,23 +1,29 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { ForceDeletePostCommand } from "../force-delete-post.command";
-import { PostsRepository } from "../../../posts/posts.repository";
-import { NotFoundException } from "@nestjs/common";
 import { PostDeletedByAdminEvent } from "../../events/post-deleted-by-admin.event";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { orThrowNotFoundPost } from "../../../common/utils/or-throw";
+import { Post } from "../../../entities/post.entity";
 
 @CommandHandler(ForceDeletePostCommand)
 export class ForceDeletePostHandler
   implements ICommandHandler<ForceDeletePostCommand>
 {
-  constructor(
-    private readonly postsRepository: PostsRepository,
-    private readonly eventBus: EventBus,
-  ) {}
+  constructor(private readonly eventBus: EventBus) {}
 
-  async execute(command: ForceDeletePostCommand): Promise<void> {
-    const { postIdentifier } = command;
-    const post = await this.postsRepository.findByPostId(postIdentifier);
-    if (!post) throw new NotFoundException("없는 게시글");
-    await this.postsRepository.remove(post);
+  @Transaction()
+  async execute(
+    command: ForceDeletePostCommand,
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
+    const {
+      postIdentifier: { postId, boardType },
+    } = command;
+    const post = await em
+      .findOneOrFail(Post, { where: { postId, boardType } })
+      .catch(orThrowNotFoundPost);
+    await em.remove(post);
     if (post.writerNickname)
       this.eventBus.publish(new PostDeletedByAdminEvent(post));
   }

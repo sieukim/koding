@@ -1,29 +1,44 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { DeleteAccountCommand } from "../delete-account.command";
-import { UsersRepository } from "../../users.repository";
 import { UserDeletedEvent } from "../../events/user-deleted.event";
 import { ProfileAvatarChangedEvent } from "../../../upload/event/profile-avatar-changed.event";
+import { EntityManager, In, Transaction, TransactionManager } from "typeorm";
+import { User } from "../../../entities/user.entity";
+import { orThrowNotFoundUser } from "../../../common/utils/or-throw";
+import { increaseField } from "../../../common/utils/increase-field";
+import { Fetched } from "../../../common/types/fetched.type";
 
 @CommandHandler(DeleteAccountCommand)
 export class DeleteAccountHandler
   implements ICommandHandler<DeleteAccountCommand>
 {
-  constructor(
-    private readonly usersRepository: UsersRepository,
-    private readonly eventBus: EventBus,
-  ) {}
+  constructor(private readonly eventBus: EventBus) {}
 
-  async execute(command: DeleteAccountCommand): Promise<void> {
-    const { requestUserNickname, nickname } = command;
-    const [requestUser, user] = await Promise.all([
-      this.usersRepository.findByNickname(requestUserNickname),
-      this.usersRepository.findByNickname(nickname),
+  @Transaction()
+  async execute(
+    command: DeleteAccountCommand,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<void> {
+    const em = tm!;
+    const { nickname } = command;
+    const user = (await em
+      .findOneOrFail(User, {
+        where: { nickname },
+        relations: ["followings", "followers"],
+      })
+      .catch(orThrowNotFoundUser)) as Fetched<User, "followings" | "followers">;
+    await Promise.all([
+      increaseField(em, User, "followersCount", -1, {
+        nickname: In(user.followings.map((f) => f.toNickname)),
+      }),
+      increaseField(em, User, "followingsCount", -1, {
+        nickname: In(user.followers.map((f) => f.fromNickname)),
+      }),
     ]);
-    user.verifySameUser(requestUser);
-    await this.usersRepository.remove(user);
+    await em.remove(user);
     this.eventBus.publishAll([
       new UserDeletedEvent(nickname),
-      new ProfileAvatarChangedEvent(user.nickname, user.avatarUrl, undefined),
+      new ProfileAvatarChangedEvent(user.nickname, user.avatarUrl, null),
     ]);
   }
 }

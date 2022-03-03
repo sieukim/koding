@@ -16,16 +16,3 @@ export class EmailUserGuard extends LoggedInGuard {
     return true;
   }
 }
-
-@Injectable()
-export class EmailVerifiedUserGuard extends EmailUserGuard {
-  canActivate(context: ExecutionContext): boolean {
-    super.canActivate(context);
-    const user = context.switchToHttp().getRequest<Request>().user;
-    if (!user.emailSignupVerified)
-      throw new ForbiddenException(
-        "이메일 회원가입 인증(이메일 인증)이 된 유저만 접근할 수 있습니다",
-      );
-    return true;
-  }
-}

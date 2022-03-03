@@ -1,26 +1,23 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { MarkReadNotificationCommand } from "../mark-read-notification.command";
-import { NotificationsRepository } from "../../notifications.repository";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { Notification } from "../../../entities/notification.entity";
 
 @CommandHandler(MarkReadNotificationCommand)
 export class MarkReadNotificationHandler
   implements ICommandHandler<MarkReadNotificationCommand>
 {
-  constructor(
-    private readonly notificationsRepository: NotificationsRepository,
-  ) {}
-
-  async execute(command: MarkReadNotificationCommand): Promise<void> {
+  @Transaction()
+  async execute(
+    command: MarkReadNotificationCommand,
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
     const { notificationId, nickname } = command;
-    await this.notificationsRepository.updateOne(
-      {
-        notificationId: { eq: notificationId },
-        receiverNickname: { eq: nickname },
-      },
-      {
-        read: true,
-      },
+    await em.update(
+      Notification,
+      { notificationId, receiverNickname: nickname },
+      { read: true },
     );
-    return;
   }
 }

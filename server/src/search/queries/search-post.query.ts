@@ -1,6 +1,6 @@
 import { IQuery } from "@nestjs/cqrs";
-import { PostBoardType } from "../../models/post.model";
 import { PostSortType } from "../services/post-search.service";
+import { PostBoardType } from "../../entities/post-board.type";
 
 export class SearchPostQuery implements IQuery {
   constructor(

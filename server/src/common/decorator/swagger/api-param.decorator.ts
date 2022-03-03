@@ -1,5 +1,5 @@
 import { ApiParam } from "@nestjs/swagger";
-import { PostBoardType } from "../../../models/post.model";
+import { PostBoardType } from "../../../entities/post-board.type";
 
 export const ApiParamBoardType = ({
   name = "boardType",

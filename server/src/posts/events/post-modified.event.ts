@@ -1,4 +1,4 @@
-import { PostIdentifier } from "../../models/post.model";
+import { PostIdentifier } from "../../entities/post.entity";
 import { Event } from "../../common/utils/event";
 
 @Event()

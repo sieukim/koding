@@ -1,8 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ofType, Saga } from "@nestjs/cqrs";
 import { filter, map, Observable } from "rxjs";
-import { UserDeletedEvent } from "../../users/events/user-deleted.event";
-import { RenamePostWriterToNullCommand } from "../commands/rename-post-writer-to-null.command";
 import { CommentAddedEvent } from "../../comments/events/comment-added.event";
 import { CommentDeletedEvent } from "../../comments/events/comment-deleted.event";
 import {
@@ -11,18 +9,9 @@ import {
 } from "../commands/increase-comment-count.command";
 import { PostReadCountIncreasedEvent } from "../events/post-read-count-increased.event";
 import { IncreaseReadCountCommand } from "../commands/increase-read-count.command";
-import { PostDeletedEvent } from "../events/post-deleted.event";
-import { DeleteOrphanPostAggreateInfosCommand } from "../commands/delete-orphan-post-aggreate-infos.command";
 
 @Injectable()
 export class PostsSaga {
-  @Saga()
-  updatePostWriterToNull = ($events: Observable<any>) =>
-    $events.pipe(
-      ofType(UserDeletedEvent),
-      map(({ nickname }) => new RenamePostWriterToNullCommand(nickname)),
-    );
-
   @Saga()
   increaseReadCount = ($events: Observable<any>) =>
     $events.pipe(
@@ -50,15 +39,5 @@ export class PostsSaga {
             IncreaseType.Positive,
           );
       }),
-    );
-
-  @Saga()
-  deleteOrphanPostAggregates = ($events: Observable<any>) =>
-    $events.pipe(
-      ofType(PostDeletedEvent),
-      map(
-        ({ postIdentifier }) =>
-          new DeleteOrphanPostAggreateInfosCommand(postIdentifier),
-      ),
     );
 }

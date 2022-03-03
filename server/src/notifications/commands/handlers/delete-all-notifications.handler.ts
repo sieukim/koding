@@ -1,19 +1,24 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { DeleteAllNotificationsCommand } from "../delete-all-notifications.command";
-import { NotificationsRepository } from "../../notifications.repository";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { Notification } from "../../../entities/notification.entity";
 
 @CommandHandler(DeleteAllNotificationsCommand)
 export class DeleteAllNotificationsHandler
   implements ICommandHandler<DeleteAllNotificationsCommand>
 {
-  constructor(
-    private readonly notificationsRepository: NotificationsRepository,
-  ) {}
-
-  async execute(command: DeleteAllNotificationsCommand): Promise<number> {
+  @Transaction()
+  async execute(
+    command: DeleteAllNotificationsCommand,
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
     const { nickname } = command;
-    return this.notificationsRepository.deleteAll({
-      receiverNickname: { eq: nickname },
-    });
+    await em
+      .createQueryBuilder()
+      .delete()
+      .from(Notification)
+      .where("receiverNickname = :nickname", { nickname })
+      .execute();
   }
 }

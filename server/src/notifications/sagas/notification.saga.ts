@@ -1,6 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { ofType, Saga } from "@nestjs/cqrs";
-import { filter, map, mergeAll, mergeMap, Observable } from "rxjs";
+import {
+  catchError,
+  EMPTY,
+  filter,
+  map,
+  mergeAll,
+  mergeMap,
+  Observable,
+} from "rxjs";
 import { CommentAddedEvent } from "../../comments/events/comment-added.event";
 import { AddNotificationCommand } from "../commands/add-notification.command";
 import {
@@ -9,45 +17,52 @@ import {
   FollowNotificationData,
   MentionNotificationData,
   PostDeletedNotificationData,
-} from "../../models/notification.model";
+} from "../../entities/notification.entity";
 import { UserFollowedEvent } from "../../users/events/user-followed.event";
 import { PostDeletedByAdminEvent } from "../../admin/events/post-deleted-by-admin.event";
 import { CommentDeletedByAdminEvent } from "../../admin/events/comment-deleted-by-admin.event";
-import { CommentsRepository } from "../../comments/comments.repository";
-import { PostsRepository } from "../../posts/posts.repository";
+import { EntityManager } from "typeorm";
+import { InjectEntityManager } from "@nestjs/typeorm";
+import { Comment } from "../../entities/comment.entity";
+import { Post } from "../../entities/post.entity";
+import { Fetched } from "../../common/types/fetched.type";
 
 @Injectable()
 export class NotificationSaga {
-  constructor(
-    private readonly commentsRepository: CommentsRepository,
-    private readonly postsRepository: PostsRepository,
-  ) {}
+  constructor(@InjectEntityManager() private readonly em: EntityManager) {}
 
   @Saga()
   commentNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(CommentAddedEvent),
-      mergeMap(async ({ postIdentifier: { postId, boardType }, commentId }) => {
-        const [comment, post] = await Promise.all([
-          this.commentsRepository.findByCommentId(commentId),
-          this.postsRepository.findByPostId({ postId, boardType }),
-        ]);
-        return { post, comment };
+      mergeMap(async ({ postIdentifier, commentId }) => {
+        const comment = (await this.em.findOneOrFail(Comment, {
+          where: { commentId },
+          relations: ["post"],
+        })) as Fetched<Comment, "post">;
+        comment.verifyOwnerPost(postIdentifier);
+        return { post: comment.post, comment };
       }),
+      catchError(() => EMPTY),
       filter(
-        // 본인 게시글에 본인이 댓글을 단 경우는 알람에서 제외
+        // 본인 게시글에 본인이 댓글을 단 경우는 알림에서 제외
         ({ post, comment }) => comment.writerNickname !== post.writerNickname,
+      ),
+      filter(
+        // 게시글 혹은 댓글 작성자가 탈퇴한 경우는 알림에서 제외
+        ({ post, comment }) =>
+          post.writerNickname !== null && comment.writerNickname !== null,
       ),
       map(
         ({ post, comment }) =>
           new AddNotificationCommand(
-            post.writerNickname,
+            post.writerNickname!,
             new CommentNotificationData({
               commentId: comment.commentId,
               boardType: post.boardType,
               postId: post.postId,
               commentContent: comment.content,
-              commentWriterNickname: comment.writerNickname,
+              commentWriterNickname: comment.writerNickname!,
               postTitle: post.title,
             }),
           ),
@@ -58,13 +73,19 @@ export class NotificationSaga {
   mentionNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(CommentAddedEvent),
-      mergeMap(async ({ postIdentifier: { postId, boardType }, commentId }) => {
-        const [comment, post] = await Promise.all([
-          this.commentsRepository.findByCommentId(commentId),
-          this.postsRepository.findByPostId({ postId, boardType }),
-        ]);
-        return { post, comment };
+      mergeMap(async ({ postIdentifier, commentId }) => {
+        const comment = (await this.em.findOneOrFail(Comment, {
+          where: { commentId },
+          relations: ["post"],
+        })) as Fetched<Comment, "post">;
+        comment.verifyOwnerPost(postIdentifier);
+        return { post: comment.post, comment };
       }),
+      catchError(() => EMPTY),
+      filter(
+        // 댓글 작성자가 탈퇴한 경우는 알림에서 제외
+        ({ comment }) => comment.writerNickname !== null,
+      ),
       map(({ post, comment }) =>
         comment.mentionedNicknames.map(
           (mentionedNickname) =>
@@ -75,7 +96,7 @@ export class NotificationSaga {
                 postTitle: post.title,
                 commentContent: comment.content,
                 commentId: comment.commentId,
-                commentWriterNickname: comment.writerNickname,
+                commentWriterNickname: comment.writerNickname!,
                 boardType: post.boardType,
               }),
             ),
@@ -103,10 +124,11 @@ export class NotificationSaga {
   postDeletedNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(PostDeletedByAdminEvent),
+      filter(({ post: { writerNickname } }) => writerNickname !== null),
       map(
         ({ post: { postId, boardType, writerNickname, title } }) =>
           new AddNotificationCommand(
-            writerNickname,
+            writerNickname!,
             new PostDeletedNotificationData({ postId, boardType, title }),
           ),
       ),
@@ -116,6 +138,7 @@ export class NotificationSaga {
   commentDeletedNotification = ($events: Observable<any>) =>
     $events.pipe(
       ofType(CommentDeletedByAdminEvent),
+      filter(({ comment: { writerNickname } }) => writerNickname !== null),
       mergeMap(
         async ({
           comment: {
@@ -126,12 +149,11 @@ export class NotificationSaga {
             content,
           },
         }) => {
-          const post = await this.postsRepository.findByPostId({
-            postId,
-            boardType,
+          const post = await this.em.findOneOrFail(Post, {
+            where: { postId, boardType },
           });
           return new AddNotificationCommand(
-            commentWriterNickname,
+            commentWriterNickname!,
             new CommentDeletedNotificationData({
               postId,
               boardType,
@@ -142,5 +164,6 @@ export class NotificationSaga {
           );
         },
       ),
+      catchError(() => EMPTY),
     );
 }

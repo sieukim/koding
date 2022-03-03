@@ -1,5 +1,5 @@
 import { ICommand } from "@nestjs/cqrs";
-import { NotificationDataType } from "../../models/notification.model";
+import { NotificationDataType } from "../../entities/notification.entity";
 
 export class AddNotificationCommand implements ICommand {
   constructor(

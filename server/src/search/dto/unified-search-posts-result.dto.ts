@@ -1,17 +1,24 @@
 import { PostMetadataInfoDto } from "src/posts/dto/post-metadata-info.dto";
-import { PostBoardType } from "../../models/post.model";
 import { ApiProperty } from "@nestjs/swagger";
-import { ArrayMaxSize } from "class-validator";
+import { ArrayMaxSize, IsNumber, Min } from "class-validator";
 import { Expose, plainToClass } from "class-transformer";
-import { PostListDto } from "../../posts/dto/post-list.dto";
+import { PostBoardType } from "../../entities/post-board.type";
 
-export class SearchPostResultDto extends PostListDto {
+export class SearchPostResultDto {
   @Expose()
   @ArrayMaxSize(5)
   @ApiProperty({
     description: "요약된 검색 결과.",
   })
   posts: PostMetadataInfoDto[];
+
+  @Expose()
+  @Min(0)
+  @IsNumber()
+  @ApiProperty({
+    description: "조건에 맞는 총 게시글 수",
+  })
+  totalCount: number;
 }
 
 export class UnifiedSearchPostsResultDto
@@ -22,11 +29,11 @@ export class UnifiedSearchPostsResultDto
   @Expose()
   career: SearchPostResultDto;
   @Expose()
-  column: SearchPostResultDto;
+  community: SearchPostResultDto;
   @Expose()
-  common: SearchPostResultDto;
+  blog: SearchPostResultDto;
   @Expose()
-  question: SearchPostResultDto;
+  qna: SearchPostResultDto;
   @Expose()
   recruit: SearchPostResultDto;
 

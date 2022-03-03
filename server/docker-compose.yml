@@ -7,16 +7,45 @@ services:
       - "3001:3001"
     depends_on:
       - elasticsearch-mapping-init
-      - monstache
       - redis
+      - mysql
     links:
-      - mongo
       - elasticsearch
       - redis
+      - mysql
 
+  mysql:
+    image: mysql:8.0.28
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=1111
+      - MYSQL_DATABASE=koding
+      - MYSQL_USER=koding-user
+      - MYSQL_PASSWORD=1111
+      - TZ=Asia/Seoul
+    command: # 명령어 실행
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - ./mysql/db:/var/lib/mysql
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.0
+    volumes:
+      - ./logstash/mysql-connector-java-8.0.28.jar:/usr/share/logstash/mysql-connector-java-8.0.28.jar
+      - ./logstash/pipelines.yml/:/usr/share/logstash/config/pipelines.yml
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+    ports:
+      - "5044:5044"
+    depends_on:
+      - mysql
+      - elasticsearch
+    links:
+      - mysql
+      - elasticsearch
 
   elasticsearch:
-    restart: always
     build: elasticsearch
     ports:
       - "9200:9200"
@@ -38,52 +67,19 @@ services:
       - elasticsearch
     depends_on:
       - elasticsearch
-  
+
   kibana:
-    restart: always
-    image: docker.elastic.co/kibana/kibana:6.8.14
-    expose:
-      - 5601
+    image: docker.elastic.co/kibana/kibana:7.17.0
     ports:
-      - 5601:5601
+      - "5601:5601"
     depends_on:
       - elasticsearch-mapping-init
     environment:
       - SERVER_PORT=5601
-      - SERVER_NAME=kibana.example.org
+      - SERVER_NAME=kibana
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     links:
       - elasticsearch
-
-  monstache:
-    restart: always
-    image: rwynn/monstache:rel5
-    command: -f /home/monstache.config.toml &
-    volumes:
-      - ./monstache/monstache.config.toml:/home/monstache.config.toml
-    depends_on:
-      - elasticsearch-mapping-init
-      - mongo-replica-init
-    links:
-      - elasticsearch
-      - mongo
-    ports:
-      - "8080:8080"
-
-  mongo:
-    image: mongo:5.0.5
-    ports:
-      - "27020:27017"
-    command: mongod --replSet koding-replication
-    volumes:
-      - ./mongo/db:/data/db
-
-  mongo-replica-init:
-    build: mongo-replica-init
-    depends_on:
-      - mongo
-    links:
-      - mongo
 
   redis:
     image: redis:6.2.6-alpine

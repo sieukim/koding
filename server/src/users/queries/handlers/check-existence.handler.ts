@@ -1,23 +1,35 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { UsersRepository } from "src/users/users.repository";
 import { CheckExistenceQuery } from "../check-existence.query";
 import { BadRequestException } from "@nestjs/common";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { User } from "../../../entities/user.entity";
 
 @QueryHandler(CheckExistenceQuery)
 export class CheckExistenceHandler
   implements IQueryHandler<CheckExistenceQuery>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
-
-  async execute(query: CheckExistenceQuery): Promise<boolean> {
+  @Transaction()
+  async execute(
+    query: CheckExistenceQuery,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<boolean> {
+    const em = tm!;
     const { key, value } = query;
-    let user;
+    let user: User | undefined;
     switch (key) {
       case "nickname":
-        user = await this.userRepository.findByNickname(value);
+        user = await em.findOne(User, {
+          where: { nickname: value },
+          select: ["nickname"],
+          loadEagerRelations: false,
+        });
         break;
       case "email":
-        user = await this.userRepository.findByEmail(value);
+        user = await em.findOne(User, {
+          where: { email: value },
+          select: ["nickname"],
+          loadEagerRelations: false,
+        });
         break;
       default:
         throw new BadRequestException("잘못된 key 값입니다");

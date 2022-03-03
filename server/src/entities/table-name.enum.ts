@@ -1,0 +1,17 @@
+export enum TableName {
+  Comment = "comments",
+  CommentLike = "comment_likes",
+  EmailVerifyToken = "email_verify_tokens",
+  Follow = "follows",
+  Notification = "notifications",
+  Post = "posts",
+  PostDailyRanking = "post_daily_rankings",
+  PostLike = "post_likes",
+  PostReport = "post_reports",
+  PostScrap = "post_scraps",
+  S3PostImage = "s3_post_images",
+  S3ProfileAvatar = "s3_profile_avatars",
+  Tag = "tags",
+  TemporaryGithubUser = "temporary_github_users",
+  User = "users",
+}

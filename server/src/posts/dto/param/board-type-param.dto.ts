@@ -1,5 +1,5 @@
 import { IsEnum } from "class-validator";
-import { PostBoardType } from "../../../models/post.model";
+import { PostBoardType } from "../../../entities/post-board.type";
 
 export class BoardTypeParamDto {
   /*

@@ -1,17 +1,20 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ComparePasswordCommand } from "../compare-password.command";
-import { UsersRepository } from "../../users.repository";
-import { User } from "../../../models/user.model";
+import { User } from "../../../entities/user.entity";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
 
 @CommandHandler(ComparePasswordCommand)
 export class ComparePasswordHandler
   implements ICommandHandler<ComparePasswordCommand, User | null>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
-
-  async execute(command: ComparePasswordCommand): Promise<User | null> {
+  @Transaction({ isolation: "READ UNCOMMITTED" })
+  async execute(
+    command: ComparePasswordCommand,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<User | null> {
+    const em = tm!;
     const { password, email } = command;
-    const user = await this.userRepository.findByEmail(email);
+    const user = await em.findOne(User, { where: { email } });
     if (!user) return null;
     if (await user.comparePassword(password)) return user;
     return null;

@@ -1,19 +1,20 @@
 import { PassportSerializer } from "@nestjs/passport";
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { UsersRepository } from "../users/users.repository";
-import { User } from "../models/user.model";
+import { User } from "../entities/user.entity";
+import { EntityManager } from "typeorm";
+import { InjectEntityManager } from "@nestjs/typeorm";
 
 @Injectable()
 export class LocalSerializer extends PassportSerializer {
   private readonly logger = new Logger(LocalSerializer.name);
 
-  constructor(private readonly userRepository: UsersRepository) {
+  constructor(@InjectEntityManager() private readonly em: EntityManager) {
     super();
   }
 
   async deserializeUser(email: any, done: CallableFunction) {
     try {
-      const user = await this.userRepository.findByEmail(email);
+      const user = await this.em.findOne(User, { where: { email } });
       this.logger.log(`deserialize User ${email}`);
       if (user) done(null, user);
       else throw new NotFoundException();

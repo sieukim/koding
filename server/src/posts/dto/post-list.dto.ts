@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Post } from "../../models/post.model";
+import { Post } from "../../entities/post.entity";
 import { Expose, plainToClass } from "class-transformer";
 import { IsNumber, Min } from "class-validator";
 import { PostWithWriterInfoDto } from "./post-with-writer-info.dto";

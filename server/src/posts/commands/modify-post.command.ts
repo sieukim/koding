@@ -1,5 +1,5 @@
 import { ICommand } from "@nestjs/cqrs";
-import { PostIdentifier } from "../../models/post.model";
+import { PostIdentifier } from "../../entities/post.entity";
 import { ModifyPostRequestDto } from "../dto/modify-post-request.dto";
 
 export class ModifyPostCommand implements ICommand {

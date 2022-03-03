@@ -1,6 +1,6 @@
 import { ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
 import { IsOptional } from "class-validator";
-import { Comment } from "../../models/comment.model";
+import { Comment } from "../../entities/comment.entity";
 
 export class ModifyCommentRequestDto extends PartialType(
   PickType(Comment, ["content", "mentionedNicknames"] as const),

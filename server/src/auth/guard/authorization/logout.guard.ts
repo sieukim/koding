@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
 export class LogoutGuard implements CanActivate {
   private readonly sessionCookieName: string;
 
-  constructor(configService: ConfigService) {
+  constructor(configService: ConfigService<any, true>) {
     this.sessionCookieName = configService.get<string>("session.cookie-name");
   }
 

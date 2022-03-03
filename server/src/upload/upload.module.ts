@@ -2,30 +2,15 @@ import { Module } from "@nestjs/common";
 import { MulterModule } from "@nestjs/platform-express";
 import { UploadController } from "./upload.controller";
 import { CqrsModule } from "@nestjs/cqrs";
-import { MongooseModule } from "@nestjs/mongoose";
-import {
-  S3PostImageDocument,
-  S3PostImageSchema,
-} from "../schemas/s3-post-image.schema";
 import { UploadEventHandlers } from "./event/handlers";
-import {
-  S3ProfileAvatarDocument,
-  S3ProfileAvatarSchema,
-} from "../schemas/s3-profile-avatar.schema";
 import { UploadServices } from "./services";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { S3PostImage } from "../entities/s3-post.image.entity";
+import { S3ProfileAvatar } from "../entities/s3-profile.avatar.entity";
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      {
-        name: S3PostImageDocument.name,
-        schema: S3PostImageSchema,
-      },
-      {
-        name: S3ProfileAvatarDocument.name,
-        schema: S3ProfileAvatarSchema,
-      },
-    ]),
+    TypeOrmModule.forFeature([S3PostImage, S3ProfileAvatar]),
     MulterModule.register(),
     CqrsModule,
   ],

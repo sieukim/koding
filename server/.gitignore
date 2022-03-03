@@ -38,8 +38,11 @@ dist/
 
 # config
 config.yml
-config-aws.yml
+config-*.yml
 .env
 
 # front build file
-public
+public/
+
+# ssl cert
+secrets/

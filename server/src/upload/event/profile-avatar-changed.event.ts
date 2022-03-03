@@ -5,7 +5,7 @@ import { Event } from "../../common/utils/event";
 export class ProfileAvatarChangedEvent implements IEvent {
   constructor(
     public readonly nickname: string,
-    public readonly prevImageUrl?: string,
-    public readonly changedImageUrl?: string,
+    public readonly prevImageUrl: string | null,
+    public readonly changedImageUrl: string | null,
   ) {}
 }

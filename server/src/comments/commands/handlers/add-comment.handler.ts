@@ -1,49 +1,63 @@
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { AddCommentCommand } from "../add-comment.command";
-import { PostsRepository } from "../../../posts/posts.repository";
-import { Comment } from "../../../models/comment.model";
-import { UsersRepository } from "../../../users/users.repository";
-import { CommentsRepository } from "../../comments.repository";
-import { Logger, NotFoundException } from "@nestjs/common";
+import { Comment } from "../../../entities/comment.entity";
 import { CommentAddedEvent } from "../../events/comment-added.event";
+import { EntityManager, In, Transaction, TransactionManager } from "typeorm";
+import { User } from "../../../entities/user.entity";
+import {
+  orThrowNotFoundPost,
+  orThrowNotFoundUser,
+} from "src/common/utils/or-throw";
+import { Post } from "../../../entities/post.entity";
 
 @CommandHandler(AddCommentCommand)
 export class AddCommentHandler implements ICommandHandler<AddCommentCommand> {
-  private readonly logger = new Logger(AddCommentHandler.name);
+  constructor(private readonly eventBus: EventBus) {}
 
-  constructor(
-    private readonly postRepository: PostsRepository,
-    private readonly userRepository: UsersRepository,
-    private readonly commentRepository: CommentsRepository,
-    private readonly eventBus: EventBus,
-  ) {}
-
-  async execute(command: AddCommentCommand): Promise<Comment> {
-    const { postIdentifier, addCommentRequest, writerNickname } = command;
+  @Transaction()
+  async execute(
+    command: AddCommentCommand,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<Comment> {
+    const em = tm!;
+    const {
+      postIdentifier: { postId, boardType },
+      addCommentRequest,
+      writerNickname,
+    } = command;
     const { mentionedNicknames, content } = addCommentRequest;
-    const writer = await this.userRepository.findByNickname(writerNickname);
-    if (!writer) throw new NotFoundException("잘못된 작성자 입니다");
-    const post = await this.postRepository.findByPostId(postIdentifier);
-    if (!post) throw new NotFoundException("잘못된 게시글입니다");
-    const mentionedUsers = await this.userRepository.findAll({
-      nickname: { in: mentionedNicknames },
-    });
+    const [writer, mentionedUsers] = await Promise.all([
+      em
+        .findOneOrFail(User, {
+          where: { nickname: writerNickname },
+          select: ["nickname"],
+        })
+        .catch(orThrowNotFoundUser),
+      em.find(User, {
+        where: { nickname: In(mentionedNicknames ?? []) },
+        select: ["nickname"],
+      }),
+      em
+        .findOneOrFail(Post, {
+          where: { postId, boardType },
+          select: ["postId"],
+        })
+        .catch(orThrowNotFoundPost),
+    ]);
     const comment = new Comment({
-      post,
+      postIdentifier: { postId, boardType },
       writerNickname: writer.nickname,
       content,
       mentionedNicknames: mentionedUsers.map((user) => user.nickname),
     });
-    this.logger.log(`before commentId: ${comment.commentId}`);
-    const returned = await this.commentRepository.persist(comment);
-    this.logger.log(`after commentId: ${returned.commentId}`);
+    await em.save(comment, { reload: false });
     this.eventBus.publish(
       new CommentAddedEvent(
-        postIdentifier,
+        { postId, boardType },
         comment.commentId,
         comment.createdAt,
       ),
     );
-    return returned;
+    return comment;
   }
 }

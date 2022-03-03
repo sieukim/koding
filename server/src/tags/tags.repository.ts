@@ -1,30 +1,29 @@
 import { Injectable } from "@nestjs/common";
-import { Model } from "mongoose";
-import { TagDocument } from "../schemas/tag.schema";
-import { InjectModel } from "@nestjs/mongoose";
-import { PostBoardType } from "../models/post.model";
+import { InjectEntityManager } from "@nestjs/typeorm";
+import { EntityManager, In } from "typeorm";
+import { Tag } from "../entities/tag.entity";
+import { increaseField } from "../common/utils/increase-field";
+import { PostBoardType } from "../entities/post-board.type";
 
 @Injectable()
 export class TagsRepository {
-  constructor(
-    @InjectModel(TagDocument.name)
-    private readonly tagModel: Model<TagDocument>,
-  ) {}
+  constructor(@InjectEntityManager() private readonly em: EntityManager) {}
 
   async increaseRefCount(
     boardType: PostBoardType,
     tags: string[],
   ): Promise<void> {
     if (tags.length <= 0) return;
-    await this.tagModel.bulkWrite(
-      tags.map((tag) => ({
-        updateOne: {
-          filter: { tag, boardType },
-          update: { $inc: { refCount: 1 } },
-          upsert: true,
-        },
-      })),
-    );
+    this.em
+      .createQueryBuilder()
+      .insert()
+      .into(Tag)
+      .values(tags.map((tag) => new Tag({ boardType, tag, certified: false })))
+      .orIgnore(true);
+    await increaseField(this.em, Tag, "refCount", 1, {
+      tag: In(tags),
+      boardType,
+    });
   }
 
   async decreaseRefCount(
@@ -32,69 +31,52 @@ export class TagsRepository {
     tags: string[],
   ): Promise<void> {
     if (tags.length <= 0) return;
-    await this.tagModel.bulkWrite(
-      tags.map((tag) => ({
-        updateOne: {
-          filter: { tag, boardType },
-          update: { $inc: { refCount: -1 } },
-          upsert: true,
-        },
-      })),
-    );
-    // 참조되지 않는 태그 삭제
-    await this.tagModel
-      .deleteMany({
-        tags: { $in: tags },
-        boardType,
-        refCount: { $lte: 0 },
-      })
-      .exec();
-  }
-
-  async getCertifiedTags(boardType: PostBoardType): Promise<string[]> {
-    const tags = await this.tagModel
-      .find({ certified: true, boardType })
-      .exec();
-    return tags.map(({ tag }) => tag);
+    await increaseField(this.em, Tag, "refCount", -1, {
+      tag: In(tags),
+      boardType,
+    });
   }
 
   async getAllTags(boardType: PostBoardType): Promise<string[]> {
-    const tags = await this.tagModel
-      .find({
-        boardType,
-      })
-      .exec();
+    const tags = await this.em.find(Tag, {
+      where: { boardType },
+    });
     return tags.map(({ tag }) => tag);
   }
 
   async addCertifiedTags(boardType: PostBoardType, tags: string[]) {
     if (tags.length <= 0) return;
-    await this.tagModel.bulkWrite(
-      tags.map((tag) => ({
-        updateOne: {
-          filter: { tag, boardType },
-          update: { $set: { certified: true } },
-          upsert: true,
-        },
-      })),
+    await this.em.update(
+      Tag,
+      {
+        tag: In(tags),
+        boardType,
+      },
+      {
+        certified: true,
+      },
     );
+    await this.em
+      .createQueryBuilder()
+      .insert()
+      .into(Tag)
+      .values(tags.map((tag) => new Tag({ tag, boardType, certified: true })))
+      .orUpdate(["certified"], ["tag", "boardType"]);
   }
 
   async removeCertifiedTags(boardType: PostBoardType, tags: string[]) {
     if (tags.length <= 0) return 0;
-    const result = await this.tagModel.deleteMany({
-      tags: { $in: tags },
+    await this.em.delete(Tag, {
+      tags: In(tags),
       boardType,
       certified: true,
     });
-    return result.deletedCount;
   }
 
   async removeAllCertifiedTags(boardType: PostBoardType) {
-    const result = await this.tagModel.deleteMany({
-      certified: true,
+    await this.em.delete(Tag, {
       boardType,
+      certified: true,
     });
-    return result.deletedCount;
   }
 }

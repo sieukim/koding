@@ -1,4 +1,4 @@
-import { PostIdentifier } from "../../models/post.model";
+import { PostIdentifier } from "../../entities/post.entity";
 import { IEvent } from "@nestjs/cqrs";
 import { Event } from "../../common/utils/event";
 

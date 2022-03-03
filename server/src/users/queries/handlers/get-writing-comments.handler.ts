@@ -1,35 +1,44 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { GetWritingCommentsQuery } from "../get-writing-comments.query";
-import { CommentsRepository } from "../../../comments/comments.repository";
-import { SortOrder } from "../../../common/repository/sort-option";
-import { FindOption } from "../../../common/repository/find-option";
-import { Comment } from "../../../models/comment.model";
+import { Comment } from "../../../entities/comment.entity";
 import { WritingCommentsInfoDto } from "../../dto/writing-comments-info.dto";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
 
 @QueryHandler(GetWritingCommentsQuery)
 export class GetWritingCommentsHandler
   implements IQueryHandler<GetWritingCommentsQuery, WritingCommentsInfoDto>
 {
-  constructor(private readonly commentsRepository: CommentsRepository) {}
-
+  @Transaction()
   async execute(
     query: GetWritingCommentsQuery,
+    @TransactionManager() tm?: EntityManager,
   ): Promise<WritingCommentsInfoDto> {
+    const em = tm!;
     const { nickname, pageSize, cursor, boardType } = query;
-    const findOption: FindOption<Comment> = {
-      writerNickname: { eq: nickname },
-      boardType: { eq: boardType },
-    };
-    if (cursor) findOption.commentId = { lte: cursor };
-    const comments = await this.commentsRepository.findAllWith(
-      findOption,
-      ["post"],
-      { commentId: SortOrder.DESC },
-      pageSize + 1,
-    );
+    const qb = em
+      .createQueryBuilder(Comment, "comment")
+      .where("comment.writerNickname = :nickname", { nickname })
+      .andWhere("(comment.boardType = :boardType)", { boardType })
+      .innerJoinAndSelect("comment.post", "post")
+      .orderBy("comment.createdAt", "DESC")
+      .addOrderBy("comment.commentId", "DESC")
+      .limit(pageSize + 1);
+    if (cursor) {
+      const [createdAt, commentId] = cursor?.split(",");
+      qb.andWhere(
+        "(comment.createdAt < :createdAt OR (comment.createdAt = :createdAt AND comment.commentId < :commentId))",
+        {
+          createdAt: new Date(parseInt(createdAt)),
+          commentId,
+        },
+      );
+    }
+    const comments = await qb.getMany();
     let nextPageCursor: string | undefined;
-    if (comments.length === pageSize + 1)
-      nextPageCursor = comments.pop().commentId;
+    if (comments.length === pageSize + 1) {
+      const { createdAt, commentId } = comments.pop()!;
+      nextPageCursor = [createdAt.getTime().toString(), commentId].join(",");
+    }
     return new WritingCommentsInfoDto(comments, nextPageCursor);
   }
 }

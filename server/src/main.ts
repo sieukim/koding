@@ -10,26 +10,48 @@ import { ConfigService } from "@nestjs/config";
 import * as cookieParser from "cookie-parser";
 import * as session from "express-session";
 import * as passport from "passport";
-import * as mongoose from "mongoose";
+import * as express from "express";
 import { NextFunction, Request, Response } from "express";
 import { RequestErrorLoggerInterceptor } from "./common/interceptors/request-error-logger.interceptor";
-import { Cache } from "cache-manager";
+import * as connectRedis from "connect-redis";
+import { RedisCache } from "./index";
+import * as http from "http";
+import { ExpressAdapter } from "@nestjs/platform-express";
+import * as https from "https";
+import { ServerOptions } from "https";
+import * as fs from "fs";
+import * as path from "path";
 
-async function testRedisConnection(cache: Cache) {
+async function testRedisConnection(cache: RedisCache) {
   await cache.set("test", "success");
   const success = (await cache.get("test")) === "success";
   if (success) console.log(`Redis Connection Success`);
   else console.warn(`Redis Connection Fail`);
 }
 
-async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+function createRedisSessionStore(cache: RedisCache) {
+  const RedisStore = connectRedis(session);
+  return new RedisStore({
+    client: cache.store.getClient(),
+  });
+}
 
+const httpsOptions: ServerOptions = {
+  key: fs.readFileSync(
+    path.join(__dirname, "..", "secrets", "private-key.pem"),
+  ),
+  cert: fs.readFileSync(
+    path.join(__dirname, "..", "secrets", "public-certificate.pem"),
+  ),
+};
+
+async function bootstrap() {
+  const server = express();
+  const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+  const redisCacheManager = app.get<RedisCache>(CACHE_MANAGER);
   // elasticCache 연결 테스트
-  await testRedisConnection(app.get(CACHE_MANAGER));
-  // 몽구스 쿼리 디버그
-  mongoose.set("debug", true);
-  const configService = app.get(ConfigService);
+  await testRedisConnection(redisCacheManager);
+  const configService = app.get<ConfigService<any, true>>(ConfigService);
   app.use(
     cookieParser(configService.get<string>("cookie.secret")),
     session({
@@ -38,6 +60,7 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: { httpOnly: true },
       name: configService.get<string>("session.cookie-name"),
+      store: createRedisSessionStore(redisCacheManager),
     }),
     passport.initialize(),
     // passport.session(),
@@ -68,7 +91,9 @@ async function bootstrap() {
 
   SwaggerModule.setup("api", app, document);
 
-  await app.listen(3001);
+  await app.init();
+  http.createServer(server).listen(configService.get<number>("port") ?? 80);
+  https.createServer(httpsOptions, server).listen(443);
 }
 
 bootstrap();

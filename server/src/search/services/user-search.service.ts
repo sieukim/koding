@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { ConfigService } from "@nestjs/config";
-import { SortOrder } from "../../common/repository/sort-option";
+import { SortOrder } from "../../common/sort-order.enum";
 import {
   NicknameAndAvatar,
   NicknameSearchResultDto,
@@ -13,7 +13,7 @@ export class UserSearchService {
 
   constructor(
     private readonly elasticsearchService: ElasticsearchService,
-    configService: ConfigService,
+    configService: ConfigService<any, true>,
   ) {
     this.userIndexName = configService.get<string>(
       "database.elasticsearch.index.user",
@@ -23,7 +23,7 @@ export class UserSearchService {
   async searchNicknameWithCursor(
     nickname: string,
     pageSize: number,
-    cursor: string,
+    cursor?: string,
   ) {
     if (cursor?.length === 0) cursor = undefined;
     let nextPageCursor: string | undefined;

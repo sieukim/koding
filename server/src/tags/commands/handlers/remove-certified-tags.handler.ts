@@ -8,14 +8,10 @@ export class RemoveCertifiedTagsHandler
 {
   constructor(private readonly tagsRepository: TagsRepository) {}
 
-  async execute(command: RemoveCertifiedTagsCommand): Promise<any> {
+  async execute(command: RemoveCertifiedTagsCommand) {
     const { tags, boardType, removeAllTags } = command;
     if (removeAllTags)
-      return await this.tagsRepository.removeAllCertifiedTags(boardType);
-    else
-      return await this.tagsRepository.removeCertifiedTags(
-        boardType,
-        tags ?? [],
-      );
+      await this.tagsRepository.removeAllCertifiedTags(boardType);
+    else await this.tagsRepository.removeCertifiedTags(boardType, tags ?? []);
   }
 }

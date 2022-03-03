@@ -1,11 +1,12 @@
 import { PickType } from "@nestjs/swagger";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 import { Expose, plainToClass } from "class-transformer";
 
 export class UserInfoDto extends PickType(User, [
   "email",
   "nickname",
-  "emailSignupVerified",
+  "isGithubUser",
+  "isEmailUser",
   "isPortfolioUrlPublic",
   "isGithubUrlPublic",
   "isBlogUrlPublic",
@@ -13,7 +14,6 @@ export class UserInfoDto extends PickType(User, [
   "githubUrl",
   "blogUrl",
   "githubUserInfo",
-  "githubSignupVerified",
   "followersCount",
   "followingsCount",
   "techStack",
