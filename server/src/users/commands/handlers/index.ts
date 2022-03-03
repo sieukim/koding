@@ -3,16 +3,14 @@ import { SignupGithubHandler } from "./signup-github.handler";
 import { FollowUserHandler } from "./follow-user.handler";
 import { UnfollowUserHandler } from "./unfollow-user.handler";
 import { ComparePasswordHandler } from "./compare-password.handler";
-import { VerifyEmailSignupHandler } from "./verify-email-signup.handler";
 import { ResetPasswordHandler } from "./reset-password.handler";
 import { ResetPasswordRequestHandler } from "./reset-password-request.handler";
 import { VerifyGithubSignupHandler } from "./verify-github-signup.handler";
 import { ChangeProfileHandler } from "./change-profile.handler";
 import { ChangePasswordHandler } from "./change-password.handler";
 import { DeleteAccountHandler } from "./delete-account.handler";
-import { ScrapPostHandler } from "./scrap-post.handler";
-import { UnscrapPostHandler } from "./unscrap-post.handler";
 import { DeleteAvatarHandler } from "./delete-avatar.handler";
+import { SendEmailVerifyTokenHandler } from "./send-email-verify-token.handler";
 
 export const UserCommandHandlers = [
   SignupLocalHandler,
@@ -20,14 +18,12 @@ export const UserCommandHandlers = [
   FollowUserHandler,
   UnfollowUserHandler,
   ComparePasswordHandler,
-  VerifyEmailSignupHandler,
   VerifyGithubSignupHandler,
   ResetPasswordHandler,
   ResetPasswordRequestHandler,
   ChangeProfileHandler,
   ChangePasswordHandler,
   DeleteAccountHandler,
-  ScrapPostHandler,
-  UnscrapPostHandler,
   DeleteAvatarHandler,
+  SendEmailVerifyTokenHandler,
 ];

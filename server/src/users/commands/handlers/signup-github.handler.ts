@@ -1,23 +1,24 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { SignupGithubCommand } from "../signup-github.command";
-import { User } from "../../../models/user.model";
-import { UsersRepository } from "../../users.repository";
-import axios from "axios";
 import {
   GithubRepositoryInfo,
   GithubUserInfo,
-} from "../../../schemas/user.schema";
-import { Logger } from "@nestjs/common";
+  User,
+} from "../../../entities/user.entity";
+import axios from "axios";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { TemporaryGithubUser } from "../../../entities/temporary-github-user.entity";
 
 @CommandHandler(SignupGithubCommand)
 export class SignupGithubHandler
   implements ICommandHandler<SignupGithubCommand>
 {
-  private readonly logger = new Logger(SignupGithubHandler.name);
-
-  constructor(private readonly userRepository: UsersRepository) {}
-
-  async execute(command: SignupGithubCommand): Promise<User> {
+  @Transaction()
+  async execute(
+    command: SignupGithubCommand,
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
     const {
       signupGithubRequest: {
         githubId,
@@ -28,9 +29,7 @@ export class SignupGithubHandler
         name,
       },
     } = command;
-    let user = await this.userRepository.findOne({
-      githubUserIdentifier: { eq: githubUserIdentifier },
-    });
+    let user = await em.findOne(User, { where: { githubUserIdentifier } });
     if (user) return user;
 
     const rawRepositories: any[] = (await axios.get(reposUrl)).data;
@@ -48,22 +47,21 @@ export class SignupGithubHandler
       repositories,
     } as GithubUserInfo;
 
-    user = await this.userRepository.findByEmail(email);
-    this.logger.log(user);
+    user = await em.findOne(User, { where: { email } });
     if (user) {
       user.linkAccountWithGithub(githubUserIdentifier, githubUserInfo);
-      user = await this.userRepository.updateByEmail(user);
+      await em.save(user, { reload: false });
+      console.log("link account with github", user);
+      return user;
     } else {
-      user = new User({
+      const githubUser = new TemporaryGithubUser({
         email,
         githubUserInfo,
         githubUserIdentifier,
-        isGithubUser: true,
       });
-      user.setNewGithubSignupVerifyToken();
-      user = await this.userRepository.persistByEmail(user);
+      await em.save(githubUser, { reload: false });
+      console.log("new github user:", githubUser);
+      return githubUser;
     }
-    console.log(user);
-    return user;
   }
 }

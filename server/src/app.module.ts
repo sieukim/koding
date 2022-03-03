@@ -3,7 +3,6 @@ import { AuthModule } from "./auth/auth.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { configuration } from "./config/configutation";
 import { AppLoggerMiddleware } from "./common/middlewares/logger.middleware";
-import { MongooseModule } from "@nestjs/mongoose";
 import { UsersModule } from "./users/users.module";
 import { EmailModule } from "./email/email.module";
 import { UploadModule } from "./upload/upload.module";
@@ -17,6 +16,9 @@ import { APP_GUARD } from "@nestjs/core";
 import { RolesGuard } from "./auth/guard/roles.guard";
 import { AdminModule } from "./admin/admin.module";
 import { ServeStaticModule } from "@nestjs/serve-static";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import * as fs from "fs";
+import * as path from "path";
 
 @Module({
   imports: [
@@ -26,20 +28,28 @@ import { ServeStaticModule } from "@nestjs/serve-static";
       expandVariables: true,
       cache: true,
     }),
-    MongooseModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        // user: configService.get<string>('database.mongodb.username'),
-        // pass: configService.get<string>('database.mongodb.password'),
-        // auth: {
-        //   username: 'user1',
-        //   password: 'secret',
-        // },
-        uri: configService.get<string>("database.mongodb.uri"),
+      useFactory: (configService: ConfigService<any, true>) => ({
+        type: "mysql",
+        host: configService.get<string>("database.mysql.host"),
+        username: configService.get<string>("database.mysql.username"),
+        password: configService.get<string>("database.mysql.password"),
+        database: configService.get<string>("database.mysql.database"),
+        entities: ["dist/**/*.entity{.ts,.js}"],
+        charset: "utf8mb4",
+        logging: ["query"],
+        // synchronize: true,
+        // dropSchema: true,
+        ssl: configService.get<string>("environment") === "production" && {
+          ca: fs.readFileSync(
+            path.join(__dirname, "..", "DigiCertGlobalRootCA.crt.pem"),
+          ),
+        },
       }),
     }),
     ServeStaticModule.forRoot({
-      rootPath: __dirname + "/../public",
+      rootPath: path.join(__dirname, "..", "public"),
     }),
     ScheduleModule.forRoot(),
     AuthModule,

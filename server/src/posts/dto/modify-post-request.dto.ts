@@ -1,6 +1,6 @@
 import { ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
 import { IsOptional } from "class-validator";
-import { Post } from "../../models/post.model";
+import { Post } from "../../entities/post.entity";
 
 export class ModifyPostRequestDto extends PartialType(
   PickType(Post, [

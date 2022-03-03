@@ -1,11 +1,12 @@
 import { ApiPropertyOptional, PickType } from "@nestjs/swagger";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 import { Expose, plainToClass } from "class-transformer";
 
 export class MyUserInfoDto extends PickType(User, [
   "email",
   "nickname",
-  "emailSignupVerified",
+  "isGithubUser",
+  "isEmailUser",
   "isPortfolioUrlPublic",
   "isGithubUrlPublic",
   "isBlogUrlPublic",
@@ -13,7 +14,6 @@ export class MyUserInfoDto extends PickType(User, [
   "githubUrl",
   "blogUrl",
   "githubUserInfo",
-  "githubSignupVerified",
   "followersCount",
   "followingsCount",
   "isGithubUser",
@@ -31,16 +31,17 @@ export class MyUserInfoDto extends PickType(User, [
   @ApiPropertyOptional({
     description: "사용자 깃허브 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
   })
-  githubUrl?: string;
+  githubUrl: string | null;
+
   @ApiPropertyOptional({
     description: "사용자 블로그 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
   })
-  blogUrl?: string;
+  blogUrl: string | null;
   @ApiPropertyOptional({
     description:
       "사용자 포트폴리오 주소. 공개 여부와 관계 없이 항상 값을 가져옴",
   })
-  portfolioUrl?: string;
+  portfolioUrl: string | null;
 
   static fromModel(model: User) {
     return plainToClass(MyUserInfoDto, model, {

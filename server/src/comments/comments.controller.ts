@@ -23,9 +23,8 @@ import {
 } from "@nestjs/swagger";
 import { AddCommentRequestDto } from "./dto/add-comment-request.dto";
 import { CommentInfoDto } from "./dto/comment-info.dto";
-import { VerifiedUserGuard } from "../auth/guard/authorization/verified-user.guard";
 import { LoginUser } from "../common/decorator/login-user.decorator";
-import { User } from "../models/user.model";
+import { User } from "../entities/user.entity";
 import { ModifyCommentRequestDto } from "./dto/modify-comment-request.dto";
 import { ReadCommentsDto } from "./dto/read-comments.dto";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
@@ -43,6 +42,7 @@ import { ParamNicknameSameUserGuard } from "../auth/guard/authorization/param-ni
 import { CommentIdentifierWithNicknameParamDto } from "./dto/param/comment-identifier-with-nickname-param.dto";
 import { LikeCommentCommand } from "./commands/like-comment.command";
 import { UnlikeCommentCommand } from "./commands/unlike-comment.command";
+import { LoggedInGuard } from "../auth/guard/authorization/logged-in.guard";
 
 @ApiTags("POST/COMMENT")
 @ApiBadRequestResponse({
@@ -101,7 +101,7 @@ export class CommentsController {
     description: "댓글 작성 성공",
     type: CommentInfoDto,
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.OK)
   @Post()
   async addComment(
@@ -128,7 +128,7 @@ export class CommentsController {
     description: "게시글 수정 성공",
     type: CommentInfoDto,
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.OK)
   @Patch(":commentId")
   async modifyComment(
@@ -156,7 +156,7 @@ export class CommentsController {
   @ApiNoContentResponse({
     description: "게시글 식제 성공",
   })
-  @UseGuards(VerifiedUserGuard)
+  @UseGuards(LoggedInGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":commentId")
   async deleteComment(

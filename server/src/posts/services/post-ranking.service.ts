@@ -1,19 +1,16 @@
 import { Injectable } from "@nestjs/common";
-import { Model, Types } from "mongoose";
-import { PostBoardType, PostIdentifier } from "../../models/post.model";
+import { PostIdentifier } from "../../entities/post.entity";
 import { getCurrentDate } from "../../common/utils/time.util";
-import { PostDailyRankingDocument } from "../../schemas/post-daliy-ranking.schema";
-import { SortOrder } from "../../common/repository/sort-option";
-import { InjectModel } from "@nestjs/mongoose";
 import { IncreaseType } from "../commands/increase-comment-count.command";
-import { PostDocument } from "../../schemas/post.schema";
-import { BackOffPolicy, Retryable } from "typescript-retry-decorator";
+import { InjectEntityManager } from "@nestjs/typeorm";
+import { PostDailyRanking } from "../../entities/post-daily-ranking.entity";
+import { EntityManager } from "typeorm";
 
 @Injectable()
 export class PostRankingService {
   constructor(
-    @InjectModel(PostDailyRankingDocument.name)
-    private readonly dailyRankingModel: Model<PostDailyRankingDocument>,
+    @InjectEntityManager()
+    private readonly em: EntityManager,
   ) {}
 
   increaseDailyLikeCount(postIdentifier: PostIdentifier) {
@@ -72,61 +69,38 @@ export class PostRankingService {
     );
   }
 
-  async getDailyRanking(boardType: PostBoardType, pageSize) {
-    const currentDate = getCurrentDate();
-    const dailyRankings = await this.dailyRankingModel
-      .find({ aggregateDate: currentDate, boardType, popularity: { $gt: 0 } })
-      .sort({ popularity: SortOrder.DESC, postId: SortOrder.DESC })
-      .populate({
-        path: "post",
-        populate: { path: "writer" },
-      })
-      .limit(pageSize)
-      .exec();
-    console.log("dailyRankings", dailyRankings);
-    return dailyRankings
-      .filter((post) => post.post != null)
-      .map((dailyRanking) => PostDocument.toModel(dailyRanking.post));
-  }
-
-  async getDailyRankingCount(boardType: PostBoardType) {
-    const currentDate = getCurrentDate();
-    return this.dailyRankingModel
-      .count({ aggregateDate: currentDate, boardType, popularity: { $gt: 0 } })
-      .exec();
-  }
-
-  // 여러 사용자가 동시에 create 시 발생하는 Duplicate Error 대응용
-  @Retryable({
-    maxAttempts: 3,
-    backOff: 100,
-    backOffPolicy: BackOffPolicy.FixedBackOffPolicy,
-  })
   private async modifyAggregateField(
-    fieldName: keyof PostDailyRankingDocument &
+    fieldName: keyof PostDailyRanking &
       ("likeCount" | "readCount" | "scrapCount" | "commentCount"),
     { postId, boardType }: PostIdentifier,
     delta: IncreaseType,
   ) {
-    const currentDate = getCurrentDate();
-    const popularityDelta = this.resolvePopularityWeight(fieldName) * delta;
-    await this.dailyRankingModel
-      .updateOne(
-        {
-          postId: new Types.ObjectId(postId),
-          aggregateDate: currentDate,
+    return this.em.transaction(async (em) => {
+      const currentDate = getCurrentDate();
+      const popularityDelta = this.resolvePopularityWeight(fieldName) * delta;
+      let postRanking = await em.findOne(PostDailyRanking, {
+        postId,
+        aggregateDate: currentDate,
+      });
+      if (postRanking) {
+        postRanking[fieldName]++;
+        postRanking.popularity += popularityDelta;
+        await em.save(postRanking, { reload: false });
+      } else {
+        postRanking = new PostDailyRanking({
+          postId,
           boardType,
-        },
-        {
-          $inc: { [fieldName]: delta, popularity: popularityDelta },
-        },
-        { upsert: delta === IncreaseType.Positive },
-      )
-      .exec();
+          aggregateDate: currentDate,
+        });
+        postRanking[fieldName]++;
+        postRanking.popularity += popularityDelta;
+        await em.save(postRanking, { reload: false });
+      }
+    });
   }
 
   private resolvePopularityWeight(
-    fieldName: keyof PostDailyRankingDocument &
+    fieldName: keyof PostDailyRanking &
       ("likeCount" | "readCount" | "scrapCount" | "commentCount"),
   ) {
     switch (fieldName) {
@@ -138,11 +112,5 @@ export class PostRankingService {
       case "readCount":
         return 1;
     }
-  }
-
-  removeOrphanPostRanking({ postId, boardType }: PostIdentifier) {
-    return this.dailyRankingModel
-      .deleteMany({ postId: new Types.ObjectId(postId), boardType })
-      .exec();
   }
 }

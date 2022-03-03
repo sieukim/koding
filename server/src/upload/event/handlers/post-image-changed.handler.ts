@@ -8,7 +8,7 @@ export class PostImageChangedHandler
 {
   constructor(private readonly uploadService: PostImageUploadService) {}
 
-  async handle(event: PostImageChangedEvent): Promise<any> {
+  async handle(event: PostImageChangedEvent) {
     const { postId, changedImageUrls = [], prevImageUrls = [] } = event;
     const prevImageSet = new Set(prevImageUrls);
     const changedImageSet = new Set(changedImageUrls);

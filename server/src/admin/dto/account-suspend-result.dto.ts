@@ -1,5 +1,5 @@
 import { PickType } from "@nestjs/swagger";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 import { plainToClass } from "class-transformer";
 
 export class AccountSuspendResultDto extends PickType(User, [

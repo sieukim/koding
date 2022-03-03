@@ -1,5 +1,5 @@
 import { IQuery } from "@nestjs/cqrs";
-import { PostIdentifier } from "../../models/post.model";
+import { PostIdentifier } from "../../entities/post.entity";
 
 export class ReadCommentsQuery implements IQuery {
   constructor(

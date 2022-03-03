@@ -9,6 +9,7 @@ import { GetWritingPostsHandler } from "./get-writing-posts.handler";
 import { GetWritingCommentsHandler } from "./get-writing-comments.handler";
 import { GetScrapPostsHandler } from "./get-scrap-posts.handler";
 import { GetLikePostsHandler } from "./get-like-posts.handler";
+import { CheckEmailTokenValidityHandler } from "./check-email-token-validity.handler";
 
 export const UserQueryHandlers = [
   GetFollowerUsersHandler,
@@ -22,4 +23,5 @@ export const UserQueryHandlers = [
   GetWritingCommentsHandler,
   GetScrapPostsHandler,
   GetLikePostsHandler,
+  CheckEmailTokenValidityHandler,
 ];

@@ -2,7 +2,7 @@ import { ApiExtraModels, PickType } from "@nestjs/swagger";
 import {
   Notification,
   NotificationDataTypes,
-} from "../../models/notification.model";
+} from "../../entities/notification.entity";
 
 @ApiExtraModels(...NotificationDataTypes)
 export class NotificationInfoDto extends PickType(Notification, [

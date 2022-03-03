@@ -1,0 +1,4 @@
+- pipeline.id: "mysql-post"
+  path.config: "/usr/share/logstash/pipeline/mysql-post.conf"
+- pipeline.id: "mysql-user"
+  path.config: "/usr/share/logstash/pipeline/mysql-user.conf"

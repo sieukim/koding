@@ -4,20 +4,12 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { TagsRepository } from "./tags.repository";
 import { TagEventHandlers } from "./events/handlers";
 import { TagQueryHandlers } from "./queries/handlers";
-import { MongooseModule } from "@nestjs/mongoose";
-import { TagDocument, TagSchema } from "src/schemas/tag.schema";
 import { TagCommandHandlers } from "./commands/handlers";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { Tag } from "../entities/tag.entity";
 
 @Module({
-  imports: [
-    CqrsModule,
-    MongooseModule.forFeature([
-      {
-        name: TagDocument.name,
-        schema: TagSchema,
-      },
-    ]),
-  ],
+  imports: [CqrsModule, TypeOrmModule.forFeature([Tag])],
   controllers: [TagsController],
   providers: [
     TagsRepository,

@@ -1,7 +1,7 @@
 import { IntersectionType } from "@nestjs/swagger";
 import { NicknameParamDto } from "../../users/dto/param/nickname-param.dto";
 import { PostIdentifierParamDto } from "./param/post-identifier-param.dto";
-import { PostIdentifier } from "../../models/post.model";
+import { PostIdentifier } from "../../entities/post.entity";
 
 export class UserLikePostInfoDto extends IntersectionType(
   NicknameParamDto,

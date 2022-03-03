@@ -1,4 +1,4 @@
-import { Post } from "../../models/post.model";
+import { Post } from "../../entities/post.entity";
 import { PostInfoDto } from "../../posts/dto/post-info.dto";
 
 export class WritingPostsInfoDto {

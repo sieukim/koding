@@ -6,9 +6,10 @@ import {
 import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { ConfigService } from "@nestjs/config";
 import { PostMetadataInfoDto } from "../../posts/dto/post-metadata-info.dto";
-import { SortOrder } from "../../common/repository/sort-option";
-import { PostBoardType } from "../../models/post.model";
+import { SortOrder } from "../../common/sort-order.enum";
+import { Post } from "../../entities/post.entity";
 import { PostListWithCursorDto } from "../../posts/dto/post-list-with-cursor.dto";
+import { PostBoardType } from "../../entities/post-board.type";
 
 export const PostSearchTypes = ["query", "tags"] as const;
 export type PostSearchType = typeof PostSearchTypes[number];
@@ -29,7 +30,7 @@ export class PostSearchService {
 
   constructor(
     private readonly elasticsearchService: ElasticsearchService,
-    configService: ConfigService,
+    configService: ConfigService<any, true>,
   ) {
     this.postIndexName = configService.get<string>(
       "database.elasticsearch.index.post",
@@ -66,7 +67,6 @@ export class PostSearchService {
   ) {
     if (cursor?.length === 0) cursor = undefined;
     let nextPageCursor: string | undefined;
-    let prevPageCursor: string | undefined;
     const body = await this.searchByQueryAndTags(
       { query, tags },
       boardType,
@@ -82,22 +82,7 @@ export class PostSearchService {
         postId: item._id,
       }),
     );
-    if (cursor && cursor.length > 0) {
-      const prevBody = await this.searchByQueryAndTags(
-        { query, tags },
-        boardType,
-        sortType,
-        SortOrder.ASC,
-        pageSize,
-        cursor,
-      );
-      const rawPrevPosts = prevBody.hits.hits;
-      if (rawPrevPosts.length === pageSize) {
-        prevPageCursor = (rawPrevPosts.pop().sort as string[]).join(",");
-      } else if (rawPrevPosts.length > 0) {
-        prevPageCursor = "";
-      }
-    }
+
     if (posts.length === pageSize) {
       const rawPosts = body.hits.hits;
       nextPageCursor = (rawPosts[rawPosts.length - 1].sort as string[]).join(
@@ -106,9 +91,8 @@ export class PostSearchService {
     }
 
     return new PostListWithCursorDto({
-      posts,
+      posts: posts as Array<Post & { writer: null }>,
       totalCount,
-      prevPageCursor,
       nextPageCursor,
     });
   }
@@ -212,6 +196,7 @@ export class PostSearchService {
     this.logger.log(`search param: ${JSON.stringify(searchParams)}`);
     try {
       const { body } = await this.elasticsearchService.search(searchParams);
+      this.logger.log(`search result: ${JSON.stringify(body)}`);
       return body;
     } catch (e) {
       console.error("error in search", e);

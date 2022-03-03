@@ -1,34 +1,37 @@
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventPublisher, ICommandHandler } from "@nestjs/cqrs";
 import { FollowUserCommand } from "../follow-user.command";
-import { UsersRepository } from "../../users.repository";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { User } from "../../../models/user.model";
-import { UserFollowedEvent } from "../../events/user-followed.event";
+import { User } from "../../../entities/user.entity";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
 
 @CommandHandler(FollowUserCommand)
 export class FollowUserHandler implements ICommandHandler<FollowUserCommand> {
-  constructor(
-    private readonly userRepository: UsersRepository,
-    private readonly eventBus: EventBus,
-  ) {}
+  constructor(private readonly publisher: EventPublisher) {}
 
-  async execute(command: FollowUserCommand): Promise<{ from: User; to: User }> {
+  @Transaction()
+  async execute(
+    command: FollowUserCommand,
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
     const { fromNickname, toNickname } = command;
     if (fromNickname === toNickname)
-      throw new BadRequestException("자신은 팔로우할 수 없습니다");
-    const users = await this.userRepository.findAll({
-      nickname: { in: [fromNickname, toNickname] },
-    });
-    if (users.length !== 2)
+      throw new BadRequestException("자신을 팔로우할 수 없습니다");
+    // eslint-disable-next-line prefer-const
+    let [fromUser, toUser] = await Promise.all([
+      em.findOne(User, {
+        where: { nickname: fromNickname },
+        relations: ["followings"],
+      }),
+      em.findOne(User, {
+        where: { nickname: toNickname },
+      }),
+    ]);
+    if (!fromUser || !toUser)
       throw new NotFoundException("잘못된 사용자 정보입니다");
-    const fromUser = users.find((user) => user.nickname === fromNickname);
-    const toUser = users.find((user) => user.nickname === toNickname);
-    const alreadyFollowed = fromUser.followingNicknames.some(
-      (nickname) => nickname === toNickname,
-    );
-    const { from, to } = await this.userRepository.followUser(fromUser, toUser);
-    if (!alreadyFollowed)
-      this.eventBus.publish(new UserFollowedEvent(fromNickname, toNickname));
-    return { from, to };
+    fromUser = this.publisher.mergeObjectContext(fromUser);
+    fromUser.followUser(toUser);
+    await em.save(User, fromUser, { reload: false });
+    fromUser.commit();
   }
 }

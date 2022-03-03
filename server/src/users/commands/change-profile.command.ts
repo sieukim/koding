@@ -3,7 +3,6 @@ import { ChangeProfileRequestDto } from "../dto/change-profile-request.dto";
 
 export class ChangeProfileCommand implements ICommand {
   constructor(
-    public readonly requestUserNickname: string,
     public readonly nickname: string,
     public readonly request: ChangeProfileRequestDto,
   ) {}

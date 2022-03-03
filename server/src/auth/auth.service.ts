@@ -11,7 +11,7 @@ import { ResetPasswordHandler } from "../users/commands/handlers/reset-password.
 import { CheckPasswordTokenValidityQuery } from "../users/queries/check-password-token-validity.query";
 import { CheckPasswordTokenValidityHandler } from "../users/queries/handlers/check-password-token-validity.handler";
 import { getCurrentTime } from "../common/utils/time.util";
-import { User } from "../models/user.model";
+import { User } from "../entities/user.entity";
 
 @Injectable()
 export class AuthService {

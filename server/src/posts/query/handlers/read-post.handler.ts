@@ -1,68 +1,91 @@
 import { EventPublisher, IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { ReadPostQuery } from "../read-post.query";
 import { PostWithAroundInfoDto } from "../../dto/post-with-around-info.dto";
-import { PostsRepository } from "../../posts.repository";
-import { CACHE_MANAGER, Inject, NotFoundException } from "@nestjs/common";
-import { Post, PostIdentifier } from "../../../models/post.model";
-import { SortOrder } from "../../../common/repository/sort-option";
-import { PostLikeService } from "../../services/post-like.service";
-import { PostScrapService } from "../../services/post-scrap.service";
+import { CACHE_MANAGER, Inject } from "@nestjs/common";
+import { Post, PostIdentifier } from "../../../entities/post.entity";
 import { Cache } from "cache-manager";
-import { PostReportService } from "../../services/post-report.service";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { orThrowNotFoundPost } from "../../../common/utils/or-throw";
+import { Fetched } from "../../../common/types/fetched.type";
 
 @QueryHandler(ReadPostQuery)
 export class ReadPostHandler implements IQueryHandler<ReadPostQuery> {
   constructor(
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-    private readonly postRepository: PostsRepository,
-    private readonly postLikeService: PostLikeService,
-    private readonly postScrapService: PostScrapService,
-    private readonly postReportService: PostReportService,
     private readonly publisher: EventPublisher,
   ) {}
 
-  async execute(query: ReadPostQuery): Promise<PostWithAroundInfoDto> {
+  @Transaction()
+  async execute(
+    query: ReadPostQuery,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<PostWithAroundInfoDto> {
+    const em = tm!;
     const { postIdentifier, readerNickname, readerIp } = query;
     const { postId, boardType } = postIdentifier;
-    let post = (await this.postRepository.findOneWith(
-      {
-        boardType: { eq: boardType },
-        postId: { eq: postId },
-      },
-      ["writer"],
-    )) as Post;
-    if (!post) throw new NotFoundException("잘못된 게시글 아이디");
-    post = this.publisher.mergeObjectContext(post);
+    const qb = em
+      .createQueryBuilder(Post, "post")
+      .where("(post.postId = :postId AND post.boardType = :boardType)", {
+        boardType,
+        postId,
+      })
+      .leftJoinAndSelect("post.writer", "writer");
+
+    if (readerNickname) {
+      qb.leftJoinAndSelect("post.likes", "like", "like.nickname = :nickname")
+        .leftJoinAndSelect(
+          "post.reports",
+          "report",
+          "report.nickname = :nickname",
+        )
+        .leftJoinAndSelect("post.scraps", "scrap", "scrap.nickname = :nickname")
+        .setParameters({
+          nickname: readerNickname,
+        });
+    }
+    const post = this.publisher.mergeObjectContext(
+      (await qb.getOneOrFail().catch(orThrowNotFoundPost)) as Fetched<
+        Post,
+        "writer"
+      >,
+    );
+    console.log("post read: ", post);
     if (await this.shouldIncreaseReadCount(postIdentifier, readerIp))
       post.increaseReadCount();
-    const [liked, scrapped, reported, prevPost, nextPost] = await Promise.all([
-      readerNickname
-        ? this.postLikeService.isUserLikePost(postIdentifier, readerNickname)
-        : false,
-      readerNickname
-        ? this.postScrapService.isUserScrapPost(postIdentifier, readerNickname)
-        : false,
-      readerNickname
-        ? this.postReportService.isUserReportPost(
-            postIdentifier,
-            readerNickname,
-          )
-        : false,
-      this.postRepository.findOne(
-        {
-          boardType: { eq: boardType },
-          postId: { gt: postId },
-        },
-        { postId: SortOrder.ASC },
-      ),
-      this.postRepository.findOne(
-        {
-          boardType: { eq: boardType },
-          postId: { lt: postId },
-        },
-        { postId: SortOrder.DESC },
-      ),
+    const [prevPost, nextPost] = await Promise.all([
+      em
+        .createQueryBuilder(Post, "post")
+        .where("post.boardType = :boardType", { boardType })
+        .andWhere(
+          "(post.createdAt > :createdAt OR (post.createdAt = :createdAt AND post.postId > :postId))",
+          {
+            createdAt: post.createdAt,
+            postId,
+          },
+        )
+        .orderBy("post.createdAt", "ASC")
+        .addOrderBy("post.postId", "ASC")
+        .getOne(),
+      em
+        .createQueryBuilder(Post, "post")
+        .where("post.boardType = :boardType", { boardType })
+        .andWhere(
+          "(post.createdAt < :createdAt OR (post.createdAt = :createdAt AND post.postId < :postId))",
+          {
+            createdAt: post.createdAt,
+            postId,
+          },
+        )
+        .orderBy("post.createdAt", "DESC")
+        .addOrderBy("post.postId", "DESC")
+        .getOne(),
     ]);
+
+    const [liked, scrapped, reported] = [
+      (post.likes?.length ?? 0) > 0,
+      (post.scraps?.length ?? 0) > 0,
+      (post.reports?.length ?? 0) > 0,
+    ];
     post.commit();
     return new PostWithAroundInfoDto(
       post,

@@ -1,10 +1,6 @@
 import { forwardRef, Global, Module } from "@nestjs/common";
 import { UsersController } from "./users.controller";
-import { MongooseModule } from "@nestjs/mongoose";
-import { UserDocument, UserSchema } from "../schemas/user.schema";
-import { UsersService } from "./users.service";
 import { EmailModule } from "../email/email.module";
-import { UsersRepository } from "./users.repository";
 import { UserCommandHandlers } from "./commands/handlers";
 import { UserEventHandlers } from "./events/handlers";
 import { UserQueryHandlers } from "./queries/handlers";
@@ -13,12 +9,20 @@ import { EmailSagas } from "./sagas/email.sagas";
 import { PostsModule } from "../posts/posts.module";
 import { CommentsModule } from "../comments/comments.module";
 import { UploadModule } from "../upload/upload.module";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { User } from "../entities/user.entity";
+import { Follow } from "../entities/follow.entity";
+import { EmailVerifyToken } from "../entities/email-verify-token.entity";
+import { TemporaryGithubUser } from "../entities/temporary-github-user.entity";
 
 @Global()
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: UserDocument.name, schema: UserSchema },
+    TypeOrmModule.forFeature([
+      User,
+      Follow,
+      EmailVerifyToken,
+      TemporaryGithubUser,
     ]),
     EmailModule,
     CqrsModule,
@@ -28,13 +32,11 @@ import { UploadModule } from "../upload/upload.module";
   ],
   controllers: [UsersController],
   providers: [
-    UsersService,
-    UsersRepository,
     EmailSagas,
     ...UserCommandHandlers,
     ...UserEventHandlers,
     ...UserQueryHandlers,
   ],
-  exports: [UsersRepository, UsersService],
+  exports: [],
 })
 export class UsersModule {}

@@ -4,7 +4,6 @@ import {
   ConflictException,
   Controller,
   Delete,
-  ForbiddenException,
   Get,
   Head,
   HttpCode,
@@ -21,7 +20,6 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { SignupLocalRequestDto } from "./dto/signup-local-request.dto";
-import { UsersService } from "./users.service";
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -41,8 +39,6 @@ import {
 } from "@nestjs/swagger";
 import { UserInfoDto } from "./dto/user-info.dto";
 import { FollowUserDto } from "./dto/follow-user.dto";
-import { FollowUserResultDto } from "./dto/follow-user-result.dto";
-import { UnfollowUserResultDto } from "./dto/unfollow-user-result.dto";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { GetFollowingUsersQuery } from "./queries/get-following-users.query";
 import { GetFollowingUsersHandler } from "./queries/handlers/get-following-users.handler";
@@ -54,7 +50,7 @@ import { GetUserInfoQuery } from "./queries/get-user-info.query";
 import { GetUserInfoHandler } from "./queries/handlers/get-user-info.handler";
 import { CheckFollowingQuery } from "./queries/check-following.query";
 import { LoginUser } from "../common/decorator/login-user.decorator";
-import { User } from "../models/user.model";
+import { User } from "../entities/user.entity";
 import { MyUserInfoDto } from "./dto/my-user-info.dto";
 import { ChangeProfileRequestDto } from "./dto/change-profile-request.dto";
 import { ChangeProfileCommand } from "./commands/change-profile.command";
@@ -84,6 +80,11 @@ import { ProfileAvatarUploadInterceptor } from "../upload/interceptors/profile-a
 import { DeleteAvatarCommand } from "./commands/delete-avatar.command";
 import { GetPostsOfFollowingsQuery } from "../posts/query/get-posts-of-followings.query";
 import { PostListWithCursorDto } from "../posts/dto/post-list-with-cursor.dto";
+import { SignupLocalCommand } from "./commands/signup-local.command";
+import { CheckExistenceQuery } from "./queries/check-existence.query";
+import { FollowUserCommand } from "./commands/follow-user.command";
+import { UnfollowUserCommand } from "./commands/unfollow-user.command";
+import { SignupLocalHandler } from "./commands/handlers/signup-local.handler";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -97,8 +98,7 @@ export class UsersController {
   private readonly logger = new Logger(UsersController.name);
 
   constructor(
-    private readonly usersService: UsersService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService<any, true>,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
@@ -110,9 +110,8 @@ export class UsersController {
     description: "회원가입 성공, 확인 이메일 발송",
     type: MyUserInfoDto,
   })
-  @ApiConflictResponse({
-    description: "회원가입 실패. 중복 있음",
-  })
+  @ApiConflictResponse({ description: "회원가입 실패. 중복 있음" })
+  @ApiBadRequestResponse({ description: "입력값 오류" })
   @UseInterceptors(ProfileAvatarUploadInterceptor)
   @Post()
   async joinUser(
@@ -122,7 +121,9 @@ export class UsersController {
     console.log(`signup local request: ${JSON.stringify(body)}`);
     console.log("avatar : ", avatarFile);
     body.avatarUrl = avatarFile?.location;
-    const user = await this.usersService.signupLocal(body);
+    const user = (await this.commandBus.execute(
+      new SignupLocalCommand(body),
+    )) as Awaited<ReturnType<SignupLocalHandler["execute"]>>;
     return MyUserInfoDto.fromModel(user);
   }
 
@@ -168,15 +169,12 @@ export class UsersController {
   @Delete(":nickname")
   async deleteAccount(
     @Param() { nickname }: NicknameParamDto,
-    @LoginUser() loginUser: User,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.commandBus.execute(
-      new DeleteAccountCommand(loginUser.nickname, nickname),
-    );
+    await this.commandBus.execute(new DeleteAccountCommand(nickname));
     req.logout();
-    res.clearCookie(this.configService.get("session.cookie-name"));
+    res.clearCookie(this.configService.get<string>("session.cookie-name")!);
     return;
   }
 
@@ -204,13 +202,12 @@ export class UsersController {
   async changeProfile(
     @Param() { nickname }: NicknameParamDto,
     @Body() body: ChangeProfileRequestDto,
-    @LoginUser() loginUser: User,
     @UploadedFile() avatarFile?: Express.MulterS3.File,
   ) {
     body.avatarUrl = avatarFile?.location;
     this.logger.log(`사용자 프로필 변경; body: ${JSON.stringify(body)}`);
     const result = (await this.commandBus.execute(
-      new ChangeProfileCommand(loginUser.nickname, nickname, body),
+      new ChangeProfileCommand(nickname, body),
     )) as Awaited<ReturnType<ChangeProfileHandler["execute"]>>;
     return MyUserInfoDto.fromModel(result);
   }
@@ -236,16 +233,10 @@ export class UsersController {
   changePassword(
     @Param() { nickname }: NicknameParamDto,
     @Body() body: ChangePasswordRequestDto,
-    @LoginUser() loginUser: User,
   ) {
     const { currentPassword, newPassword } = body;
     return this.commandBus.execute(
-      new ChangePasswordCommand(
-        loginUser.nickname,
-        nickname,
-        currentPassword,
-        newPassword,
-      ),
+      new ChangePasswordCommand(nickname, currentPassword, newPassword),
     ) as ReturnType<ChangePasswordHandler["execute"]>;
   }
 
@@ -280,35 +271,11 @@ export class UsersController {
         `key 값은 ["nickname", "email"] 중 하나여아 합니다. ${key}`,
       );
     if (
-      await this.usersService.checkExistence(key as "nickname" | "email", value)
+      await this.queryBus.execute(
+        new CheckExistenceQuery(key as "nickname" | "email", value),
+      )
     )
       throw new ConflictException();
-  }
-
-  @ApiOperation({
-    summary: "회원가입 이메일 인증",
-  })
-  @ApiQuery({
-    name: "verifyToken",
-    example: "9ad4af90-6976-11ec-9730-131e1ddb758c",
-    description: "이메일 링크에 포함된 인증 토큰",
-  })
-  @ApiParam({
-    name: "nickname",
-    example: "testNickname123",
-    description: "이메일 인증을 할 사용자 닉네임",
-  })
-  @ApiNoContentResponse({
-    description: "이메일 인증 성공",
-  })
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Get(":nickname/verify")
-  async verifySignup(
-    @Param() { nickname }: NicknameParamDto,
-    @Query("verifyToken") verifyToken: string,
-  ) {
-    this.logger.log(`nickname: ${nickname}, verifyToken: ${verifyToken}`);
-    await this.usersService.verifyEmailSignup(nickname, verifyToken);
   }
 
   @ApiOperation({
@@ -324,25 +291,20 @@ export class UsersController {
   @ApiNotFoundResponse({
     description: "잘못된 닉네임",
   })
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: "팔로우 완료(원래 이미 팔로우하고 있었던 경우도 포함)",
-    type: FollowUserResultDto,
   })
   @UseGuards(ParamNicknameSameUserGuard)
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Post(":nickname/followings")
   async followUser(
     @Param() { nickname }: NicknameParamDto,
     @Body() body: FollowUserDto,
-    @LoginUser() loginUser: User,
   ) {
-    if (nickname !== loginUser.nickname)
-      throw new ForbiddenException("팔로우할 권한이 없습니다");
-    const { from, to } = await this.usersService.followUser(
-      { nickname },
-      { nickname: body.nickname },
+    await this.commandBus.execute(
+      new FollowUserCommand(nickname, body.nickname),
     );
-    return new FollowUserResultDto(from, to);
+    return;
   }
 
   @ApiOperation({
@@ -359,25 +321,20 @@ export class UsersController {
   @ApiNotFoundResponse({
     description: "잘못된 닉네임",
   })
-  @ApiOkResponse({
+  @ApiNoContentResponse({
     description: "언팔로우 완료(원래 팔로우하지 않았던 경우도 포함)",
-    type: UnfollowUserResultDto,
   })
   @UseGuards(ParamNicknameSameUserGuard)
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":nickname/followings/:followNickname")
   async unfollowUser(
     @Param("nickname") nickname: string,
     @Param("followNickname") followNickname: string,
-    @LoginUser() loginUser: User,
   ) {
-    if (nickname !== loginUser.nickname)
-      throw new ForbiddenException("언팔로우할 권한이 없습니다");
-    const { from, to } = await this.usersService.unfollowUser(
-      { nickname },
-      { nickname: followNickname },
+    await this.commandBus.execute(
+      new UnfollowUserCommand(nickname, followNickname),
     );
-    return new UnfollowUserResultDto(from, to);
+    return;
   }
 
   @ApiOperation({

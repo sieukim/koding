@@ -1,7 +1,8 @@
 import { PostMetadataInfoDto } from "./post-metadata-info.dto";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Post } from "../../models/post.model";
+import { Post } from "../../entities/post.entity";
 import { PostReadInfoDto } from "./post-read-info.dto";
+import { Fetched } from "../../common/types/fetched.type";
 
 export class PostWithAroundInfoDto {
   @ApiProperty({
@@ -18,7 +19,7 @@ export class PostWithAroundInfoDto {
   nextPostInfo?: PostMetadataInfoDto;
 
   constructor(
-    post: Post,
+    post: Fetched<Post, "writer">,
     liked: boolean,
     scrapped: boolean,
     reported: boolean,

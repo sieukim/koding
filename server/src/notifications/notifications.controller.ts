@@ -15,13 +15,11 @@ import {
 } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import {
-  ApiBody,
   ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiParam,
   ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
@@ -85,10 +83,6 @@ export class NotificationsController {
   @ApiOperation({
     summary: "알림 조회",
   })
-  @ApiParam({
-    name: "nickname",
-    description: "알림을 조회할 사용자 닉네임",
-  })
   @ApiNotFoundResponse({
     description: "잘못된 사용자 닉네임",
   })
@@ -99,7 +93,7 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   @Get()
   getNotifications(
-    @Param("nickname") nickname: string,
+    @Param() { nickname }: NicknameParamDto,
     @Query() { cursor, pageSize }: CursorPagingQueryDto,
   ) {
     this.logger.log(`getNotifications called`);
@@ -128,19 +122,17 @@ export class NotificationsController {
   /*
    * 알림 읽음 처리
    */
-  @ApiBody({
-    type: MarkReadNotificationRequestDto,
-  })
+
   @ApiNoContentResponse({
     description: "알림 읽음 처리 성공",
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Patch(":notificationId")
-  markReadNotifications(
+  async markReadNotifications(
     @Param() { notificationId, nickname }: NotificationIdAndNicknameParamDto,
     @Body() body: MarkReadNotificationRequestDto,
   ) {
-    return this.commandBus.execute(
+    await this.commandBus.execute(
       new MarkReadNotificationCommand(notificationId, nickname),
     );
   }
@@ -153,10 +145,10 @@ export class NotificationsController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(":notificationId")
-  deleteNotification(
+  async deleteNotification(
     @Param() { notificationId, nickname }: NotificationIdAndNicknameParamDto,
   ) {
-    return this.commandBus.execute(
+    await this.commandBus.execute(
       new DeleteNotificationCommand(nickname, notificationId),
     );
   }
@@ -169,7 +161,7 @@ export class NotificationsController {
   })
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete()
-  deleteAllNotification(@Param() { nickname }: NicknameParamDto) {
-    return this.commandBus.execute(new DeleteAllNotificationsCommand(nickname));
+  async deleteAllNotification(@Param() { nickname }: NicknameParamDto) {
+    await this.commandBus.execute(new DeleteAllNotificationsCommand(nickname));
   }
 }

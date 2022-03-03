@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from "@nestjs/swagger";
 import { IsString, IsUUID } from "class-validator";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 
 export class SignupGithubVerifyRequestDto extends PickType(User, [
   "email",

@@ -8,6 +8,8 @@ import { CommentAddedEvent } from "../../../comments/events/comment-added.event"
 import { CommentDeletedEvent } from "../../../comments/events/comment-deleted.event";
 import { PostRankingService } from "../../services/post-ranking.service";
 import { getCurrentDate, isSameDate } from "../../../common/utils/time.util";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { NotImplementedException } from "@nestjs/common";
 
 const events = [
   PostReadCountIncreasedEvent,
@@ -25,7 +27,11 @@ export class SyncPostAggregateInfoHandler
 {
   constructor(private readonly postRankingService: PostRankingService) {}
 
-  handle(event: InstanceType<typeof events[number]>) {
+  @Transaction()
+  handle(
+    event: InstanceType<typeof events[number]>,
+    @TransactionManager() tm?: EntityManager,
+  ) {
     const { postIdentifier } = event;
     const currentDate = getCurrentDate();
     if (event instanceof PostReadCountIncreasedEvent) {
@@ -52,6 +58,8 @@ export class SyncPostAggregateInfoHandler
         return this.postRankingService.decreaseDailyCommentCount(
           postIdentifier,
         );
+    } else {
+      throw new NotImplementedException("구현되지 않았습니다");
     }
   }
 }

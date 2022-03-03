@@ -1,5 +1,5 @@
 import { ApiProperty, PickType } from "@nestjs/swagger";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 
 export class PasswordResetEmailRequestDto extends PickType(User, ["email"]) {
   @ApiProperty({

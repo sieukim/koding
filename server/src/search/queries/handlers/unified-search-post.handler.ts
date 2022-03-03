@@ -1,8 +1,8 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { UnifiedSearchPostQuery } from "../unified-search-post.query";
 import { PostSearchService } from "../../services/post-search.service";
-import { PostBoardTypes } from "../../../models/post.model";
 import { UnifiedSearchPostsResultDto } from "../../dto/unified-search-posts-result.dto";
+import { PostBoardTypes } from "../../../entities/post-board.type";
 
 @QueryHandler(UnifiedSearchPostQuery)
 export class UnifiedSearchPostHandler
@@ -15,7 +15,7 @@ export class UnifiedSearchPostHandler
     query,
     tags,
     sortType,
-  }: UnifiedSearchPostQuery): Promise<any> {
+  }: UnifiedSearchPostQuery) {
     const promises = await Promise.all(
       PostBoardTypes.map((boardType) =>
         this.postSearchService

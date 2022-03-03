@@ -1,19 +1,24 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResetPasswordCommand } from "../reset-password.command";
-import { UsersRepository } from "../../users.repository";
-import { NotFoundException } from "@nestjs/common";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { User } from "../../../entities/user.entity";
+import { orThrowNotFoundUser } from "src/common/utils/or-throw";
 
 @CommandHandler(ResetPasswordCommand)
 export class ResetPasswordHandler
   implements ICommandHandler<ResetPasswordCommand, void>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
-
-  async execute(command: ResetPasswordCommand): Promise<void> {
+  @Transaction()
+  async execute(
+    command: ResetPasswordCommand,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<void> {
+    const em = tm!;
     const { newPassword, email, verifyToken } = command;
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new NotFoundException("잘못된 사용자");
-    await user.verifyResetPassword({ verifyToken, newPassword });
-    await this.userRepository.update(user);
+    const user = await em
+      .findOneOrFail(User, { where: { email }, loadEagerRelations: false })
+      .catch(orThrowNotFoundUser);
+    await user.resetPassword({ verifyToken, newPassword });
+    await em.save(user, { reload: false });
   }
 }

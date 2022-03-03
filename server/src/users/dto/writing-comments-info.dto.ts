@@ -1,4 +1,4 @@
-import { Comment } from "../../models/comment.model";
+import { Comment } from "../../entities/comment.entity";
 import { MyCommentInfoDto } from "../../comments/dto/my-comment-info.dto";
 
 export class WritingCommentsInfoDto {

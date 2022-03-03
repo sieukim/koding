@@ -1,20 +1,25 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { SuspendUserAccountCommand } from "../suspend-user-account.command";
-import { UserSuspendService } from "../../services/user-suspend.service";
-import { User } from "../../../models/user.model";
+import { User } from "../../../entities/user.entity";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { orThrowNotFoundUser } from "../../../common/utils/or-throw";
 
 @CommandHandler(SuspendUserAccountCommand)
 export class SuspendUserAccountHandler
   implements ICommandHandler<SuspendUserAccountCommand>
 {
-  constructor(private readonly userSuspendService: UserSuspendService) {}
-
-  async execute(command: SuspendUserAccountCommand): Promise<User> {
+  @Transaction()
+  async execute(
+    command: SuspendUserAccountCommand,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<User> {
+    const em = tm!;
     const { nickname, suspendDay, forever } = command;
-    return this.userSuspendService.suspendUserAccount(
-      nickname,
-      forever,
-      suspendDay,
-    );
+    const user = await em
+      .findOneOrFail(User, { where: { nickname } })
+      .catch(orThrowNotFoundUser);
+    user.suspendAccount(forever, suspendDay);
+    await em.save(user, { reload: false });
+    return user;
   }
 }

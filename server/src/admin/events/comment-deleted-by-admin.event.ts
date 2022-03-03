@@ -1,5 +1,5 @@
 import { IEvent } from "@nestjs/cqrs";
-import { Comment } from "../../models/comment.model";
+import { Comment } from "../../entities/comment.entity";
 import { Event } from "../../common/utils/event";
 
 @Event()

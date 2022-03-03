@@ -1,32 +1,32 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { UsersRepository } from "../../users.repository";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
-import { User } from "../../../models/user.model";
+import { User } from "../../../entities/user.entity";
 import { UnfollowUserCommand } from "../unfollow-user.command";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
 
 @CommandHandler(UnfollowUserCommand)
 export class UnfollowUserHandler
   implements ICommandHandler<UnfollowUserCommand>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
-
+  @Transaction()
   async execute(
     command: UnfollowUserCommand,
-  ): Promise<{ from: User; to: User }> {
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
     const { fromNickname, toNickname } = command;
     if (fromNickname === toNickname)
       throw new BadRequestException("자신을 언팔로우할 수 없습니다");
-    const users = await this.userRepository.findAll({
-      nickname: { in: [fromNickname, toNickname] },
-    });
-    if (users.length !== 2)
+    const [fromUser, toUser] = await Promise.all([
+      em.findOne(User, {
+        where: { nickname: fromNickname },
+        relations: ["followings"],
+      }),
+      em.findOne(User, { where: { nickname: toNickname } }),
+    ]);
+    if (!fromUser || !toUser)
       throw new NotFoundException("잘못된 사용자 정보입니다");
-    const fromUser = users.find((user) => user.nickname === fromNickname);
-    const toUser = users.find((user) => user.nickname === toNickname);
-    const { from, to } = await this.userRepository.unfollowUser(
-      fromUser,
-      toUser,
-    );
-    return { from, to };
+    fromUser.unfollowUser(toUser);
+    await em.save(fromUser, { reload: false });
   }
 }

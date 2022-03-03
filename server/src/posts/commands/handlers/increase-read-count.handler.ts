@@ -1,16 +1,24 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { IncreaseReadCountCommand } from "../increase-read-count.command";
-import { PostsRepository } from "../../posts.repository";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { Post } from "../../../entities/post.entity";
+import { increaseField } from "../../../common/utils/increase-field";
 
 @CommandHandler(IncreaseReadCountCommand)
 export class IncreaseReadCountHandler
   implements ICommandHandler<IncreaseReadCountCommand>
 {
-  constructor(private readonly postRepository: PostsRepository) {}
+  @Transaction()
+  async execute(
+    command: IncreaseReadCountCommand,
+    @TransactionManager() tm?: EntityManager,
+  ) {
+    const em = tm!;
+    const {
+      postIdentifier: { postId, boardType },
+    } = command;
 
-  async execute(command: IncreaseReadCountCommand) {
-    const { postIdentifier } = command;
-    await this.postRepository.increaseReadCount(postIdentifier);
+    await increaseField(em, Post, "readCount", 1, { postId, boardType });
     return;
   }
 }

@@ -1,5 +1,5 @@
 import { ApiProperty, PickType } from "@nestjs/swagger";
-import { Comment } from "../../models/comment.model";
+import { Comment } from "../../entities/comment.entity";
 import { Expose, plainToClass, Transform } from "class-transformer";
 import { PostInfoDto } from "../../posts/dto/post-info.dto";
 

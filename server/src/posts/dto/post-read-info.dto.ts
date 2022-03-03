@@ -7,21 +7,21 @@ export class PostReadInfoDto extends PostWithWriterInfoDto {
    */
   @Expose()
   @Type(() => Boolean)
-  liked?: boolean = false;
+  liked: boolean = false;
 
   /*
    * 게시글에 대한 사용자의 스크랩 여부. 로그인한 사용자가 없을 경우엔 false
    */
   @Expose()
   @Type(() => Boolean)
-  scrapped?: boolean = false;
+  scrapped: boolean = false;
 
   /*
    * 게시글에 대한 사용자의 신고 여부. 로그인한 사용자가 없을 경우엔 false
    */
   @Expose()
   @Type(() => Boolean)
-  reported?: boolean = false;
+  reported: boolean = false;
 
   static fromJson(json: Readonly<PostReadInfoDto>) {
     return plainToClass(PostReadInfoDto, json, {

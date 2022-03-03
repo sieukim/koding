@@ -1,4 +1,4 @@
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 import { UserInfoDto } from "./user-info.dto";
 import { ApiProperty } from "@nestjs/swagger";
 

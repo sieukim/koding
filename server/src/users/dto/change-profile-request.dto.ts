@@ -4,7 +4,7 @@ import {
   PartialType,
   PickType,
 } from "@nestjs/swagger";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 import { IsOptional } from "class-validator";
 import { Exclude } from "class-transformer";
 import { BooleanTransform } from "../../common/decorator/boolean-transform.decorator";

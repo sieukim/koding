@@ -1,20 +1,39 @@
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { VerifyGithubSignupCommand } from "../verify-github-signup.command";
-import { User } from "../../../models/user.model";
-import { UsersRepository } from "../../users.repository";
-import { NotFoundException } from "@nestjs/common";
+import { User } from "../../../entities/user.entity";
+import { BadRequestException } from "@nestjs/common";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { TemporaryGithubUser } from "../../../entities/temporary-github-user.entity";
 
 @CommandHandler(VerifyGithubSignupCommand)
 export class VerifyGithubSignupHandler
   implements ICommandHandler<VerifyGithubSignupCommand, User>
 {
-  constructor(private readonly userRepository: UsersRepository) {}
-
-  async execute(command: VerifyGithubSignupCommand): Promise<User> {
+  @Transaction()
+  async execute(
+    command: VerifyGithubSignupCommand,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<User> {
+    const em = tm!;
     const { verifyToken, newNickname, email } = command;
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new NotFoundException("잘못된 이메일");
-    user.verifyGithubSignup({ verifyToken, newNickname });
-    return this.userRepository.updateByEmail(user);
+    const githubUser = await em
+      .findOneOrFail(TemporaryGithubUser, { where: { email } })
+      .catch(() => {
+        throw new BadRequestException("깃허브 연동 사용자가 아닙니다");
+      });
+    githubUser.verify(verifyToken);
+
+    const user = new User({
+      isGithubUser: true,
+      nickname: newNickname,
+      email,
+      githubUserIdentifier: githubUser.githubUserIdentifier,
+      githubUserInfo: githubUser.githubUserInfo,
+    });
+    const [result] = await Promise.all([
+      em.save(user, { reload: false }),
+      em.remove(githubUser),
+    ]);
+    return result;
   }
 }

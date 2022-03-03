@@ -5,11 +5,11 @@ import {
   Logger,
 } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import { S3PostImageDocument } from "../../schemas/s3-post-image.schema";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
 import { getCurrentTime } from "../../common/utils/time.util";
 import { S3Service } from "./s3.service";
+import { EntityManager, In, MoreThan } from "typeorm";
+import { InjectEntityManager } from "@nestjs/typeorm";
+import { S3PostImage } from "../../entities/s3-post.image.entity";
 
 @Injectable()
 export class PostImageUploadService {
@@ -17,77 +17,61 @@ export class PostImageUploadService {
 
   constructor(
     private readonly s3Service: S3Service,
-    @InjectModel(S3PostImageDocument.name)
-    private readonly postImageModel: Model<S3PostImageDocument>,
+    @InjectEntityManager() private readonly em: EntityManager,
   ) {}
 
   // @Cron(CronExpression.EVERY_10_SECONDS)
   @Cron(CronExpression.EVERY_HOUR)
   async deleteUnusedTemporaryFile() {
-    const deadline = getCurrentTime();
-    deadline.setHours(deadline.getHours() - S3PostImageDocument.EXPIRE_HOUR);
-    // deadline.setSeconds(deadline.getSeconds() - 10);
-    const files = await this.postImageModel
-      .find({
-        createdAt: { $gte: deadline },
-        postId: null,
-      })
-      .exec();
-    await this.s3Service
-      .deletePostImageFiles(files.map((file) => file.s3FileKey))
-      .catch((err) =>
-        this.logger.error(
-          `error while removing s3 images : ${err.toString?.() ?? err}`,
-        ),
+    return this.em.transaction(async (em) => {
+      const deadline = getCurrentTime();
+      deadline.setHours(deadline.getHours() - S3PostImage.EXPIRE_HOUR);
+      // deadline.setSeconds(deadline.getSeconds() - 10);
+      const files = await em.find(S3PostImage, {
+        where: { createdAt: MoreThan(deadline), postId: null },
+      });
+      await this.s3Service
+        .deletePostImageFiles(files.map((file) => file.s3FileKey))
+        .catch((err) =>
+          this.logger.error(
+            `error while removing s3 images : ${err.toString?.() ?? err}`,
+          ),
+        );
+      await em.remove(files);
+      this.logger.log(
+        `unused(during ${S3PostImage.EXPIRE_HOUR} hour) temporary files deleted`,
       );
-    await this.postImageModel
-      .deleteMany({
-        _id: { $in: files.map((file) => file._id) },
-      })
-      .exec();
-    this.logger.log(
-      `unused(during ${S3PostImageDocument.EXPIRE_HOUR} hour) temporary files deleted`,
-    );
+    });
   }
 
   async saveTemporaryPostImageFile(
     file: Express.MulterS3.File,
     uploaderNickname: string,
   ) {
-    const temporaryFile = await this.postImageModel.create({
+    const temporaryFile = new S3PostImage({
       uploaderNickname,
       s3FileUrl: file.location,
       s3FileKey: file.key,
-      postId: null,
     });
+    await this.em.save(temporaryFile, { reload: false });
     return temporaryFile.s3FileUrl;
   }
 
   async setOwnerPostOfImages(postId: string, fileUrls: string[]) {
-    await this.postImageModel
-      .updateMany(
-        {
-          s3FileUrl: { $in: fileUrls },
-        },
-        { $set: { postId } },
-      )
-      .exec();
+    await this.em.update(S3PostImage, { s3FileUrl: In(fileUrls) }, { postId });
     return;
   }
 
   async removePostImages(fileUrls: string[]) {
-    const files = await this.postImageModel
-      .find({
-        s3FileUrl: { $in: fileUrls },
-      })
-      .exec();
-    await this.s3Service.deletePostImageFiles(
-      files.map((file) => file.s3FileKey),
-    );
-    await this.postImageModel
-      .deleteMany({ _id: { $in: files.map((file) => file._id) } })
-      .exec();
-    return;
+    return this.em.transaction(async (em) => {
+      const files = await em.find(S3PostImage, {
+        where: { s3FileUrl: In(fileUrls) },
+      });
+      await this.s3Service.deletePostImageFiles(
+        files.map((file) => file.s3FileKey),
+      );
+      await em.remove(files);
+    });
   }
 
   async validateImageUrls(imageUrls: string[], requestUserNickname: string) {
@@ -101,21 +85,16 @@ export class PostImageUploadService {
     fileUrls: string[],
     uploaderNickname: string,
   ) {
-    const fileCount = await this.postImageModel
-      .count({
-        s3FileUrl: { $in: fileUrls },
-        uploaderNickname,
-      })
-      .exec();
+    const fileCount = await this.em.count(S3PostImage, {
+      where: { s3FileUrl: In(fileUrls), uploaderNickname },
+    });
     return fileUrls.length === fileCount;
   }
 
   private async checkExistenceOfPostImages(fileUrls: string[]) {
-    const fileCount = await this.postImageModel
-      .count({
-        s3FileUrl: { $in: fileUrls },
-      })
-      .exec();
+    const fileCount = await this.em.count(S3PostImage, {
+      where: { s3FileUrl: In(fileUrls) },
+    });
     return fileUrls.length === fileCount;
   }
 }

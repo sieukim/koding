@@ -1,5 +1,5 @@
 import { PickType } from "@nestjs/swagger";
-import { Comment } from "../../models/comment.model";
+import { Comment } from "../../entities/comment.entity";
 import { Expose, plainToClass } from "class-transformer";
 
 export class CommentInfoDto extends PickType(Comment, [

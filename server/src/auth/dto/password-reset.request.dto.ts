@@ -1,6 +1,6 @@
 import { ApiProperty, PickType } from "@nestjs/swagger";
 import { IsNumberString, Length } from "class-validator";
-import { User } from "../../models/user.model";
+import { User } from "../../entities/user.entity";
 
 export class PasswordResetRequestDto extends PickType(User, [
   "email",
@@ -21,4 +21,6 @@ export class PasswordResetRequestDto extends PickType(User, [
     maxLength: 6,
   })
   verifyToken: string;
+
+  password!: string;
 }

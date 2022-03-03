@@ -1,24 +1,29 @@
 import { CommandHandler, EventPublisher, ICommandHandler } from "@nestjs/cqrs";
 import { ResetPasswordRequestCommand } from "../reset-password-request.command";
-import { UsersRepository } from "../../users.repository";
-import { NotFoundException } from "@nestjs/common";
+import { EntityManager, Transaction, TransactionManager } from "typeorm";
+import { User } from "../../../entities/user.entity";
+import { orThrowNotFoundUser } from "../../../common/utils/or-throw";
 
 @CommandHandler(ResetPasswordRequestCommand)
 export class ResetPasswordRequestHandler
   implements ICommandHandler<ResetPasswordRequestCommand, void>
 {
-  constructor(
-    private readonly userRepository: UsersRepository,
-    private readonly publisher: EventPublisher,
-  ) {}
+  constructor(private readonly publisher: EventPublisher) {}
 
-  async execute(command: ResetPasswordRequestCommand): Promise<void> {
+  @Transaction()
+  async execute(
+    command: ResetPasswordRequestCommand,
+    @TransactionManager() tm?: EntityManager,
+  ): Promise<void> {
+    const em = tm!;
     const { email } = command;
-    let user = await this.userRepository.findByEmail(email);
-    if (!user) throw new NotFoundException("잘못된 사용자입니다");
-    user = this.publisher.mergeObjectContext(user);
+    const user = this.publisher.mergeObjectContext(
+      await em
+        .findOneOrFail(User, { where: { email } })
+        .catch(orThrowNotFoundUser),
+    );
     user.sendPasswordResetEmail();
+    await em.save(User, user, { reload: false });
     user.commit();
-    await this.userRepository.update(user);
   }
 }
