@@ -85,6 +85,7 @@ import { CheckExistenceQuery } from "./queries/check-existence.query";
 import { FollowUserCommand } from "./commands/follow-user.command";
 import { UnfollowUserCommand } from "./commands/unfollow-user.command";
 import { SignupLocalHandler } from "./commands/handlers/signup-local.handler";
+import { KodingConfig } from "../config/configutation";
 
 @ApiTags("USER")
 @ApiUnauthorizedResponse({
@@ -98,7 +99,7 @@ export class UsersController {
   private readonly logger = new Logger(UsersController.name);
 
   constructor(
-    private readonly configService: ConfigService<any, true>,
+    private readonly configService: ConfigService<KodingConfig, true>,
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
@@ -174,7 +175,9 @@ export class UsersController {
   ) {
     await this.commandBus.execute(new DeleteAccountCommand(nickname));
     req.logout();
-    res.clearCookie(this.configService.get<string>("session.cookie-name")!);
+    res.clearCookie(
+      this.configService.get("session.cookie-name", { infer: true }),
+    );
     return;
   }
 

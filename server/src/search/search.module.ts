@@ -5,21 +5,24 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { CqrsModule } from "@nestjs/cqrs";
 import { SearchQueryHandlers } from "./queries/handlers";
 import { SearchServices } from "./services";
+import { KodingConfig } from "../config/configutation";
 
 @Module({
   imports: [
     ElasticsearchModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<any, true>) => ({
-        node: configService.get<string>("database.elasticsearch.host")!,
+      useFactory: (configService: ConfigService<KodingConfig, true>) => ({
+        node: configService.get("database.elasticsearch.host", {
+          infer: true,
+        }),
         auth: {
-          username: configService.get<string>(
-            "database.elasticsearch.username",
-          )!,
-          password: configService.get<string>(
-            "database.elasticsearch.password",
-          )!,
+          username: configService.get("database.elasticsearch.username", {
+            infer: true,
+          }),
+          password: configService.get("database.elasticsearch.password", {
+            infer: true,
+          }),
         },
         maxRetries: 10,
         requestTimeout: 60000,

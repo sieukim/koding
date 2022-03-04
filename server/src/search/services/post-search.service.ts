@@ -10,6 +10,7 @@ import { SortOrder } from "../../common/sort-order.enum";
 import { Post } from "../../entities/post.entity";
 import { PostListWithCursorDto } from "../../posts/dto/post-list-with-cursor.dto";
 import { PostBoardType } from "../../entities/post-board.type";
+import { KodingConfig } from "../../config/configutation";
 
 export const PostSearchTypes = ["query", "tags"] as const;
 export type PostSearchType = typeof PostSearchTypes[number];
@@ -30,10 +31,11 @@ export class PostSearchService {
 
   constructor(
     private readonly elasticsearchService: ElasticsearchService,
-    configService: ConfigService<any, true>,
+    configService: ConfigService<KodingConfig, true>,
   ) {
-    this.postIndexName = configService.get<string>(
+    this.postIndexName = configService.get(
       "database.elasticsearch.index.post",
+      { infer: true },
     );
   }
 

@@ -9,19 +9,22 @@ import { validateOrReject } from "class-validator";
 import { SignupGithubCommand } from "../../users/commands/signup-github.command";
 import { SignupGithubHandler } from "../../users/commands/handlers/signup-github.handler";
 import { User } from "../../entities/user.entity";
+import { KodingConfig } from "../../config/configutation";
 
 @Injectable()
 export class GithubStrategy extends PassportStrategy(Strategy, "github") {
   constructor(
     private readonly authService: AuthService,
     private readonly commandBus: CommandBus,
-    configService: ConfigService<any, true>,
+    configService: ConfigService<KodingConfig, true>,
   ) {
     super({
-      clientID: configService.get<string>("auth.social.github.client_id"),
-      clientSecret: configService.get<string>(
-        "auth.social.github.client_secret",
-      ),
+      clientID: configService.get("auth.social.github.client_id", {
+        infer: true,
+      }),
+      clientSecret: configService.get("auth.social.github.client_secret", {
+        infer: true,
+      }),
     });
   }
 

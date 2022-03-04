@@ -5,14 +5,17 @@ import { SendEmailCommand } from "../../email/commands/send-email.command";
 import { ConfigService } from "@nestjs/config";
 import { ResetPasswordRequestedEvent } from "../events/reset-password-requested.event";
 import { EmailVerifyTokenCreatedEvent } from "../events/email-verify-token-created.event";
+import { KodingConfig } from "../../config/configutation";
 
 @Injectable()
 export class EmailSagas {
   private readonly baseUrl: string;
 
-  constructor(configService: ConfigService<any, true>) {
+  constructor(configService: ConfigService<KodingConfig, true>) {
     this.baseUrl =
-      configService.get("domain") + ":" + configService.get("port");
+      configService.get("domain", { infer: true }) +
+      ":" +
+      configService.get("port", { infer: true });
   }
 
   @Saga()

@@ -21,6 +21,7 @@ import * as https from "https";
 import { ServerOptions } from "https";
 import * as fs from "fs";
 import * as path from "path";
+import { KodingConfig } from "./config/configutation";
 
 async function testRedisConnection(cache: RedisCache) {
   await cache.set("test", "success");
@@ -51,15 +52,16 @@ async function bootstrap() {
   const redisCacheManager = app.get<RedisCache>(CACHE_MANAGER);
   // elasticCache 연결 테스트
   await testRedisConnection(redisCacheManager);
-  const configService = app.get<ConfigService<any, true>>(ConfigService);
+  const configService =
+    app.get<ConfigService<KodingConfig, true>>(ConfigService);
   app.use(
-    cookieParser(configService.get<string>("cookie.secret")),
+    cookieParser(configService.get("cookie.secret", { infer: true })),
     session({
-      secret: configService.get<string>("session.secret"),
+      secret: configService.get("session.secret", { infer: true }),
       resave: false,
       saveUninitialized: false,
       cookie: { httpOnly: true },
-      name: configService.get<string>("session.cookie-name"),
+      name: configService.get("session.cookie-name", { infer: true }),
       store: createRedisSessionStore(redisCacheManager),
     }),
     passport.initialize(),
@@ -69,7 +71,9 @@ async function bootstrap() {
         if (err instanceof NotFoundException) {
           console.log("세션에 삭제된 유저가 저장되어 있으므로 세선 삭제");
           req.logout();
-          res.clearCookie(configService.get("session.cookie-name"));
+          res.clearCookie(
+            configService.get("session.cookie-name", { infer: true }),
+          );
           next();
         } else next(err);
       });

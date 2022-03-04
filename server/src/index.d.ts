@@ -1,5 +1,6 @@
 import { User } from "./entities/user.entity";
 import { Cache, Store } from "cache-manager";
+import * as IORedis from "ioredis";
 
 declare module "express" {
   interface Request {
@@ -13,6 +14,6 @@ interface RedisCache extends Cache {
 
 interface RedisStore extends Store {
   name: "redis";
-  getClient: () => Redis.RedisClient;
+  getClient: () => IORedis.Redis;
   isCacheableValue: (value: any) => boolean;
 }

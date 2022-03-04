@@ -17,16 +17,17 @@ import { PostLike } from "../entities/post-like.entity";
 import { PostScrap } from "../entities/post-scrap.entity";
 import { PostDailyRanking } from "../entities/post-daily-ranking.entity";
 import { PostReport } from "../entities/post-report.entity";
+import { KodingConfig } from "../config/configutation";
 
 @Module({
   imports: [
     CacheModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<any, true>) => ({
+      useFactory: (configService: ConfigService<KodingConfig, true>) => ({
         isGlobal: true,
         store: redisStore,
-        host: configService.get<string>("database.redis.host"),
-        port: configService.get<number>("database.redis.port"),
+        host: configService.get("database.redis.host", { infer: true }),
+        port: configService.get<number>("database.redis.port", { infer: true }),
       }),
     }),
     TypeOrmModule.forFeature([

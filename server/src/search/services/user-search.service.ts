@@ -6,6 +6,7 @@ import {
   NicknameAndAvatar,
   NicknameSearchResultDto,
 } from "../dto/nickname-search-result.dto";
+import { KodingConfig } from "../../config/configutation";
 
 @Injectable()
 export class UserSearchService {
@@ -13,10 +14,11 @@ export class UserSearchService {
 
   constructor(
     private readonly elasticsearchService: ElasticsearchService,
-    configService: ConfigService<any, true>,
+    configService: ConfigService<KodingConfig, true>,
   ) {
-    this.userIndexName = configService.get<string>(
+    this.userIndexName = configService.get(
       "database.elasticsearch.index.user",
+      { infer: true },
     );
   }
 

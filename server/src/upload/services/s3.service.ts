@@ -2,6 +2,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { S3 } from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
 import { isString } from "class-validator";
+import { KodingConfig } from "../../config/configutation";
 
 @Injectable()
 export class S3Service {
@@ -11,21 +12,25 @@ export class S3Service {
   public readonly profileAvatarKeyPrefix: string;
   private readonly logger = new Logger(S3Service.name);
 
-  constructor(configService: ConfigService<any, true>) {
+  constructor(configService: ConfigService<KodingConfig, true>) {
     this.s3 = new S3({
       credentials: {
-        accessKeyId: configService.get<string>("aws.s3.aws-key"),
-        secretAccessKey: configService.get<string>("aws.s3.aws-secret"),
+        accessKeyId: configService.get("aws.s3.aws-key", { infer: true }),
+        secretAccessKey: configService.get("aws.s3.aws-secret", {
+          infer: true,
+        }),
         expired: false,
       },
-      region: configService.get<string>("aws.s3.region"),
+      region: configService.get("aws.s3.region", { infer: true }),
     });
-    this.bucketName = configService.get<string>("aws.s3.bucket");
-    this.postImageKeyPrefix = configService.get<string>(
+    this.bucketName = configService.get("aws.s3.bucket", { infer: true });
+    this.postImageKeyPrefix = configService.get(
       "aws.s3.key-prefix.post-image",
+      { infer: true },
     );
-    this.profileAvatarKeyPrefix = configService.get<string>(
+    this.profileAvatarKeyPrefix = configService.get(
       "aws.s3.key-prefix.profile-avatar",
+      { infer: true },
     );
   }
 

@@ -1,7 +1,12 @@
-import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import {
+  CACHE_MANAGER,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from "@nestjs/common";
 import { AuthModule } from "./auth/auth.module";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import { configuration } from "./config/configutation";
+import { configuration, KodingConfig } from "./config/configutation";
 import { AppLoggerMiddleware } from "./common/middlewares/logger.middleware";
 import { UsersModule } from "./users/users.module";
 import { EmailModule } from "./email/email.module";
@@ -19,6 +24,9 @@ import { ServeStaticModule } from "@nestjs/serve-static";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import * as fs from "fs";
 import * as path from "path";
+import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
+import { ThrottlerStorageRedisService } from "nestjs-throttler-storage-redis";
+import { RedisCache } from "./index";
 
 @Module({
   imports: [
@@ -30,18 +38,19 @@ import * as path from "path";
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService<any, true>) => ({
+      useFactory: (configService: ConfigService<KodingConfig, true>) => ({
         type: "mysql",
-        host: configService.get<string>("database.mysql.host"),
-        username: configService.get<string>("database.mysql.username"),
-        password: configService.get<string>("database.mysql.password"),
-        database: configService.get<string>("database.mysql.database"),
+        host: configService.get("database.mysql.host", { infer: true }),
+        username: configService.get("database.mysql.username", { infer: true }),
+        password: configService.get("database.mysql.password", { infer: true }),
+        database: configService.get("database.mysql.database", { infer: true }),
         entities: ["dist/**/*.entity{.ts,.js}"],
         charset: "utf8mb4",
         logging: ["query"],
         // synchronize: true,
         // dropSchema: true,
-        ssl: configService.get<string>("environment") === "production" && {
+        ssl: configService.get("environment", { infer: true }) ===
+          "production" && {
           ca: fs.readFileSync(
             path.join(__dirname, "..", "DigiCertGlobalRootCA.crt.pem"),
           ),
@@ -50,6 +59,14 @@ import * as path from "path";
     }),
     ServeStaticModule.forRoot({
       rootPath: path.join(__dirname, "..", "public"),
+    }),
+    ThrottlerModule.forRootAsync({
+      inject: [CACHE_MANAGER],
+      useFactory: (cache: RedisCache) => ({
+        ttl: 60,
+        limit: 50,
+        storage: new ThrottlerStorageRedisService(cache.store.getClient()),
+      }),
     }),
     ScheduleModule.forRoot(),
     AuthModule,
@@ -68,6 +85,10 @@ import * as path from "path";
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
