@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Button, Form, Input } from 'antd';
+import { Button, Col, Form, Input, Row } from 'antd';
 import {
+  KeyOutlined,
   LinkOutlined,
   LockOutlined,
   MailOutlined,
@@ -18,19 +19,36 @@ export const SignupForm = ({
   setTechStack,
   interestTech,
   setInterestTech,
+  sendLoading,
+  sendData,
+  sendError,
+  verifyLoading,
+  verifyData,
+  verifyError,
+  onSendToken,
+  onVerifyToken,
+  initializeState,
 }) => {
   const [form] = Form.useForm();
   const [validated, setValidated] = useState({ email: false, nickname: false });
+
+  // 인증 코드 발송 상태
+  const [tokenSent, setTokenSent] = useState(false);
+
+  // 인증 코드 확인 상태
+  const [tokenVerified, setTokenVerified] = useState(false);
 
   // 이메일
   const email = form.getFieldValue('email');
 
   // 이메일 onChange 핸들러
-  const onChangeEmail = useCallback(
+  const onChangeMail = useCallback(
     (e) => {
       onDuplicateCheck('email', e.target.value);
+      initializeState(); // 인증 코드 발송 상태 초기화
+      setTokenSent(false);
     },
-    [onDuplicateCheck],
+    [onDuplicateCheck, initializeState],
   );
 
   useEffect(() => {
@@ -49,12 +67,60 @@ export const SignupForm = ({
 
   // 이메일 유효성 검증
   const validateEmail = useCallback(() => {
-    if (validated.email) return Promise.resolve();
-
     if (!validated.email) {
       return Promise.reject(new Error('사용중인 이메일입니다.'));
     }
-  }, [validated.email]);
+
+    if (!tokenSent && !sendData) {
+      return Promise.reject(new Error('인증 코드 발송이 필요합니다.'));
+    }
+
+    return Promise.resolve();
+  }, [validated, tokenSent, sendData]);
+
+  // 인증 코드 발송 버튼 onClick 이벤트 핸들러
+  const onClickSend = useCallback(() => {
+    const email = form.getFieldValue('email');
+    onSendToken({ email: email });
+    setTokenSent(true);
+  }, [onSendToken, form]);
+
+  // 인증 코드 확인 버튼 onClick 핸들러
+  const onClickVerify = useCallback(() => {
+    const { email, verifyToken: token } = form.getFieldsValue([
+      'email',
+      'verifyToken',
+    ]);
+    onVerifyToken(email, token);
+    setTokenVerified(true);
+  }, [onVerifyToken, form]);
+
+  // 인증 코드 유효성 검증
+  const validateToken = useCallback(
+    (_, value) => {
+      if (!value || value.length !== 6) return Promise.reject();
+
+      if (verifyError) {
+        return Promise.reject(new Error('인증번호가 일치하지 않습니다.'));
+      }
+
+      if (!tokenVerified && !verifyData) {
+        return Promise.reject(new Error('인증 코드 확인이 필요합니다.'));
+      }
+
+      return Promise.resolve();
+    },
+    [tokenVerified, verifyError, verifyData],
+  );
+
+  useEffect(() => {
+    if (tokenSent) {
+      form.validateFields(['email']);
+    }
+    if (tokenVerified) {
+      form.validateFields(['verifyToken']);
+    }
+  }, [tokenSent, tokenVerified, form, sendError, verifyError]);
 
   // 비밀번호 유효성 검증
   const validatePassword = useCallback((_, value) => {
@@ -99,18 +165,18 @@ export const SignupForm = ({
   );
 
   useEffect(() => {
-    if (checked.nickname && duplicated.nickname) {
+    if (tokenVerified.nickname && duplicated.nickname) {
       setValidated((validated) => ({ ...validated, nickname: false }));
     } else {
       setValidated((validated) => ({ ...validated, nickname: true }));
     }
-  }, [checked.nickname, duplicated.nickname, nickname]);
+  }, [tokenVerified.nickname, duplicated.nickname, nickname]);
 
   useEffect(() => {
-    if (checked.nickname) {
+    if (tokenVerified.nickname) {
       form.validateFields(['nickname']);
     }
-  }, [checked.nickname, validated.nickname, form]);
+  }, [tokenVerified.nickname, validated.nickname, form]);
 
   // 닉네임 유효성 검증
   const validateNickname = useCallback(
@@ -140,22 +206,59 @@ export const SignupForm = ({
 
   return (
     <Form name="signup-form" form={form} onFinish={onFinish}>
-      <Form.Item
-        name="email"
-        hasFeedback
-        rules={[
-          { required: true, message: '이메일을 입력하세요.' },
-          { type: 'email', message: '이메일을 입력하세요.' },
-          { validator: validateEmail },
-        ]}
-      >
-        <Input
-          prefix={<MailOutlined className="site-form-item-icon" />}
-          placeholder="이메일"
-          onChange={onChangeEmail}
-          allowClear={true}
-        />
-      </Form.Item>
+      <Row gutter={8}>
+        <Col flex={3}>
+          <Form.Item
+            name="email"
+            rules={[
+              { required: true, message: '이메일을 입력하세요.' },
+              { type: 'email', message: '이메일을 입력하세요.' },
+              { validator: validateEmail },
+            ]}
+            hasFeedback
+            validateFirst={true}
+          >
+            <Input
+              prefix={<MailOutlined className="site-form-item-icon" />}
+              placeholder="이메일"
+              onChange={onChangeMail}
+              allowClear={true}
+            />
+          </Form.Item>
+        </Col>
+        <Col flex={1}>
+          <Button
+            onClick={onClickSend}
+            loading={sendLoading}
+            disabled={!validated.email}
+          >
+            인증 코드 발송
+          </Button>
+        </Col>
+      </Row>
+      <Row gutter={8}>
+        <Col flex={3}>
+          <Form.Item
+            name="verifyToken"
+            rules={[
+              { required: true, message: '인증 코드를 입력하세요.' },
+              { validator: validateToken },
+            ]}
+            hasFeedback
+          >
+            <Input
+              prefix={<KeyOutlined className="site-form-item-icon" />}
+              placeholder="인증 코드"
+              allowClear={true}
+            />
+          </Form.Item>
+        </Col>
+        <Col flex={1}>
+          <Button onClick={onClickVerify} loading={verifyLoading}>
+            인증 코드 확인
+          </Button>
+        </Col>
+      </Row>
       <Form.Item
         name="password"
         hasFeedback

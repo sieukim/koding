@@ -38,10 +38,26 @@ export const signup = (user) => {
   if (user.interestTech.length > 0) {
     formData.set('interestTech', user.interestTech);
   }
+  formData.set('verifyToken', user.verifyToken);
 
   return axios.post('/api/users', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+};
+
+// 이메일 인증 token 발송
+export const sendSignupToken = (email) => {
+  return axios.post(`/api/auth/email/verifyToken`, email);
+};
+
+// 이메일 인증 token 검증
+export const verifySignupToken = (email, verifyToken) => {
+  const query = new URLSearchParams();
+
+  query.set('email', email);
+  query.set('verifyToken', verifyToken);
+
+  return axios.head(`/api/auth/email/verifyToken?${query.toString()}`);
 };
 
 // 이메일 로그인
@@ -65,12 +81,12 @@ export const logout = () => {
 };
 
 // 비밀번호 초기화 token 전송 요청
-export const sendToken = (user) => {
+export const sendResetToken = (user) => {
   return axios.delete(`/api/auth/email/password`, { data: user });
 };
 
 // 비밀번호 초기화 token 검증
-export const verifyToken = (user) => {
+export const verifyResetToken = (user) => {
   return axios.post(`/api/auth/email/password/verifyToken`, user);
 };
 
