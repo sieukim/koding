@@ -42,7 +42,6 @@ import { PasswordResetTokenVerifyRequestDto } from "./dto/password-reset-token-v
 import { User } from "../entities/user.entity";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { MyUserInfoDto } from "../users/dto/my-user-info.dto";
-import { GithubUserGuard } from "./guard/authorization/github-user.guard";
 import { LoginUserInfoDto } from "./dto/login-user-info.dto";
 import { TemporaryGithubUser } from "../entities/temporary-github-user.entity";
 import { SendEmailVerifyTokenRequestDto } from "../users/dto/send-email-verify-token-request.dto";
@@ -134,7 +133,6 @@ export class AuthController {
   @ApiNotFoundResponse({
     description: "가입하지 않은 이메일",
   })
-  @UseGuards(GithubUserGuard)
   @HttpCode(HttpStatus.OK)
   @Post("/github/verify")
   async verifyGithubSignup(@Body() body: SignupGithubVerifyRequestDto) {
