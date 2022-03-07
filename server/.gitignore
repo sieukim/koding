@@ -49,3 +49,6 @@ secrets/
 
 # serverless
 serverless.yml
+
+# ssh cert
+koding-*.pem

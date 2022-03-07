@@ -27,6 +27,7 @@ import * as path from "path";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { ThrottlerStorageRedisService } from "nestjs-throttler-storage-redis";
 import { RedisCache } from "./index";
+import { TypeOrmLoggerContainer } from "./typeorm.logger";
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { RedisCache } from "./index";
         entities: ["dist/**/*.entity{.ts,.js}"],
         charset: "utf8mb4",
         logging: ["query"],
+        logger: TypeOrmLoggerContainer.forConnection("koding-mysql", ["query"]),
         // synchronize: true,
         // dropSchema: true,
         ssl: configService.get("environment", { infer: true }) ===

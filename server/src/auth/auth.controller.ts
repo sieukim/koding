@@ -6,6 +6,7 @@ import {
   Head,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
   Query,
   Req,
@@ -57,6 +58,8 @@ export class AuthController {
     private readonly commandBus: CommandBus,
     private readonly queryBus: QueryBus,
   ) {}
+
+  private readonly logger = new Logger(AuthController.name);
 
   @ApiOperation({
     summary: "이메일 로그인",
@@ -135,13 +138,17 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.OK)
   @Post("/github/verify")
-  async verifyGithubSignup(@Body() body: SignupGithubVerifyRequestDto) {
+  async verifyGithubSignup(
+    @Body() body: SignupGithubVerifyRequestDto,
+    @Req() req: Request,
+  ) {
     const { email, nickname, verifyToken } = body;
     const user = await this.authService.verifyGithubSignupUser({
       email,
       nickname,
       verifyToken,
     });
+    req.login(user, (err) => this.logger.error(err));
     return UserInfoDto.fromModel(user);
   }
 
