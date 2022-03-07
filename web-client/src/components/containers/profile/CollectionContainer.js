@@ -20,7 +20,8 @@ const CollectionContainer = ({ profileUser }) => {
 
   // 팔로잉하는 유저의 게시글 모아보기
   const getFollowingPosts = useCallback(async () => {
-    setLoading((loading) => ({ ...loading, followings: true }));
+    if (!nextPageCursor.followings)
+      setLoading((loading) => ({ ...loading, followings: true }));
 
     const response = await api.getFollowingPosts(
       profileUser,
@@ -69,10 +70,13 @@ const CollectionContainer = ({ profileUser }) => {
   }, [profileUser]);
 
   useEffect(() => {
-    getFollowingPosts();
+    if (nextPageCursor.followings === null) getFollowingPosts();
     getScrappedPosts();
     getLikedPosts();
+    // eslint-disable-next-line
+  }, [nextPageCursor]);
 
+  useEffect(() => {
     return () => {
       setLoading({
         followings: false,

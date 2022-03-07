@@ -17,6 +17,7 @@ import NotificationPage from './pages/notification/NotificationPage';
 import SearchPage from './pages/search/SearchPage';
 import PostEditorPage from './pages/post/PostEditorPage';
 import CollectionPage from './pages/profile/CollectionPage';
+import BlogPage from './pages/blog/BlogPage';
 
 const StyledPage = styled.div`
   min-width: 1200px;
@@ -65,6 +66,7 @@ function App() {
             path="/user/:nickname/notification"
             element={<NotificationPage />}
           />
+          <Route path="/blog/:nickname" element={<BlogPage />} />
           <Route path="/search" element={<SearchPage />} />
         </Routes>
       </div>

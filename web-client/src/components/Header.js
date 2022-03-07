@@ -81,6 +81,7 @@ const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
     ({ key }) => {
       if (key === 'profile') navigate(`/user/${loginUser}/profile`);
       if (key === 'edit-profile') navigate(`/user/${loginUser}/profile/edit`);
+      if (key === 'blog') navigate(`/blog/${loginUser}`);
       if (key === 'logout') logout();
       setVisible((visible) => !visible);
     },
@@ -91,6 +92,7 @@ const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
     <Dropdown
       overlay={
         <Menu onClick={onClickMenu}>
+          <Menu.Item key="blog">내 블로그</Menu.Item>
           <Menu.Item key="profile">내 프로필</Menu.Item>
           <Menu.Item key="edit-profile">프로필 편집</Menu.Item>
           <Menu.Item key="logout">로그아웃</Menu.Item>
