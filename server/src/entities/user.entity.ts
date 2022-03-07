@@ -184,8 +184,8 @@ export class User extends AggregateRoot {
     maxLength: 16,
     type: String,
   })
-  @Column("varchar", { length: 100 })
-  password?: string;
+  @Column("varchar", { length: 100, nullable: true }) // 깃허브 유저의 경우는 null
+  password?: string | null;
 
   @Expose()
   @IsBoolean()

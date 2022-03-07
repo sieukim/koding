@@ -1,5 +1,5 @@
 import { ApiProperty, PickType } from "@nestjs/swagger";
-import { IsString, IsUUID } from "class-validator";
+import { IsString } from "class-validator";
 import { User } from "../../entities/user.entity";
 
 export class SignupGithubVerifyRequestDto extends PickType(User, [
@@ -20,7 +20,6 @@ export class SignupGithubVerifyRequestDto extends PickType(User, [
   })
   nickname: string;
 
-  @IsUUID()
   @IsString()
   @ApiProperty({
     description: "깃허브로 회원가입 시 받은 인증 토큰",

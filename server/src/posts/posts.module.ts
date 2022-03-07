@@ -22,6 +22,7 @@ import { KodingConfig } from "../config/configutation";
 @Module({
   imports: [
     CacheModule.registerAsync({
+      isGlobal: true,
       inject: [ConfigService],
       useFactory: (configService: ConfigService<KodingConfig, true>) => ({
         isGlobal: true,

@@ -22,6 +22,7 @@ import { DelimiterArrayColumn } from "./utils/delimiter-array-column.decorator";
 import { CommentLike } from "./comment-like.entity";
 import { TableName } from "./table-name.enum";
 import { PostBoardType } from "./post-board.type";
+import { BoardTypeColumn } from "./utils/board-type-column.decorator";
 
 @Index(["postId", "createdAt"])
 @Index(["writerNickname", "createdAt", "commentId"])
@@ -52,6 +53,7 @@ export class Comment {
     description: "댓글의 부모 게시글의 게시판",
     enum: PostBoardType,
   })
+  @BoardTypeColumn()
   boardType: PostBoardType;
 
   @Expose()

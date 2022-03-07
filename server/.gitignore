@@ -46,3 +46,6 @@ public/
 
 # ssl cert
 secrets/
+
+# serverless
+serverless.yml
