@@ -69,15 +69,15 @@ const BlogMent = () => {
 
 export const BoardMent = ({ boardType }) => {
   switch (boardType) {
-    case 'common':
+    case 'community':
       return <CommunityMent />;
-    case 'question':
+    case 'qna':
       return <QnaMent />;
     case 'recruit':
       return <RecruitMent />;
     case 'study-group':
       return <StudyGroupMent />;
-    case 'column':
+    case 'blog':
       return <BlogMent />;
     default:
       return <StyledBoardMent>존재하지 않는 게시판입니다.</StyledBoardMent>;

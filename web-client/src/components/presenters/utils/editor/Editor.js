@@ -23,6 +23,7 @@ export const Editor = (props) => {
 
     setImageUrls((imageUrls) => [...imageUrls, imageUrl]);
     callback(imageUrl, 'alt_text');
+    // eslint-disable-next-line
   }, []);
 
   return (

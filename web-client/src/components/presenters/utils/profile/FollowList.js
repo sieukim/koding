@@ -1,6 +1,7 @@
 import { Button, List } from 'antd';
 import { NicknameLink } from '../link/NicknameLink';
 import { UserAddOutlined, UserDeleteOutlined } from '@ant-design/icons';
+import { AvatarLink } from '../link/AvatarLink';
 
 export const FollowList = ({
   list,
@@ -14,7 +15,10 @@ export const FollowList = ({
       dataSource={list}
       renderItem={(user) => (
         <List.Item className="follow-container">
-          <NicknameLink nickname={user} />
+          <div>
+            <AvatarLink nickname={user} className="follow-user-avatar" />
+            <NicknameLink nickname={user} className="follow-user-nickname" />
+          </div>
           {loginUser &&
             loginUser !== user &&
             (loginUserFollowings.includes(user) ? (

@@ -8,9 +8,9 @@ import { ResultCard } from '../utils/search/ResultCard';
 const SearchPresenter = ({
   query,
   onClickSearch,
-  column,
-  common,
-  question,
+  blog,
+  community,
+  qna,
   recruit,
   studyGroup,
   users,
@@ -46,16 +46,16 @@ const SearchPresenter = ({
       <ResultCard
         type="post"
         title="커뮤니티"
-        boardType="common"
+        boardType="community"
         query={query}
-        posts={common?.posts}
+        posts={community?.posts}
       />
       <ResultCard
         type="post"
         title="Q&A"
-        boardType="question"
+        boardType="qna"
         query={query}
-        posts={question?.posts}
+        posts={qna?.posts}
       />
       <ResultCard
         type="post"
@@ -74,9 +74,9 @@ const SearchPresenter = ({
       <ResultCard
         type="post"
         title="블로그"
-        boardType="column"
+        boardType="blog"
         query={query}
-        posts={column?.posts}
+        posts={blog?.posts}
       />
       <ResultCard
         type="user"

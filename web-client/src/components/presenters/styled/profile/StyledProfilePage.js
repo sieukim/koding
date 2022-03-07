@@ -7,6 +7,11 @@ export const StyledProfilePage = styled.div`
   margin: 82px auto 0 auto;
   width: 900px;
 
+  .spinner {
+    width: 100%;
+    text-align: center;
+  }
+
   .item-container {
     display: flex;
     flex-direction: column;
@@ -46,9 +51,21 @@ export const StyledProfilePage = styled.div`
         margin-bottom: 10px;
       }
     }
+
+    .collection-button {
+      margin-left: 10px;
+    }
   }
 
   .item-container-editable {
+    a {
+      color: black;
+
+      :hover {
+        color: #1890ff;
+      }
+    }
+
     .url-item-blog,
     .url-item-github,
     .url-item-portfolio,

@@ -5,21 +5,21 @@ import ActivityListPresenter from '../../presenters/profile/ActivityListPresente
 const ActivityListContainer = ({ profileUser }) => {
   // 게시글
   const [posts, setPosts] = useState({
-    common: [],
-    question: [],
+    community: [],
+    qna: [],
     [`study-group`]: [],
-    column: [],
+    blog: [],
   });
 
   const [nextPostCursor, setNextPostCursor] = useState({
-    common: null,
-    question: null,
+    community: null,
+    qna: null,
     [`study-group`]: null,
-    column: null,
+    blog: null,
   });
 
   const getUserPosts = useCallback(
-    async (boardType = 'common') => {
+    async (boardType = 'community') => {
       const response = await api.getUserPosts(
         profileUser,
         boardType,
@@ -38,30 +38,30 @@ const ActivityListContainer = ({ profileUser }) => {
   );
 
   useEffect(() => {
-    getUserPosts('common');
-    getUserPosts('question');
+    getUserPosts('community');
+    getUserPosts('qna');
     getUserPosts('study-group');
-    getUserPosts('column');
+    getUserPosts('blog');
     // eslint-disable-next-line
   }, []);
 
   // 댓글
   const [comments, setComments] = useState({
-    common: [],
-    question: [],
+    community: [],
+    qna: [],
     [`study-group`]: [],
-    column: [],
+    blog: [],
   });
 
   const [nextCommentCursor, setNextCommentCursor] = useState({
-    common: null,
-    question: null,
+    community: null,
+    qna: null,
     [`study-group`]: null,
-    column: null,
+    blog: null,
   });
 
   const getUserComments = useCallback(
-    async (boardType = 'common') => {
+    async (boardType = 'community') => {
       const response = await api.getUserComments(
         profileUser,
         boardType,
@@ -80,15 +80,16 @@ const ActivityListContainer = ({ profileUser }) => {
   );
 
   useEffect(() => {
-    getUserComments('common');
-    getUserComments('question');
+    getUserComments('community');
+    getUserComments('qna');
     getUserComments(`study-group`);
-    getUserComments('column');
+    getUserComments('blog');
     // eslint-disable-next-line
   }, []);
 
   return (
     <ActivityListPresenter
+      profileUser={profileUser}
       posts={posts}
       getPosts={getUserPosts}
       nextPostCursor={nextPostCursor}

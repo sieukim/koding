@@ -48,6 +48,35 @@ const EmailSignupContainer = () => {
     }
   }, []);
 
+  // 인증 코드 발송
+  const [sendState, sendFetch, initializeSendState] = useAsync(
+    (email) => api.sendSignupToken(email),
+    [],
+    true,
+  );
+
+  // message
+  useMessage(sendState, '인증코드가 발송되었어요! 확인해주세요 🔑');
+
+  // 인증 코드 확인
+  const [verifyState, verifyFetch, initializeVerifyState] = useAsync(
+    (email, verifyToken) => api.verifySignupToken(email, verifyToken),
+    [],
+    true,
+  );
+
+  // message
+  useMessage(
+    verifyState,
+    '인증번호가 확인되었어요! 회원가입을 진행해주세요 🔑',
+  );
+
+  // 토큰 전송 후 이메일 정보 바뀐 경우 정보 초기화
+  const initializeState = useCallback(() => {
+    initializeSendState();
+    initializeVerifyState();
+  }, [initializeSendState, initializeVerifyState]);
+
   // 회원가입
   const [signupState, signupFetch] = useAsync(
     (user) => api.signup(user),
@@ -90,6 +119,15 @@ const EmailSignupContainer = () => {
       duplicated={duplicated}
       checked={checked}
       onDuplicateCheck={onDuplicateCheck}
+      sendLoading={sendState.loading}
+      sendData={sendState.success}
+      sendError={sendState.error}
+      verifyLoading={verifyState.loading}
+      verifyData={verifyState.success}
+      verifyError={verifyState.error}
+      onSendToken={sendFetch}
+      onVerifyToken={verifyFetch}
+      initializeState={initializeState}
     />
   );
 };

@@ -25,11 +25,11 @@ const NavigationBar = () => {
 
   return (
     <Menu selectedKeys={[current]} mode="horizontal">
-      <Menu.Item key="common">
-        <NavLink to="/board/common">커뮤니티</NavLink>
+      <Menu.Item key="community">
+        <NavLink to="/board/community">커뮤니티</NavLink>
       </Menu.Item>
-      <Menu.Item key="question">
-        <NavLink to="/board/question">Q&A</NavLink>
+      <Menu.Item key="qna">
+        <NavLink to="/board/qna">Q&A</NavLink>
       </Menu.Item>
       <Menu.Item key="recruit">
         <NavLink to="/board/recruit">채용 정보</NavLink>
@@ -37,8 +37,8 @@ const NavigationBar = () => {
       <Menu.Item key="study-group">
         <NavLink to="/board/study-group">스터디 모집</NavLink>
       </Menu.Item>
-      <Menu.Item key="column">
-        <NavLink to="/board/column">블로그</NavLink>
+      <Menu.Item key="blog">
+        <NavLink to="/board/blog">블로그</NavLink>
       </Menu.Item>
     </Menu>
   );
@@ -81,6 +81,7 @@ const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
     ({ key }) => {
       if (key === 'profile') navigate(`/user/${loginUser}/profile`);
       if (key === 'edit-profile') navigate(`/user/${loginUser}/profile/edit`);
+      if (key === 'blog') navigate(`/blog/${loginUser}`);
       if (key === 'logout') logout();
       setVisible((visible) => !visible);
     },
@@ -91,6 +92,7 @@ const UserDropdown = ({ loginUser, avatarUrl, logout }) => {
     <Dropdown
       overlay={
         <Menu onClick={onClickMenu}>
+          <Menu.Item key="blog">내 블로그</Menu.Item>
           <Menu.Item key="profile">내 프로필</Menu.Item>
           <Menu.Item key="edit-profile">프로필 편집</Menu.Item>
           <Menu.Item key="logout">로그아웃</Menu.Item>

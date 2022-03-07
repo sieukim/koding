@@ -75,18 +75,18 @@ export const CommentActivityList = ({ comments, next, hasMore }) => {
   return (
     <div className="comment-activity-container">
       <Collapse accordion className="collapse" ghost>
-        <Collapse.Panel header="커뮤니티" key="common">
+        <Collapse.Panel header="커뮤니티" key="community">
           <CommentList
-            comments={comments.common}
-            next={next.common}
-            hasMore={hasMore.common}
+            comments={comments.community}
+            next={next.community}
+            hasMore={hasMore.community}
           />
         </Collapse.Panel>
-        <Collapse.Panel header="Q&A" key="question">
+        <Collapse.Panel header="Q&A" key="qna">
           <CommentList
-            comments={comments.question}
-            next={next.question}
-            hasMore={hasMore.question}
+            comments={comments.qna}
+            next={next.qna}
+            hasMore={hasMore.qna}
           />
         </Collapse.Panel>
         <Collapse.Panel header="스터디 모집" key="study-group">

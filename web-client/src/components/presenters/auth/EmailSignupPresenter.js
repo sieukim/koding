@@ -10,6 +10,15 @@ const EmailSignupPresenter = ({
   duplicated,
   checked,
   onDuplicateCheck,
+  sendLoading,
+  sendData,
+  sendError,
+  verifyLoading,
+  verifyData,
+  verifyError,
+  onSendToken,
+  onVerifyToken,
+  initializeState,
 }) => {
   // 프로필 사진
   const [avatarFile, setAvatarFile] = useState(null);
@@ -23,7 +32,6 @@ const EmailSignupPresenter = ({
   // 회원가입 Form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
     (values) => {
-      console.log({ ...values, techStack, interestTech });
       onSignup({
         ...values,
         avatar: avatarFile,
@@ -48,6 +56,15 @@ const EmailSignupPresenter = ({
         setTechStack={setTechStack}
         interestTech={interestTech}
         setInterestTech={setInterestTech}
+        sendLoading={sendLoading}
+        sendData={sendData}
+        sendError={sendError}
+        verifyLoading={verifyLoading}
+        verifyData={verifyData}
+        verifyError={verifyError}
+        onSendToken={onSendToken}
+        onVerifyToken={onVerifyToken}
+        initializeState={initializeState}
       />
     </StyledAuthPage>
   );

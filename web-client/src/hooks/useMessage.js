@@ -17,5 +17,6 @@ export const useMessage = (
     if (state.error) {
       message.error(failureMessage);
     }
+    // eslint-disable-next-line
   }, [state]);
 };

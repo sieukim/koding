@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+axios.defaults.baseURL = `https://koding.kr`;
+
 /*
  **************************
  ******** auth api ********
@@ -30,12 +32,32 @@ export const signup = (user) => {
   if (user.avatar) {
     formData.set('avatar', user.avatar);
   }
-  formData.set('techStack', user.techStack);
-  formData.set('interestTech', user.interestTech);
+  if (user.techStack.length > 0) {
+    formData.set('techStack', user.techStack);
+  }
+  if (user.interestTech.length > 0) {
+    formData.set('interestTech', user.interestTech);
+  }
+  formData.set('verifyToken', user.verifyToken);
 
   return axios.post('/api/users', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
+};
+
+// 이메일 인증 token 발송
+export const sendSignupToken = (email) => {
+  return axios.post(`/api/auth/email/verifyToken`, email);
+};
+
+// 이메일 인증 token 검증
+export const verifySignupToken = (email, verifyToken) => {
+  const query = new URLSearchParams();
+
+  query.set('email', email);
+  query.set('verifyToken', verifyToken);
+
+  return axios.head(`/api/auth/email/verifyToken?${query.toString()}`);
 };
 
 // 이메일 로그인
@@ -59,12 +81,12 @@ export const logout = () => {
 };
 
 // 비밀번호 초기화 token 전송 요청
-export const sendToken = (user) => {
+export const sendResetToken = (user) => {
   return axios.delete(`/api/auth/email/password`, { data: user });
 };
 
 // 비밀번호 초기화 token 검증
-export const verifyToken = (user) => {
+export const verifyResetToken = (user) => {
   return axios.post(`/api/auth/email/password/verifyToken`, user);
 };
 
@@ -183,6 +205,27 @@ export const reportPost = (boardType, postId, nickname, reportReason) => {
     `/api/posts/${boardType}/${postId}/report/${nickname}`,
     reportReason,
   );
+};
+
+// 팔로잉 하는 유저의 게시글 모아보기
+export const getFollowingPosts = (nickname, cursor, pageSize = 10) => {
+  const query = new URLSearchParams();
+  if (cursor) query.set('cursor', cursor);
+  if (pageSize) query.set('pageSize', pageSize);
+
+  return axios.get(
+    `/api/users/${nickname}/followings/posts?${query.toString()}`,
+  );
+};
+
+// 스크랩한 게시글 모아보기
+export const getScrappedPosts = (nickname) => {
+  return axios.get(`/api/users/${nickname}/scrap-posts`);
+};
+
+// 좋아요한 게시글 모아보기
+export const getLikedPosts = (nickname) => {
+  return axios.get(`/api/users/${nickname}/like-posts`);
 };
 
 // 댓글 읽기
@@ -312,8 +355,12 @@ export const changeUserInfo = (nickname, user) => {
   if (user.avatar) {
     formData.set('avatar', user.avatar);
   }
-  formData.set('techStack', user.techStack);
-  formData.set('interestTech', user.interestTech);
+  if (user.techStack.length > 0) {
+    formData.set('techStack', user.techStack);
+  }
+  if (user.interestTech.length > 0) {
+    formData.set('interestTech', user.interestTech);
+  }
 
   return axios.patch(`/api/users/${nickname}`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },

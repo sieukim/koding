@@ -18,7 +18,7 @@ export const TagList = ({ post, tags }) => {
 
   return (
     <div className="tag-container">
-      {tags.map((tag) => (
+      {tags?.map((tag) => (
         <Tag
           key={tag}
           color={getTagColor(tag)}

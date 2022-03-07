@@ -19,8 +19,11 @@ const ResetPasswordPresenter = ({
 }) => {
   const [form] = Form.useForm();
 
-  // 발송 상태
-  const [sent, setSent] = useState(false);
+  // 인증 코드 발송 상태
+  const [tokenSent, setTokenSent] = useState(false);
+
+  // 인증 코드 확인 상태
+  const [tokenVerified, setTokenVerified] = useState(false);
 
   // 비밀번호 초기화 Form onFinish(onSubmit) 핸들러
   const onFinish = useCallback(
@@ -28,17 +31,10 @@ const ResetPasswordPresenter = ({
     [onResetPassword],
   );
 
-  // 인증 코드 발송 버튼 onClick 이벤트 핸들러
-  const onClickSend = useCallback(() => {
-    const email = form.getFieldValue('email');
-    onSendToken({ email: email });
-    setSent(true);
-  }, [onSendToken, form]);
-
   // 인증 코드 발송 상태 초기화 이벤트 핸들러
   const onChangeMail = useCallback(() => {
     initializeState();
-    setSent(false);
+    setTokenSent(false);
   }, [initializeState]);
 
   // 이메일 유효성 검증
@@ -47,14 +43,19 @@ const ResetPasswordPresenter = ({
       return Promise.reject(new Error('유효한 이메일이 아닙니다.'));
     }
 
-    if (!sent && !sendData) {
+    if (!tokenSent && !sendData) {
       return Promise.reject(new Error('인증 코드 발송이 필요합니다.'));
     }
 
     return Promise.resolve();
-  }, [sent, sendError, sendData]);
+  }, [tokenSent, sendError, sendData]);
 
-  const [checked, setChecked] = useState(false);
+  // 인증 코드 발송 버튼 onClick 이벤트 핸들러
+  const onClickSend = useCallback(() => {
+    const email = form.getFieldValue('email');
+    onSendToken({ email: email });
+    setTokenSent(true);
+  }, [onSendToken, form]);
 
   // 인증 코드 확인 버튼 onClick 이벤트 핸들러
   const onClickVerify = useCallback(() => {
@@ -63,7 +64,7 @@ const ResetPasswordPresenter = ({
       'verifyToken',
     ]);
     onVerifyToken({ email: email, verifyToken: token });
-    setChecked(true);
+    setTokenVerified(true);
   }, [onVerifyToken, form]);
 
   // 인증 코드 유효성 검증
@@ -75,23 +76,23 @@ const ResetPasswordPresenter = ({
         return Promise.reject(new Error('인증번호가 일치하지 않습니다.'));
       }
 
-      if (!checked && !verifyData) {
+      if (!tokenVerified && !verifyData) {
         return Promise.reject(new Error('인증 코드 확인이 필요합니다.'));
       }
 
       return Promise.resolve();
     },
-    [checked, verifyError, verifyData],
+    [tokenVerified, verifyError, verifyData],
   );
 
   useEffect(() => {
-    if (sent) {
+    if (tokenSent) {
       form.validateFields(['email']);
     }
-    if (checked) {
+    if (tokenVerified) {
       form.validateFields(['verifyToken']);
     }
-  }, [sent, checked, form, sendError, verifyError]);
+  }, [tokenSent, tokenVerified, form, sendError, verifyError]);
 
   // 비밀번호 유효성 검증
   const validatePassword = useCallback((_, value) => {

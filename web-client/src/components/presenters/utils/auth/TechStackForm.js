@@ -37,6 +37,12 @@ export const TagsForm = ({ type, state, setState, className }) => {
         message.error('관심 분야는 5개까지 추가 가능합니다.');
       return;
     }
+
+    if (inputTag.includes(',')) {
+      message.error('태그는 ,를 포함할 수 없습니다.');
+      return;
+    }
+
     if (inputTag && state.indexOf(inputTag) === -1) {
       setState((state) => [...state, inputTag]);
     }

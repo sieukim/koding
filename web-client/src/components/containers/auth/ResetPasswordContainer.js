@@ -7,7 +7,7 @@ import { useMessage } from '../../../hooks/useMessage';
 const ResetPasswordContainer = () => {
   // 인증 코드 발송
   const [sendState, sendFetch, initializeSendState] = useAsync(
-    (user) => api.sendToken(user),
+    (user) => api.sendResetToken(user),
     [],
     true,
   );
@@ -17,9 +17,15 @@ const ResetPasswordContainer = () => {
 
   // 인증 코드 확인
   const [verifyState, verifyFetch, initializeVerifyState] = useAsync(
-    (user) => api.verifyToken(user),
+    (user) => api.verifyResetToken(user),
     [],
     true,
+  );
+
+  // message
+  useMessage(
+    verifyState,
+    '인증번호가 확인되었어요! 비밀번호 변경을 진행해주세요 🔑',
   );
 
   // 토큰 전송 후 이메일 정보 바뀐 경우 정보 초기화
@@ -27,12 +33,6 @@ const ResetPasswordContainer = () => {
     initializeSendState();
     initializeVerifyState();
   }, [initializeSendState, initializeVerifyState]);
-
-  // message
-  useMessage(
-    verifyState,
-    '인증번호가 확인되었어요! 비밀번호 변경을 진행해주세요 🔑',
-  );
 
   // 비밀번호 초기화
   const [resetState, resetFetch] = useAsync(

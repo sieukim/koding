@@ -4,10 +4,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 const HomeContainer = () => {
   const [posts, setPosts] = useState({
-    common: [],
-    question: [],
+    community: [],
+    qna: [],
     recruit: [],
-    column: [],
+    blog: [],
   });
 
   // 일일 랭킹 조회
@@ -20,10 +20,10 @@ const HomeContainer = () => {
   }, []);
 
   useEffect(() => {
-    getRanking('common');
-    getRanking('question');
+    getRanking('community');
+    getRanking('qna');
     getRanking('recruit');
-    getRanking('column');
+    getRanking('blog');
     // eslint-disable-next-line
   }, []);
 
