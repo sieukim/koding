@@ -20,7 +20,7 @@ const BlogContainer = ({ profileUser, loginUser }) => {
 
     const response = await api.getUserPosts(
       profileUser,
-      'column',
+      'blog',
       nextPageCursor,
     );
 
@@ -45,7 +45,7 @@ const BlogContainer = ({ profileUser, loginUser }) => {
   // 게시글 작성 버튼 onClick 핸들러
   const onClickWrite = useCallback(() => {
     if (loginUser && loginUser.nickname === profileUser) {
-      navigate(`/board/column/write`);
+      navigate(`/board/blog/write`);
     }
   }, [loginUser, profileUser, navigate]);
 

@@ -38,8 +38,12 @@ const HomePresenter = ({ posts }) => {
       <div className="title-text">✨ 오늘의 인기글 ✨</div>
 
       <div className="card-container">
-        <PostList boardType="common" title="커뮤니티" posts={posts?.common} />
-        <PostList boardType="question" title="Q&A" posts={posts?.question} />
+        <PostList
+          boardType="community"
+          title="커뮤니티"
+          posts={posts?.community}
+        />
+        <PostList boardType="qna" title="Q&A" posts={posts?.qna} />
       </div>
       <div className="card-container">
         <PostList
@@ -47,7 +51,7 @@ const HomePresenter = ({ posts }) => {
           title="채용 정보"
           posts={posts?.recruit}
         />
-        <PostList boardType="column" title="블로그" posts={posts?.column} />
+        <PostList boardType="blog" title="블로그" posts={posts?.blog} />
       </div>
     </StyledHome>
   );

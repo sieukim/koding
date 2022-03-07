@@ -8,15 +8,11 @@ const HomePresenter = ({ posts }) => {
       <StyledTitle>✨ 오늘의 인기글 ✨</StyledTitle>
       <div className="card-container">
         <RankedPostList
-          boardType="common"
+          boardType="community"
           title="커뮤니티"
-          posts={posts?.common}
+          posts={posts?.community}
         />
-        <RankedPostList
-          boardType="question"
-          title="Q&A"
-          posts={posts?.question}
-        />
+        <RankedPostList boardType="qna" title="Q&A" posts={posts?.qna} />
       </div>
       <div className="card-container">
         <RankedPostList
@@ -24,11 +20,7 @@ const HomePresenter = ({ posts }) => {
           title="채용 정보"
           posts={posts?.recruit}
         />
-        <RankedPostList
-          boardType="column"
-          title="블로그"
-          posts={posts?.column}
-        />
+        <RankedPostList boardType="blog" title="블로그" posts={posts?.blog} />
       </div>
     </StyledHomePage>
   );

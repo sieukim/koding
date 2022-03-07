@@ -12,11 +12,11 @@ const HomeContainer = () => {
   }, []);
 
   useEffect(() => {
-    getRanking('common');
-    getRanking('question');
+    getRanking('community');
+    getRanking('qna');
     getRanking('recruit');
     getRanking('study-group');
-    getRanking('column');
+    getRanking('blog');
   }, [getRanking]);
 
   return <HomePresenter posts={posts} />;

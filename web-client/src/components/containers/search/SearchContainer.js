@@ -52,9 +52,9 @@ const SearchContainer = ({ query }) => {
     <SearchPresenter
       query={query}
       onClickSearch={onClickSearch}
-      column={posts.column}
-      common={posts.common}
-      question={posts.question}
+      blog={posts.blog}
+      community={posts.community}
+      qna={posts.qna}
       recruit={posts.recruit}
       studyGroup={posts[`study-group`]}
       users={users}
