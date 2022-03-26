@@ -29,9 +29,7 @@ export const Editor = (props) => {
   return (
     <ToastEditor
       ref={innerRef}
-      height="auto"
-      minHeight="700px"
-      maxHeight="700px"
+      height="700px"
       previewStyle="vertical"
       initialEditType="wysiwyg"
       language="ko-KR"
