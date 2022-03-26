@@ -29,6 +29,7 @@
         db: [MySQL, Redis],
         library: TypeORM, 
         searchEngine: [ElasticSearch, Logstash],
+        fileStorage: AWS S3,
     };
     
     deployment = {
@@ -36,7 +37,7 @@
         MySQL: Azure Database for MySQL,
         ElasticSearch: Elastic Cloud,
         Logstash: Azure Virtual Machine,
-        Redis: Amazone ElasticCache,
+        Redis: Amazon ElasticCache,
     }
 ```
 
