@@ -7,11 +7,14 @@ import { EntityManager, Transaction, TransactionManager } from "typeorm";
 import { User } from "../../../entities/user.entity";
 import { orThrowNotFoundUser } from "src/common/utils/or-throw";
 import { Follow } from "../../../entities/follow.entity";
+import { Logger } from "@nestjs/common";
 
 @QueryHandler(GetPostsOfFollowingsQuery)
 export class GetPostsOfFollowingsHandler
   implements IQueryHandler<GetPostsOfFollowingsQuery>
 {
+  private readonly logger = new Logger(GetPostsOfFollowingsHandler.name);
+
   @Transaction()
   async execute(
     query: GetPostsOfFollowingsQuery,
@@ -27,17 +30,21 @@ export class GetPostsOfFollowingsHandler
     const totalCountPromise = em.count(Post, {
       where: { writerNickname: nickname },
     });
-    const followingsQb = em
-      .createQueryBuilder()
-      .subQuery()
-      .select("follow.toNickname")
-      .from(Follow, "follow")
-      .where("follow.fromNickname = :nickname", { nickname });
 
     const qb = em
       .createQueryBuilder(Post, "post")
       .innerJoinAndSelect("post.writer", "writer")
-      .where("post.writerNickname IN " + followingsQb.getQuery())
+      .where(
+        "post.writerNickname IN " +
+          em
+            .createQueryBuilder()
+            .subQuery()
+            .select("follow.toNickname")
+            .from(Follow, "follow")
+            .where("follow.fromNickname = :nickname")
+            .getQuery(),
+      )
+      .setParameters({ nickname })
       .orderBy("post.createdAt", "DESC")
       .addOrderBy("post.postId", "DESC")
       .limit(pageSize);

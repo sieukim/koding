@@ -52,3 +52,5 @@ serverless.yml
 
 # ssh cert
 koding-*.pem
+
+dist.zip

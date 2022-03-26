@@ -94,7 +94,6 @@ export class UserSearchService {
 
     console.log("searchParams: ", JSON.stringify(searchParams));
     const { body } = await this.elasticsearchService.search(searchParams);
-    console.log("body: ", JSON.stringify(body));
     return body;
   }
 }

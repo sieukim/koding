@@ -34,7 +34,7 @@ export class ModifyCommentHandler
         select: ["nickname"],
       }),
     ]);
-    this.logger.log(`comment: ${comment.toString}`);
+    this.logger.log(`comment: ${comment.toString()}`);
     comment.modifyComment(requestUserNickname, {
       ...modifyCommentRequest,
       mentionedNicknames: mentionedUser.map(({ nickname }) => nickname),

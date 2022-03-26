@@ -7,7 +7,7 @@ import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { ConfigService } from "@nestjs/config";
 import { PostMetadataInfoDto } from "../../posts/dto/post-metadata-info.dto";
 import { SortOrder } from "../../common/sort-order.enum";
-import { Post } from "../../entities/post.entity";
+import { Post, PostIdentifier } from "../../entities/post.entity";
 import { PostListWithCursorDto } from "../../posts/dto/post-list-with-cursor.dto";
 import { PostBoardType } from "../../entities/post-board.type";
 import { KodingConfig } from "../../config/configutation";
@@ -36,6 +36,16 @@ export class PostSearchService {
     this.postIndexName = configService.get(
       "database.elasticsearch.index.post",
       { infer: true },
+    );
+  }
+
+  async deleteById({ postId }: PostIdentifier) {
+    await this.elasticsearchService.delete(
+      {
+        index: this.postIndexName,
+        id: postId,
+      },
+      { maxRetries: 2, requestTimeout: 2000 },
     );
   }
 
@@ -117,7 +127,7 @@ export class PostSearchService {
       index: this.postIndexName,
       body: {
         query: {},
-        sort: [{ _id: sortOrder === SortOrder.DESC ? "desc" : "asc" }],
+        sort: [{ createdAt: sortOrder === SortOrder.DESC ? "desc" : "asc" }],
         size: pageSize,
       },
     };
@@ -198,7 +208,6 @@ export class PostSearchService {
     this.logger.log(`search param: ${JSON.stringify(searchParams)}`);
     try {
       const { body } = await this.elasticsearchService.search(searchParams);
-      this.logger.log(`search result: ${JSON.stringify(body)}`);
       return body;
     } catch (e) {
       console.error("error in search", e);

@@ -6,6 +6,8 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { SearchQueryHandlers } from "./queries/handlers";
 import { SearchServices } from "./services";
 import { KodingConfig } from "../config/configutation";
+import { SearchCommandHandlers } from "./commands/handlers";
+import { PostSearchSaga } from "./sagas/post-search.saga";
 
 @Module({
   imports: [
@@ -33,6 +35,11 @@ import { KodingConfig } from "../config/configutation";
     CqrsModule,
   ],
   controllers: [SearchController],
-  providers: [...SearchServices, ...SearchQueryHandlers],
+  providers: [
+    ...SearchServices,
+    ...SearchQueryHandlers,
+    ...SearchCommandHandlers,
+    PostSearchSaga,
+  ],
 })
 export class SearchModule {}

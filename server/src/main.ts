@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import {
   CACHE_MANAGER,
+  Logger,
   NotFoundException,
   ValidationPipe,
 } from "@nestjs/common";
@@ -23,11 +24,13 @@ import * as fs from "fs";
 import * as path from "path";
 import { KodingConfig } from "./config/configutation";
 
+const logger = new Logger("Root");
+
 async function testRedisConnection(cache: RedisCache) {
   await cache.set("test", "success");
   const success = (await cache.get("test")) === "success";
-  if (success) console.log(`Redis Connection Success`);
-  else console.warn(`Redis Connection Fail`);
+  if (success) logger.log(`Redis Connection Success`);
+  else logger.warn(`Redis Connection Fail`);
 }
 
 function createRedisSessionStore(cache: RedisCache) {
