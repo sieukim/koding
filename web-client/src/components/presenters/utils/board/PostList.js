@@ -24,6 +24,11 @@ export const PostList = ({ loading, posts, profileUser }) => {
     else return <Avatar icon={<UserOutlined />} />;
   };
 
+  // 게시글 미리보기 내 alt_text 문자열 삭제
+  const removeAltText = (post) => {
+    post.replaceAll('alt_text', '');
+  };
+
   return (
     <StyledPostList>
       {loading ? (
@@ -92,7 +97,7 @@ export const PostList = ({ loading, posts, profileUser }) => {
               <PostLink
                 boardType={post.boardType}
                 postId={post.postId}
-                markdownContent={post.markdownContent}
+                markdownContent={removeAltText(post.markdownContent)}
               />
               <TagList post={post} tags={post.tags} />
             </List.Item>
