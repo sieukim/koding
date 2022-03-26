@@ -31,6 +31,7 @@ export const Editor = (props) => {
       ref={innerRef}
       height="auto"
       minHeight="700px"
+      maxHeight="700px"
       previewStyle="vertical"
       initialEditType="wysiwyg"
       language="ko-KR"
