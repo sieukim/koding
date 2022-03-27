@@ -14,6 +14,7 @@
 
 ```js
     frontend = {
+        programmer: sieukim,
         language: JavaScript,
         framework: React,
         library: [antd, Styled-Components],
@@ -24,6 +25,7 @@
 
 ```js
     backend = {
+        programmer: vvsos1,
         language: TypeScript,
         framework: NestJS,
         db: [MySQL, Redis],
@@ -43,4 +45,4 @@
 
 ### 배포 사이트
 
-> [koding.kr]()
+> [koding.kr](https://koding.kr)
