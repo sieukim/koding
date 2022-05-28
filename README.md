@@ -1,13 +1,5 @@
 # Koding.kr - 개발자 커뮤니티 🐶
 
-### 프로젝트 설명
-
-> 국내 개발자 커뮤니티 대부분이 특정 분야에 국한되어 각 분야의 정보가 흩어져있습니다. 
-> 이러한 점이 아쉽다고 판단하여 종합적인 분야를 다루는 개발자 커뮤니티를 개발했습니다. 
-> 해당 커뮤니티는 질의응답, 스터디 모집, 블로그 등의 기능을 제공하며, 다양한 분야를
-> 보다 쉽게 검색하기 위해 태그 기능을 도입했습니다. 키워드 검색과 태그 검색을 함께
-> 사용함으로써 검색 범위를 좁히고, 원하는 정보를 찾길 바랍니다.
-
 ### 기술 스택
 
 **Frontend** <br/>
@@ -43,6 +35,54 @@
     }
 ```
 
-### 배포 사이트
+### 데모 영상 
 
-> [koding.kr](https://koding.kr)
+**이메일 회원가입**
+
+<br/>
+<img width="600" alt="회원가입" src="https://user-images.githubusercontent.com/67683679/170820452-193e4c77-27a4-4384-a996-89d2250ac699.gif">
+
+**이메일 로그인**
+
+<br/>
+<img width="600" alt="이메일 로그인" src="https://user-images.githubusercontent.com/67683679/170820709-b04c270b-02cc-4c25-a112-6d4755b52f74.gif">
+
+**깃허브 로그인**
+
+<br/>
+<img width="600" alt="깃허브 로그인" src="https://user-images.githubusercontent.com/67683679/170820695-ee00cb77-d8ba-425f-af4a-df561a65d8d8.gif">
+
+**프로필**
+
+<br/>
+<img width="600" alt="프로필" src="https://user-images.githubusercontent.com/67683679/170820595-470cccc6-b4e1-4459-8fbd-45d642af8cad.png">
+
+**프로필 편집**
+
+<br/>
+<img width="600" alt="프로필 편집" src="https://user-images.githubusercontent.com/67683679/170820731-cc7cd77c-f1da-48cb-87ef-e67ed00b40b4.gif">
+
+**팔로우**
+
+<br/>
+<img width="600" alt="팔로우" src="https://user-images.githubusercontent.com/67683679/170820381-fa40eeb2-f0a9-49be-b5fb-e78d9511459b.gif">
+
+**알림**
+
+<br/>
+<img width="600" alt="알림" src="https://user-images.githubusercontent.com/67683679/170820341-ddaf579f-c39d-4535-b50e-55ebe4448942.gif">
+
+**게시글 작성**
+
+<br/>
+<img width="600" alt="게시글 작성" src="https://user-images.githubusercontent.com/67683679/170820267-f9816bcd-c060-4bba-bff8-b933f5186c7a.gif">
+
+**게시글 검색 및 확인**
+
+<br/>
+<img width="600" alt="게시글 검색 및 확인" src="https://user-images.githubusercontent.com/67683679/170820165-99a82550-aae2-4ffa-8343-4f4ca6f9c019.gif">
+
+**인기글**
+
+<br/>
+<img width="600" alt="인기글" src="https://user-images.githubusercontent.com/67683679/170820116-272e7c84-06cd-4015-943c-a70a320ceece.png">
